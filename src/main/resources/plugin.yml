@@ -1,0 +1,6 @@
+name: PluginUtilities
+main: memecat.fatcat.utilities.UtilitiesPlugin
+version: 0.1.0
+api-version: 1.13
+author: FatCatBuilds
+description: PluginUtilities is an utility library for Spigot developers.
