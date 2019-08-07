@@ -1,7 +1,7 @@
 # plugin-utilities
 A library with many utilities that help with developing Bukkit or Spigot plugins.
 ## Possible issues
-- The class name "AbstractSlotProperty" is kind of lengthy, especially when it's an Optional<AbstractSlotProperty>
+- The class name "AbstractSlotProperty" is kind of lengthy, especially when it's an Optional
 - The menu system might fail when it comes to server reloads (through the /reload command)
 - Is the PluginDisableEvent for menus needed at all or should it be handled better?
 - The library is barely tested for any bugs
