@@ -9,3 +9,4 @@ A library with many utilities that help with developing Bukkit or Spigot plugins
 - Updating to Java 9 would bring the ifPresentOrElse(Consumer<T>, Runnable) method
 - A glow manager that can show glow and color selectively (packets are sent only to selected players), including entities
 - Utility for making games, such as dividing a minigame into GamePhases
+- Updated centered message utility
