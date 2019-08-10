@@ -12,7 +12,7 @@ public class Utility {
      * Returns the greatest integer from a given array of integers.
      *
      * @param numbers Array of integers
-     * @return Biggest integer
+     * @return Greatest integer from the given array
      */
     public static int max(@NotNull int... numbers) {
         Preconditions.checkArgument(numbers != null, "Array of integers shouldn't be null");

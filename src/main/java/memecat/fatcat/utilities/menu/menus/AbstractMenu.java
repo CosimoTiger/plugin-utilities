@@ -2,9 +2,9 @@ package memecat.fatcat.utilities.menu.menus;
 
 import memecat.fatcat.utilities.menu.MenuManager;
 import memecat.fatcat.utilities.menu.attribute.Rows;
-import memecat.fatcat.utilities.menu.slot.AbstractSlotProperty;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
@@ -12,7 +12,6 @@ import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.server.PluginDisableEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
@@ -73,8 +72,10 @@ public abstract class AbstractMenu implements InventoryHolder {
     }
 
     /**
-     * Acts as an event handler for an inventory click related to this menu's inventory, with a parameter denoting
-     * whether the click is outside of the inventory.
+     * Handles any {@link InventoryClickEvent} related to this inventory menu.
+     * <p>
+     * By default, the {@link InventoryAction} {@code COLLECT_TO_CURSOR} and {@code MOVE_TO_OTHER_INVENTORY} are
+     * cancelled and any non-external action is cancelled from interaction.
      *
      * @param event    InventoryClickEvent event
      * @param external Whether the clicked inventory is not this menu, possibly not any
@@ -89,6 +90,10 @@ public abstract class AbstractMenu implements InventoryHolder {
                 break;
             default:
                 break;
+        }
+
+        if (!external) {
+            event.setCancelled(true);
         }
     }
 
@@ -128,16 +133,6 @@ public abstract class AbstractMenu implements InventoryHolder {
             }
         }
     }
-
-    /**
-     * Sets a slot property object at the given inventory {@link AbstractMenu} slot(s).
-     *
-     * @param property {@link AbstractSlotProperty} object
-     * @param slots    Slots that these properties will belong to
-     * @return This instance, useful for chaining
-     */
-    @NotNull
-    public abstract AbstractMenu set(@Nullable AbstractSlotProperty property, int... slots);
 
     /**
      * Sets an item stack at the given inventory {@link AbstractMenu} slot(s).
@@ -220,12 +215,12 @@ public abstract class AbstractMenu implements InventoryHolder {
     }
 
     /**
-     * Returns the inventory that this menu represents.
+     * Returns the amount of rows that this {@link AbstractMenu} has.
      *
-     * @return Not null {@link Inventory}
+     * @return {@link Rows} enum
      */
     @NotNull
-    public abstract Inventory getInventory();
+    public abstract Optional<Rows> getRows();
 
     /**
      * Returns the inventory type of this {@link AbstractMenu}.
@@ -236,14 +231,6 @@ public abstract class AbstractMenu implements InventoryHolder {
      */
     @NotNull
     public abstract InventoryType getType();
-
-    /**
-     * Returns the amount of rows that this {@link AbstractMenu} has.
-     *
-     * @return {@link Rows} enum
-     */
-    @NotNull
-    public abstract Optional<Rows> getRows();
 
     /**
      * Returns the slot amount that this {@link AbstractMenu} has.

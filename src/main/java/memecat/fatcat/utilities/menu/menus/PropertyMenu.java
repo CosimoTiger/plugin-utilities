@@ -12,10 +12,18 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public abstract class PropertyMenu extends InventoryMenu implements Iterable<PropertyMenu.SlotData> {
+/**
+ * Implementation of {@link InventoryMenu} with an {@link AbstractSlotProperty} array with the same size as the
+ * inventory, with many methods for working with these properties.
+ *
+ * @see AbstractSlotProperty
+ * @see InventoryMenu
+ */
+public class PropertyMenu extends InventoryMenu implements Iterable<PropertyMenu.SlotData> {
 
     /**
      * Properties of each slot in this inventory are stored in an array, linear like inventories.
@@ -35,7 +43,7 @@ public abstract class PropertyMenu extends InventoryMenu implements Iterable<Pro
     }
 
     /**
-     * Creates a new {@link PropertyMenu} from the given inventory type and holder.
+     * Creates a new {@link InventoryMenu} from the given inventory type and holder.
      *
      * @param type   Type of an inventory
      * @param holder Object that this inventory belongs to (chest, player, horse..)
@@ -45,7 +53,7 @@ public abstract class PropertyMenu extends InventoryMenu implements Iterable<Pro
     }
 
     /**
-     * Creates a new {@link PropertyMenu} from the given inventory type and display name (title).
+     * Creates a new {@link InventoryMenu} from the given inventory type and display name (title).
      *
      * @param type  Type of an inventory
      * @param title Display name of this inventory
@@ -55,7 +63,7 @@ public abstract class PropertyMenu extends InventoryMenu implements Iterable<Pro
     }
 
     /**
-     * Creates a new {@link PropertyMenu} from the given inventory type.
+     * Creates a new {@link InventoryMenu} from the given inventory type.
      *
      * @param type Type of an inventory
      */
@@ -64,7 +72,7 @@ public abstract class PropertyMenu extends InventoryMenu implements Iterable<Pro
     }
 
     /**
-     * Creates a new chest {@link PropertyMenu} from the given amount of rows, it's holder and display name (title).
+     * Creates a new chest {@link InventoryMenu} from the given amount of rows, it's holder and display name (title).
      *
      * @param rows   {@link Rows} enum, amount of rows in this chest inventory
      * @param holder Object that this inventory belongs to (chest, player, horse..)
@@ -76,7 +84,7 @@ public abstract class PropertyMenu extends InventoryMenu implements Iterable<Pro
     }
 
     /**
-     * Creates a new chest {@link PropertyMenu} from the given amount of rows and it's holder.
+     * Creates a new chest {@link InventoryMenu} from the given amount of rows and it's holder.
      *
      * @param rows   {@link Rows} enum, amount of rows in this chest inventory
      * @param holder Object that this inventory belongs to (chest, player, horse..)
@@ -86,7 +94,7 @@ public abstract class PropertyMenu extends InventoryMenu implements Iterable<Pro
     }
 
     /**
-     * Creates a new chest {@link PropertyMenu} from the given amount of rows and display name (title).
+     * Creates a new chest {@link InventoryMenu} from the given amount of rows and display name (title).
      *
      * @param rows  {@link Rows} enum, amount of rows in this chest inventory
      * @param title Display name of this inventory
@@ -96,7 +104,7 @@ public abstract class PropertyMenu extends InventoryMenu implements Iterable<Pro
     }
 
     /**
-     * Creates a new chest {@link PropertyMenu} from the given amount of rows.
+     * Creates a new chest {@link InventoryMenu} from the given amount of rows.
      *
      * @param rows {@link Rows} enum, amount of rows in this chest inventory
      */
@@ -105,7 +113,7 @@ public abstract class PropertyMenu extends InventoryMenu implements Iterable<Pro
     }
 
     /**
-     * Creates a new {@link PropertyMenu} with the given inventory and it's attributes equal to it.
+     * Creates a new {@link InventoryMenu} with the given inventory and it's attributes equal to it.
      *
      * @param inventory Inventory that'll function as a menu
      */
@@ -114,29 +122,26 @@ public abstract class PropertyMenu extends InventoryMenu implements Iterable<Pro
         properties = new AbstractSlotProperty[getSize()];
     }
 
+    /**
+     * {@inheritDoc}
+     * By default, runs an {@link AbstractSlotProperty} at the event's slot or cancels the event if it doesn't exist.
+     */
     @Override
     public void onClick(@NotNull InventoryClickEvent event, boolean external) {
         super.onClick(event, external);
 
-        if (external) {
+        if (event.isCancelled()) {
             return;
         }
-
-        Optional<AbstractSlotProperty> property = getSlotProperty(event.getSlot());
 
         /*
          * By default, a slot that lacks a slot property will cancel any interactions with it. This is why every existing
          * slot property in a slot needs to control the event result via Event.setCancelled(boolean cancelled).
-         *
-         * TODO: After updating to Java 9, replace the next lines with property.ifPresentOrElse(p -> p.run(event, this),
-         *   () -> event.setCancelled(true));
          */
-        if (property.isPresent()) {
-            property.get().run(event, this);
-            return;
-        }
 
-        event.setCancelled(true);
+        if (!runProperty(event)) {
+            event.setCancelled(true);
+        }
     }
 
     /**
@@ -154,10 +159,11 @@ public abstract class PropertyMenu extends InventoryMenu implements Iterable<Pro
     @NotNull
     public PropertyMenu fillSkip(@Nullable AbstractSlotProperty property, int fromSlot, int toSlot, int skipForSlots) {
         if (fromSlot > toSlot) {
-            return this;
-        } else if (toSlot > getSize()) {
-            toSlot = getSize();
+            throw new IllegalArgumentException("From-slot index argument (" + fromSlot + ") is greater than to-slot index (" + toSlot + ") argument.");
         }
+
+        Preconditions.checkPositionIndex(fromSlot, getSize(), "Invalid from-slot index argument of " + fromSlot + " with size " + getSize());
+        Preconditions.checkPositionIndex(toSlot, getSize(), "Invalid to-slot index argument of " + toSlot + " with size " + getSize());
 
         if (skipForSlots < 1) {
             for (int i = fromSlot; i < toSlot; i++) {
@@ -182,11 +188,10 @@ public abstract class PropertyMenu extends InventoryMenu implements Iterable<Pro
      */
     @NotNull
     public PropertyMenu set(@Nullable AbstractSlotProperty property, @Nullable ItemStack item, int... slots) {
-        for (int i : slots) {
-            if (isSlot(i)) {
-                setAndUpdate(property, i);
-                setAndUpdate(item, i);
-            }
+        for (int slot : slots) {
+            Preconditions.checkElementIndex(slot, getSize(), "Invalid slot property index of " + slot + " with size " + getSize());
+            setAndUpdate(property, slot);
+            setAndUpdate(item, slot);
         }
 
         return this;
@@ -201,7 +206,7 @@ public abstract class PropertyMenu extends InventoryMenu implements Iterable<Pro
      */
     @NotNull
     public PropertyMenu changeProperty(@NotNull Consumer<AbstractSlotProperty> applyProperty, int slot) {
-        Preconditions.checkArgument(isSlot(slot), "Consumer<AbstractSlotProperty> argument shouldn't be null");
+        Preconditions.checkArgument(applyProperty != null, "Consumer<AbstractSlotProperty> argument shouldn't be null");
         getSlotProperty(slot).ifPresent(applyProperty);
         return this;
     }
@@ -220,19 +225,12 @@ public abstract class PropertyMenu extends InventoryMenu implements Iterable<Pro
      */
     @NotNull
     public PropertyMenu fillInterval(@Nullable AbstractSlotProperty property, int fromSlot, int toSlot) {
-        int size = getSize();
-
         if (fromSlot > toSlot) {
-            return this;
+            throw new IllegalArgumentException("From-slot index argument (" + fromSlot + ") is greater than to-slot index (" + toSlot + ") argument.");
         }
 
-        if (fromSlot < 0) {
-            fromSlot = 0;
-        }
-
-        if (toSlot > size) {
-            toSlot = size;
-        }
+        Preconditions.checkPositionIndex(fromSlot, getSize(), "Invalid from-slot index argument of " + fromSlot + " with size " + getSize());
+        Preconditions.checkPositionIndex(toSlot, getSize(), "Invalid to-slot index argument of " + toSlot + " with size " + getSize());
 
         for (int i = fromSlot; i < toSlot; i++) {
             setAndUpdate(property, i);
@@ -260,19 +258,17 @@ public abstract class PropertyMenu extends InventoryMenu implements Iterable<Pro
     }
 
     /**
-     * Sets a slot property of the given slots in the inventory.
+     * Sets a slot property object at the given inventory {@link AbstractMenu} slot(s).
      *
-     * @param property Slot property object or null
-     * @param slots    Index numbers of inventory slots
+     * @param property {@link AbstractSlotProperty} object
+     * @param slots    Slots that these properties will belong to
      * @return This instance, useful for chaining
      */
     @NotNull
-    @Override
     public PropertyMenu set(@Nullable AbstractSlotProperty property, int... slots) {
-        for (int i : slots) {
-            if (isSlot(i)) {
-                setAndUpdate(property, i);
-            }
+        for (int slot : slots) {
+            Preconditions.checkElementIndex(slot, getSize(), "Invalid slot property index of " + slot + " with size " + getSize());
+            setAndUpdate(property, slot);
         }
 
         return this;
@@ -300,14 +296,10 @@ public abstract class PropertyMenu extends InventoryMenu implements Iterable<Pro
             return false;
         }
 
-        Optional<AbstractSlotProperty> property = getSlotProperty(event.getSlot());
-
-        if (property.isPresent()) {
-            property.get().run(event, this);
-            return false;
-        }
-
-        return false;
+        return getSlotProperty(event.getSlot()).map(property -> {
+            property.run(event, this);
+            return true;
+        }).orElse(false);
     }
 
     /**
@@ -337,13 +329,13 @@ public abstract class PropertyMenu extends InventoryMenu implements Iterable<Pro
      * Returns an {@link AbstractSlotProperty} at the given slot of this inventory menu or null if it doesn't exist.
      *
      * @param slot Slot index location of the {@link AbstractSlotProperty} in the inventory
-     * @return {@link AbstractSlotProperty} or null
+     * @return {@link Optional} of nullable {@link AbstractSlotProperty}
      */
     @NotNull
     public Optional<AbstractSlotProperty> getSlotProperty(int slot) {
-        return Optional.ofNullable(isSlot(slot) ? properties[slot] : null);
+        Preconditions.checkElementIndex(slot, getSize(), "Invalid slot property index of " + slot + " with size " + getSize());
+        return Optional.ofNullable(properties[slot]);
     }
-
 
     /**
      * Creates and returns a new {@link SlotIterator} with the given beginning index for this inventory menu.
@@ -363,76 +355,33 @@ public abstract class PropertyMenu extends InventoryMenu implements Iterable<Pro
      */
     @NotNull
     public SlotIterator iterator() {
-        return iterator(-1);
+        return iterator(0);
     }
 
     /**
-     * Allows easy iteration through this inventory menu's slots and easy modifications of them.
+     * Allows iteration through this inventory menu's slots and modifications of their contents.
      *
      * @see SlotData
      */
     public class SlotIterator implements Iterator<SlotData> {
-        private final short lastSlot = (short) (getSize() - 1);
+        private final int lastSlot = getSize() - 1;
         private int currentIndex;
-
-        private SlotData current;
 
         /**
          * Creates a new instance with a given beginning index.
          *
          * @param start Beginning slot index in this inventory
          */
-        private SlotIterator(int start) {
-            if (start <= -1) {
-                currentIndex = -1;
-            } else if (start >= getSize()) {
-                currentIndex = lastSlot;
-            } else {
-                currentIndex = start;
-            }
+        public SlotIterator(int start) {
+            Preconditions.checkPositionIndex(start, getSize(), "Invalid starting index for new SlotIterator of " + start + " with size " + getSize());
+            currentIndex = start;
         }
 
         /**
-         * Sets a new {@link AbstractSlotProperty} for this inventory at a current slot.
-         *
-         * @param property Nullable {@link AbstractSlotProperty} to set at the current slot
-         * @return This instance, useful for chaining
+         * Creates a new instance with the beginning index of 0.
          */
-        @NotNull
-        public SlotIterator setProperty(@Nullable AbstractSlotProperty property) {
-            PropertyMenu.this.setAndUpdate(property, currentIndex);
-            return this;
-        }
-
-        /**
-         * Sets a new item for this inventory at a current slot.
-         *
-         * @param item ItemStack object, or null
-         * @return This instance, useful for chaining
-         */
-        @NotNull
-        public SlotIterator setItem(@Nullable ItemStack item) {
-            PropertyMenu.this.setAndUpdate(item, currentIndex);
-            return this;
-        }
-
-        /**
-         * Moves the current index of this slot iterator to a newly given index.
-         *
-         * @param newIndex New beginning slot index for this slot iterator
-         * @return This instance, useful for chaining
-         */
-        @NotNull
-        public SlotIterator goTo(int newIndex) {
-            if (newIndex < -1) {
-                currentIndex = -1;
-            } else if (newIndex >= getSize()) {
-                currentIndex = lastSlot;
-            } else {
-                currentIndex = newIndex;
-            }
-
-            return this;
+        public SlotIterator() {
+            this(0);
         }
 
         /**
@@ -440,7 +389,7 @@ public abstract class PropertyMenu extends InventoryMenu implements Iterable<Pro
          */
         @Override
         public void remove() {
-            (current == null ? current = new SlotData(currentIndex++) : current).set(null, null);
+            new SlotData(currentIndex).set(null, null);
         }
 
         /**
@@ -478,6 +427,10 @@ public abstract class PropertyMenu extends InventoryMenu implements Iterable<Pro
          */
         @NotNull
         public SlotData previous() {
+            if (currentIndex == 0) {
+                throw new NoSuchElementException();
+            }
+
             return new SlotData(currentIndex--);
         }
 
@@ -498,12 +451,17 @@ public abstract class PropertyMenu extends InventoryMenu implements Iterable<Pro
         @NotNull
         @Override
         public SlotData next() {
-            return current == null ? current = new SlotData(currentIndex++) : current;
+            if (currentIndex == getSize()) {
+                throw new NoSuchElementException();
+            }
+
+            return new SlotData(currentIndex++);
         }
     }
 
     /**
-     * Represents an element of the {@link SlotIterator} that can lazily get both the property and item at a specific slot.
+     * Represents an element of the {@link SlotIterator} or {@link PropertyMenu} that can lazily get both the property
+     * and item at a specific slot.
      */
     public class SlotData {
 
@@ -516,7 +474,7 @@ public abstract class PropertyMenu extends InventoryMenu implements Iterable<Pro
          * @throws IllegalArgumentException If the slot index argument is out of bounds
          */
         public SlotData(int slot) {
-            Preconditions.checkArgument(isSlot(slot), "Slot index argument " + slot + " is out of bounds.");
+            Preconditions.checkElementIndex(slot, getSize(), "Invalid element index for new SlotData: " + slot + ", size: " + getSize());
             this.slot = slot;
         }
 
@@ -573,7 +531,7 @@ public abstract class PropertyMenu extends InventoryMenu implements Iterable<Pro
          */
         @NotNull
         public Optional<ItemStack> getItem() {
-            return Optional.ofNullable(inventory.getItem(slot));
+            return Optional.ofNullable(getInventory().getItem(slot));
         }
 
         /**

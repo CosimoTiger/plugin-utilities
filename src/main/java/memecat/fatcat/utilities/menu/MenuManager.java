@@ -52,34 +52,31 @@ public class MenuManager implements Listener {
      * Closes the current inventory (menu) and opens a given {@link AbstractMenu} inventory for a given viewer.
      *
      * @param menu    Given {@link AbstractMenu} that will be shown to the given viewer
-     * @param viewers Players who will see the given menu
+     * @param viewers Viewers who will see the given menu
      * @throws IllegalArgumentException If the menu or viewer argument is null
      * @throws IllegalStateException    If this inventory menu manager isn't registered for handling events
      * @throws NullPointerException     If the inventory of the given menu is null ({@link AbstractMenu#getInventory()})
      */
-    public void openMenu(@NotNull AbstractMenu menu, @NotNull Player... viewers) {
+    public void openMenu(@NotNull AbstractMenu menu, @NotNull HumanEntity... viewers) {
         Preconditions.checkState(isRegistered(), "MenuManager has no plugins registered to handle inventory menu events.");
-        Preconditions.checkArgument(menu != null, "Menu argument should never be null");
-        Preconditions.checkArgument(viewers != null && viewers.length > 0 && viewers[0] != null, "Viewers array argument should never be null");
+        Preconditions.checkArgument(menu != null, "Menu argument shouldn't be null");
+        Preconditions.checkArgument(viewers != null && viewers.length > 0 && viewers[0] != null, "Viewers array argument shouldn't be null");
 
-        Inventory inventory = Objects.requireNonNull(menu.getInventory(), "Menu inventory should never be null (AbstractMenu.getInventory()) for menu " + menu.getClass().getSimpleName());
+        Inventory inventory = Objects.requireNonNull(menu.getInventory(), "Menu inventory shouldn't be null (AbstractMenu.getInventory()) for menu " + menu.getClass().getSimpleName());
 
         if (!(inventory.getHolder() instanceof AbstractMenu)) {
             holderMenus.add(menu);
-            System.out.println("Added menu to holderMenus");
         }
 
-        for (Player viewer : viewers) {
-            Objects.requireNonNull(viewer, "Viewer argument in the viewers array should never be null");
+        for (HumanEntity viewer : viewers) {
+            Objects.requireNonNull(viewer, "Viewer argument in the viewers array shouldn't be null");
             Optional<AbstractMenu> currentMenu = getMenu(viewer.getOpenInventory().getTopInventory());
 
             if (currentMenu.isPresent()) {
                 currentMenu.get().setOpenNext(menu);
                 viewer.closeInventory();
-                System.out.println("Viewer for-loop if");
             } else {
                 viewer.openInventory(inventory);
-                System.out.println("Viewer for-loop else");
             }
         }
     }
@@ -90,7 +87,7 @@ public class MenuManager implements Listener {
      * @param menuClass {@link AbstractMenu} subclass class, or the superclass (in that case, it'll close all menus)
      */
     public void closeMenus(@NotNull Class<? extends AbstractMenu> menuClass) {
-        Preconditions.checkArgument(menuClass != null, "Menu class argument should never be null");
+        Preconditions.checkArgument(menuClass != null, "Menu class argument shouldn't be null");
 
         if (menuClass == AbstractMenu.class) {
             closeAllMenus();
@@ -118,7 +115,7 @@ public class MenuManager implements Listener {
      */
     @NotNull
     public Optional<AbstractMenu> closeMenu(@NotNull HumanEntity viewer) {
-        Preconditions.checkArgument(viewer != null, "Viewer argument should never be null");
+        Preconditions.checkArgument(viewer != null, "Viewer argument shouldn't be null");
         Optional<AbstractMenu> openMenu = getMenu(viewer);
         openMenu.ifPresent(menu -> viewer.closeInventory());
 
@@ -138,36 +135,10 @@ public class MenuManager implements Listener {
     }
 
     /**
-     * Returns the current inventory {@link AbstractMenu} that a given player is viewing.
-     *
-     * @param viewer Player that's viewing an inventory
-     * @return Optional of nullable {@link AbstractMenu} of the given viewer
-     */
-    @NotNull
-    public Optional<AbstractMenu> getMenu(@NotNull HumanEntity viewer) {
-        Preconditions.checkArgument(viewer != null, "Viewer argument shouldn't be null");
-        return getMenu(viewer.getOpenInventory().getTopInventory());
-    }
-
-    /**
-     * Returns the {@link AbstractMenu} that matches a given {@link Inventory} argument.
-     *
-     * @param inventory Inventory that possibly belongs to an {@link AbstractMenu}
-     * @return Optional of nullable {@link AbstractMenu} that matches the given inventory
-     */
-    @NotNull
-    public Optional<AbstractMenu> getMenu(@NotNull Inventory inventory) {
-        Optional<AbstractMenu> menu = getHeldMenu(inventory);
-        return menu.isPresent() ? menu : getTileMenu(inventory);
-    }
-
-    /**
-     * Returns the {@link AbstractMenu} {@link InventoryHolder} stored in the given viewer's top inventory, or null if
-     * there isn't any.
+     * Returns the {@link AbstractMenu} {@link InventoryHolder} stored in the given viewer's top inventory.
      *
      * @param viewer Viewer whose top inventory might be an {@link AbstractMenu}
-     * @return Nullable optional of{@link AbstractMenu} {@link InventoryHolder} of this viewer's top inventory, null
-     * if it's not a menu or viewer argument is null
+     * @return Nullable optional of{@link AbstractMenu} {@link InventoryHolder} of the given viewer's top inventory
      */
     @NotNull
     public static Optional<AbstractMenu> getHeldMenu(@NotNull HumanEntity viewer) {
@@ -176,7 +147,8 @@ public class MenuManager implements Listener {
     }
 
     /**
-     * Returns the {@link AbstractMenu} {@link InventoryHolder} stored in the given inventory, or null if there isn't any.
+     * Returns the {@link AbstractMenu} {@link InventoryHolder} stored in the given inventory through
+     * {@link Inventory#getHolder()}.
      *
      * @param inventory Inventory that might have an {@link AbstractMenu} {@link InventoryHolder}
      * @return Nullable optional of {@link AbstractMenu} {@link InventoryHolder} of a given matching inventory
@@ -186,9 +158,6 @@ public class MenuManager implements Listener {
         Preconditions.checkArgument(inventory != null, "Inventory argument shouldn't be null");
 
         InventoryHolder holder = inventory.getHolder();
-        if (holder == null || !inventory.equals(holder.getInventory())) {
-            return Optional.empty();
-        }
 
         return Optional.ofNullable(holder instanceof AbstractMenu ? (AbstractMenu) holder : null);
     }
@@ -227,6 +196,36 @@ public class MenuManager implements Listener {
     }
 
     /**
+     * Returns the current inventory {@link AbstractMenu} that a given player is viewing.
+     * <p>
+     * This method first uses the method {@link #getHeldMenu(Inventory)} and then {@link #getTileMenu(Inventory)} if an
+     * {@link AbstractMenu} is not found.
+     *
+     * @param viewer Player that's viewing an inventory
+     * @return Optional of nullable {@link AbstractMenu} of the given viewer
+     */
+    @NotNull
+    public Optional<AbstractMenu> getMenu(@NotNull HumanEntity viewer) {
+        Preconditions.checkArgument(viewer != null, "Viewer argument shouldn't be null");
+        return getMenu(viewer.getOpenInventory().getTopInventory());
+    }
+
+    /**
+     * Returns the {@link AbstractMenu} that matches a given {@link Inventory} argument.
+     * <p>
+     * This method first uses the method {@link #getHeldMenu(Inventory)} and then {@link #getTileMenu(Inventory)} if an
+     * {@link AbstractMenu} is not found.
+     *
+     * @param inventory Inventory that possibly belongs to an {@link AbstractMenu}
+     * @return Optional of nullable {@link AbstractMenu} that matches the given inventory
+     */
+    @NotNull
+    public Optional<AbstractMenu> getMenu(@NotNull Inventory inventory) {
+        Optional<AbstractMenu> menu = getHeldMenu(inventory);
+        return menu.isPresent() ? menu : getTileMenu(inventory);
+    }
+
+    /**
      * Registers a new plugin for registering this {@link MenuManager} as a {@link Listener}
      *
      * @param newPlugin New enabled plugin that will register this {@link MenuManager} as a {@link Listener}
@@ -237,13 +236,23 @@ public class MenuManager implements Listener {
     @NotNull
     public static MenuManager getInstance(@NotNull Plugin newPlugin) {
         if (instance == null || !isRegistered()) {
-            Preconditions.checkArgument(newPlugin != null, "New plugin argument for registration should never be null");
+            Preconditions.checkArgument(newPlugin != null, "New plugin argument for registration shouldn't be null");
             Preconditions.checkState(newPlugin.isEnabled(), "New plugin for registration is not enabled");
 
             Bukkit.getPluginManager().registerEvents(instance = new MenuManager(), plugin = newPlugin);
         }
 
         return instance;
+    }
+
+    /**
+     * Returns the {@link Optional} of a nullable registered plugin that registers this {@link Listener}'s event handlers.
+     *
+     * @return Optional of a nullable registered plugin
+     */
+    @NotNull
+    public static Optional<Plugin> getPlugin() {
+        return Optional.ofNullable(plugin);
     }
 
     /**
@@ -259,16 +268,6 @@ public class MenuManager implements Listener {
         }
 
         return instance;
-    }
-
-    /**
-     * Returns the {@link Optional} of a nullable registered plugin that registers this {@link Listener}'s event handlers.
-     *
-     * @return Optional of a nullable registered plugin
-     */
-    @NotNull
-    public static Optional<Plugin> getPlugin() {
-        return Optional.ofNullable(plugin);
     }
 
     /**
@@ -319,18 +318,10 @@ public class MenuManager implements Listener {
                 e.printStackTrace();
             } finally {
                 try {
-                    Optional<AbstractMenu> nextMenu = menu.getOpenNext();
-
-                    if (nextMenu.isPresent()) {
-                        Inventory inventory = Objects.requireNonNull(nextMenu.get().getInventory(), "Menu Inventory should never be null (AbstractMenu.getInventory()) for menu " + menu.getClass().getSimpleName());
-
-                        if (!(inventory.getHolder() instanceof AbstractMenu)) {
-                            holderMenus.add(nextMenu.get());
-                        }
-
+                    menu.getOpenNext().ifPresent(nextMenu -> {
                         final HumanEntity viewer = event.getPlayer();
-                        getPlugin().ifPresent(plugin -> Bukkit.getScheduler().runTask(plugin, () -> viewer.openInventory(inventory)));
-                    }
+                        getPlugin().ifPresent(plugin -> Bukkit.getScheduler().runTask(plugin, () -> openMenu(nextMenu, viewer)));
+                    });
                 } catch (Exception e) {
                     getPlugin().ifPresent(p -> p.getLogger().warning("An error occurred while attempting to open the next menu."));
                     e.printStackTrace();
@@ -421,10 +412,10 @@ public class MenuManager implements Listener {
      */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPluginDisable(PluginDisableEvent event) {
-        Optional<Plugin> p = getPlugin();
 
-        if (p.isPresent() && event.getPlugin().equals(p.get())) {
-            plugin = UtilitiesPlugin.getInstance().isPresent() ? UtilitiesPlugin.getInstance().get() : null;
+        if (getPlugin().map(p -> p.equals(event.getPlugin())).orElse(false)) {
+            plugin = UtilitiesPlugin.getInstance().orElse(null);
+
             for (AbstractMenu menu : holderMenus) {
                 if (isRegistered()) {
                     return;

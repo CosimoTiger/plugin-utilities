@@ -24,24 +24,24 @@ import java.util.function.Consumer;
  * @author Alan B.
  * @see PropertyMenu
  */
-public abstract class InventoryMenu extends AbstractMenu {
+public class InventoryMenu extends AbstractMenu {
 
     /**
      * Main, constant part of an {@link InventoryMenu} that identifies it
      */
-    protected final Inventory inventory;
+    private final Inventory inventory;
 
     /**
      * Amount of rows that exist in this chest inventory, or null if the inventory isn't a chest
      */
-    protected Rows rows;
+    private final Rows rows;
 
     /**
      * The identifier (ID) of a BukkitTask task that's relevant to this inventory. The task is automatically
      * cancelled when the menu is closed with no viewers left, but this can be modified by overriding the
      * {@link #onClose(InventoryCloseEvent)} method.
      */
-    protected int taskId = -1;
+    private int taskId = -1;
 
     /**
      * Creates a new {@link InventoryMenu} from the given inventory type, holder and display name (title).
@@ -52,6 +52,7 @@ public abstract class InventoryMenu extends AbstractMenu {
      */
     public InventoryMenu(@NotNull InventoryType type, @Nullable InventoryHolder holder, @Nullable String title) {
         inventory = Bukkit.createInventory(holder == null ? this : holder, type, title == null ? type.getDefaultTitle() : title);
+        rows = null;
     }
 
     /**
@@ -133,6 +134,8 @@ public abstract class InventoryMenu extends AbstractMenu {
         if ((this.inventory = inventory) == null) {
             throw new IllegalArgumentException("Inventory argument should never be null");
         }
+
+        rows = null;
     }
 
     @Override
@@ -157,10 +160,11 @@ public abstract class InventoryMenu extends AbstractMenu {
     @NotNull
     public InventoryMenu fillSkip(@Nullable ItemStack item, int fromSlot, int toSlot, int skipForSlots) {
         if (fromSlot > toSlot) {
-            throw new IllegalArgumentException("From-slot index argument " + fromSlot + " is greater than to-slot index " + toSlot + " argument.");
-        } else if (toSlot > getSize()) {
-            toSlot = getSize();
+            throw new IllegalArgumentException("From-slot index argument (" + fromSlot + ") is greater than to-slot index (" + toSlot + ") argument.");
         }
+
+        Preconditions.checkPositionIndex(fromSlot, getSize(), "Invalid from-slot index argument of " + fromSlot + " with size " + getSize());
+        Preconditions.checkPositionIndex(toSlot, getSize(), "Invalid to-slot index argument of " + toSlot + " with size " + getSize());
 
         if (skipForSlots <= 1) {
             for (int i = fromSlot; i < toSlot; i++) {
@@ -190,16 +194,11 @@ public abstract class InventoryMenu extends AbstractMenu {
     @NotNull
     public InventoryMenu fillInterval(@Nullable ItemStack item, int fromSlot, int toSlot) {
         if (fromSlot > toSlot) {
-            throw new IllegalArgumentException("From-slot index argument " + fromSlot + " is greater than to-slot index " + toSlot + " argument.");
-        } else if (fromSlot < 0) {
-            fromSlot = 0;
+            throw new IllegalArgumentException("From-slot index argument (" + fromSlot + ") is greater than to-slot index (" + toSlot + ") argument.");
         }
 
-        int size = getSize();
-
-        if (toSlot > size) {
-            toSlot = size;
-        }
+        Preconditions.checkPositionIndex(fromSlot, getSize(), "Invalid from-slot index argument of " + fromSlot + " with size " + getSize());
+        Preconditions.checkPositionIndex(toSlot, getSize(), "Invalid to-slot index argument of " + toSlot + " with size " + getSize());
 
         for (int i = fromSlot; i < toSlot; i++) {
             setAndUpdate(item, i);
@@ -217,7 +216,7 @@ public abstract class InventoryMenu extends AbstractMenu {
      */
     @NotNull
     public InventoryMenu changeItem(@NotNull Consumer<ItemStack> applyItem, int slot) {
-        Preconditions.checkArgument(isSlot(slot), "Consumer<AbstractSlotProperty> argument shouldn't be null");
+        Preconditions.checkArgument(applyItem != null, "Consumer<ItemStack> argument shouldn't be null");
         getItem(slot).ifPresent(applyItem);
         return this;
     }
@@ -247,21 +246,16 @@ public abstract class InventoryMenu extends AbstractMenu {
     }
 
     /**
-     * Sets an item stack in a slot in an inventory.
+     * {@inheritDoc}
      *
-     * @param item  Item stack or null
-     * @param slots Index numbers of inventory slots
-     * @return This instance, useful for chaining
+     * @throws IndexOutOfBoundsException If the given slot argument is out of the inventory's array bounds
      */
     @NotNull
     @Override
     public InventoryMenu set(@Nullable ItemStack item, int... slots) {
-        for (int i : slots) {
-            if (!isSlot(i)) {
-                continue;
-            }
-
-            setAndUpdate(item, i);
+        for (int slot : slots) {
+            Preconditions.checkElementIndex(slot, getSize(), "Invalid ItemStack index of " + slot + " with size " + getSize());
+            setAndUpdate(item, slot);
         }
 
         return this;
@@ -274,7 +268,7 @@ public abstract class InventoryMenu extends AbstractMenu {
      * @param slot Inventory slot index
      */
     protected void setAndUpdate(@Nullable ItemStack item, int slot) {
-        inventory.setItem(slot, item);
+        getInventory().setItem(slot, item);
     }
 
     /**
@@ -298,11 +292,7 @@ public abstract class InventoryMenu extends AbstractMenu {
             Bukkit.getScheduler().cancelTask(taskId);
         }
 
-        if (task == null) {
-            taskId = -1;
-        } else {
-            taskId = task.getTaskId();
-        }
+        taskId = Optional.ofNullable(task).map(BukkitTask::getTaskId).orElse(-1);
 
         return this;
     }
@@ -315,7 +305,7 @@ public abstract class InventoryMenu extends AbstractMenu {
      */
     @NotNull
     public InventoryMenu clearContents() {
-        inventory.setStorageContents(new ItemStack[0]);
+        getInventory().setStorageContents(new ItemStack[0]);
         return this;
     }
 
@@ -326,51 +316,37 @@ public abstract class InventoryMenu extends AbstractMenu {
     }
 
     /**
-     * Returns the existing item stack at the given slot of this inventory menu or else null.
+     * {@inheritDoc}
      *
-     * @param slot Slot index location of the item in the inventory
-     * @return Item stack or null
+     * @throws IndexOutOfBoundsException If the given slot argument is out of the inventory's array bounds
      */
     @NotNull
     @Override
     public Optional<ItemStack> getItem(int slot) {
-        return Optional.ofNullable(isSlot(slot) ? inventory.getItem(slot) : null);
-    }
-
-    /**
-     * Returns the amount of rows that this {@link InventoryMenu} has.
-     *
-     * @return {@link Rows} enum containing the amount
-     */
-    @NotNull
-    public final Optional<Rows> getRows() {
-        return Optional.ofNullable(rows);
-    }
-
-    /**
-     * Returns a boolean value indicating whether a given slot index is within this inventory's array bounds.
-     *
-     * @param slot An integer number
-     * @return Whether the given slot number is bigger than -1 and smaller than the size of this inventory
-     */
-    public final boolean isSlot(int slot) {
-        return slot > -1 && slot < getSize();
+        Preconditions.checkElementIndex(slot, getSize(), "Invalid ItemStack index of " + slot + " with size " + getSize());
+        return Optional.ofNullable(getInventory().getItem(slot));
     }
 
     @NotNull
     @Override
     public List<HumanEntity> getViewers() {
-        return inventory.getViewers();
+        return getInventory().getViewers();
     }
 
     @NotNull
-    public final InventoryType getType() {
-        return inventory.getType();
+    public Optional<Rows> getRows() {
+        return Optional.ofNullable(rows);
     }
 
     @NotNull
+    @Override
     public Inventory getInventory() {
         return inventory;
+    }
+
+    @NotNull
+    public InventoryType getType() {
+        return getInventory().getType();
     }
 
     /**
@@ -382,12 +358,8 @@ public abstract class InventoryMenu extends AbstractMenu {
         return taskId;
     }
 
-    /**
-     * Returns the slot amount that this {@link InventoryMenu} has.
-     *
-     * @return Amount of slots of this inventory {@link InventoryMenu}
-     */
-    public final int getSize() {
-        return inventory.getSize();
+    @Override
+    public int getSize() {
+        return getInventory().getSize();
     }
 }

@@ -120,8 +120,8 @@ public class ItemBuilder {
     }
 
     /**
-     * Modifies this {@link ItemBuilder}'s {@link ItemStack}'s subtype of {@link ItemMeta} with given operations,
-     * possibly specific for that subclass.
+     * Modifies the {@link ItemStack}'s subtype of {@link ItemMeta} with given operations, possibly specific for that
+     * subclass.
      *
      * @param metaClass    Class that belongs to the {@link ItemMeta} subtype
      * @param metaConsumer Consumer or anonymous function that'll take this instance's item's specific {@link ItemMeta}
@@ -145,7 +145,7 @@ public class ItemBuilder {
     }
 
     /**
-     * Removes all enchantments that are listed in a given list from this {@link ItemBuilder}'s {@link ItemStack}.
+     * Removes all enchantments that are listed in a given list from the {@link ItemStack}.
      *
      * @param enchantments Enchantment(s) that will be removed from the {@link ItemStack}
      * @return This instance, useful for chaining
@@ -162,7 +162,7 @@ public class ItemBuilder {
     }
 
     /**
-     * Removes all enchantments that are listed in a given array from this {@link ItemBuilder}'s {@link ItemStack}.
+     * Removes all enchantments that are listed in a given array from the {@link ItemStack}.
      *
      * @param enchantments Enchantment(s) that will be removed from the {@link ItemStack}
      * @return This instance, useful for chaining
@@ -179,7 +179,7 @@ public class ItemBuilder {
     }
 
     /**
-     * Appends new lines of lore at the given index of this {@link ItemBuilder}'s {@link ItemStack}'s lore from a given list.
+     * Appends new lines of lore at the given index of the {@link ItemStack}'s lore from a given list.
      *
      * @param index Index at which the specified new lines of lore will be added
      * @param lines List of lore lines that'll be added
@@ -196,7 +196,7 @@ public class ItemBuilder {
     }
 
     /**
-     * Modifies this {@link ItemBuilder}'s {@link ItemStack} with given operations.
+     * Modifies the {@link ItemStack} with given operations.
      *
      * @param itemConsumer Consumer or anonymous function that'll take this instance's item as an argument
      * @return This instance, useful for chaining
@@ -209,7 +209,7 @@ public class ItemBuilder {
     }
 
     /**
-     * Sets/repeats a new given line of lore at given indexes of this {@link ItemBuilder}'s {@link ItemStack}'s lore.
+     * Sets/repeats a new given line of lore at given indexes of the {@link ItemStack}'s lore.
      * <p>
      * If there is no existing lore, this method will create a new list with the initial size of the biggest given index
      * plus 1 and proceed to set the line at given indexes.
@@ -233,7 +233,7 @@ public class ItemBuilder {
     }
 
     /**
-     * Modifies this {@link ItemBuilder}'s {@link ItemStack}'s {@link ItemMeta} with given operations.
+     * Modifies the {@link ItemStack}'s {@link ItemMeta} with given operations.
      *
      * @param metaConsumer Consumer or anonymous function that'll take this instance's item's {@link ItemMeta} as an
      *                     argument
@@ -245,7 +245,7 @@ public class ItemBuilder {
     }
 
     /**
-     * Appends new lines of lore at the given index of this {@link ItemBuilder}'s {@link ItemStack}'s lore from a given array.
+     * Appends new lines of lore at the given index of the {@link ItemStack}'s lore from a given array.
      *
      * @param index Index at which the specified new lines of lore will be added
      * @param lines Array of lore lines that'll be added
@@ -258,9 +258,9 @@ public class ItemBuilder {
     }
 
     /**
-     * Removes given ItemFlags from this {@link ItemBuilder}'s {@link ItemStack}.
+     * Removes given ItemFlags from the {@link ItemStack}.
      *
-     * @param flags ItemFlags that'll be removed from this {@link ItemBuilder}'s {@link ItemStack}
+     * @param flags ItemFlags that'll be removed from the {@link ItemStack}
      * @return This instance, useful for chaining
      */
     @NotNull
@@ -270,7 +270,7 @@ public class ItemBuilder {
     }
 
     /**
-     * Removes a line of lore at each given list index of this {@link ItemBuilder}'s {@link ItemStack}'s lore.
+     * Removes a line of lore at each given list index of the {@link ItemStack}'s lore.
      * <p>
      * This method loops through the given list of indexes and removes a line at each given index.
      *
@@ -291,9 +291,9 @@ public class ItemBuilder {
     }
 
     /**
-     * Sets a new type (material) of item for this {@link ItemBuilder}'s {@link ItemStack}.
+     * Sets a new type of material of item for the {@link ItemStack}.
      *
-     * @param material New type (material) that this {@link ItemBuilder}'s {@link ItemStack} will be
+     * @param material New type of material that the {@link ItemStack} will be
      * @return This instance, useful for chaining
      */
     @NotNull
@@ -303,9 +303,9 @@ public class ItemBuilder {
     }
 
     /**
-     * Sets a newly given localized name for this {@link ItemBuilder}'s {@link ItemStack}.
+     * Sets a newly given localized name for the {@link ItemStack}.
      *
-     * @param name New localized name that this {@link ItemBuilder}'s {@link ItemStack} will have
+     * @param name New localized name that the {@link ItemStack} will have
      * @return This instance, useful for chaining
      */
     @NotNull
@@ -314,14 +314,14 @@ public class ItemBuilder {
     }
 
     /**
-     * Appends new lines of lore at the end of this {@link ItemBuilder}'s {@link ItemStack} lore from a given list.
+     * Appends new lines of lore at the end of the {@link ItemStack}'s lore from a given list.
      *
      * @param lines List of lore lines that'll be added
      * @return This instance, useful for chaining
      */
     @NotNull
     public ItemBuilder addLore(@NotNull List<String> lines) {
-        Preconditions.checkArgument(lines != null, "List<String> of argument shouldn't be null");
+        Preconditions.checkArgument(lines != null, "List<String> of lore lines argument shouldn't be null");
 
         Optional<List<String>> lore = getLore();
         lore.ifPresent(l -> l.addAll(lines));
@@ -330,7 +330,7 @@ public class ItemBuilder {
     }
 
     /**
-     * Adds new ItemFlags to this {@link ItemBuilder}'s {@link ItemStack}.
+     * Adds new ItemFlags to the {@link ItemStack}.
      *
      * @param flags Array of ItemFlag enums
      * @return This instance, useful for chaining
@@ -342,7 +342,7 @@ public class ItemBuilder {
     }
 
     /**
-     * Sets new lines of lore of this {@link ItemBuilder}'s {@link ItemStack} lore from a given list.
+     * Sets new lines of lore of the {@link ItemStack}'s lore from a given list.
      *
      * @param lines List of lore lines, lore will be removed if it's NULL
      * @return This instance, useful for chaining
@@ -353,7 +353,7 @@ public class ItemBuilder {
     }
 
     /**
-     * Appends new lines of lore at the end of this {@link ItemBuilder}'s {@link ItemStack} lore from a given array.
+     * Appends new lines of lore at the end of the {@link ItemStack}'s lore from a given array.
      *
      * @param lines Array of lore lines that'll be added
      * @return This instance, useful for chaining
@@ -365,7 +365,7 @@ public class ItemBuilder {
     }
 
     /**
-     * Sets a new {@link ItemMeta} for this {@link ItemBuilder}'s {@link ItemStack}.
+     * Sets a new {@link ItemMeta} for the {@link ItemStack}.
      *
      * @param meta New {@link ItemMeta}, will be removed if it's NULL
      * @return This instance, useful for chaining
@@ -376,7 +376,7 @@ public class ItemBuilder {
     }
 
     /**
-     * Sets new lines of lore of this {@link ItemBuilder}'s {@link ItemStack} lore from a given array.
+     * Sets new lines of lore of the {@link ItemStack}'s lore from a given array.
      *
      * @param lines Array of lore lines, lore will be removed if it's NULL
      * @return This instance, useful for chaining
@@ -387,20 +387,20 @@ public class ItemBuilder {
     }
 
     /**
-     * Sets whether this {@link ItemBuilder}'s {@link ItemStack} can lose it's durability through use.
+     * Sets whether the {@link ItemStack} can lose it's durability through use.
      *
      * @param breakable Whether the {@link ItemStack} can lose it's durability through use
      * @return This instance, useful for chaining
      */
     @NotNull
-    public ItemBuilder unbreakable(boolean breakable) {
-        return changeMeta(meta -> meta.setUnbreakable(breakable));
+    public ItemBuilder breakable(boolean breakable) {
+        return changeMeta(meta -> meta.setUnbreakable(!breakable));
     }
 
     /**
-     * Sets a new given display name (title) for this {@link ItemBuilder}'s {@link ItemStack}.
+     * Sets a new given display name/title for the {@link ItemStack}.
      *
-     * @param title New display name or title of an {@link ItemStack}
+     * @param title New display name/title of an {@link ItemStack}
      * @return This instance, useful for chaining
      */
     @NotNull
@@ -409,7 +409,7 @@ public class ItemBuilder {
     }
 
     /**
-     * Sets a given amount of items in this {@link ItemBuilder}'s {@link ItemStack}.
+     * Sets a given amount of items of the {@link ItemStack}.
      *
      * @param amount Amount of items in an {@link ItemStack}
      * @return This instance, useful for chaining
@@ -420,7 +420,7 @@ public class ItemBuilder {
     }
 
     /**
-     * Removes all lines of lore from this {@link ItemBuilder}'s {@link ItemStack}'s lore.
+     * Removes all lines of lore from the {@link ItemStack}'s lore.
      *
      * @return This instance, useful for chaining
      */
@@ -430,19 +430,19 @@ public class ItemBuilder {
     }
 
     /**
-     * Returns the enchantment level of a given enchantment of this {@link ItemBuilder}'s {@link ItemStack}.
+     * Returns the enchantment level of a given enchantment of the {@link ItemStack}.
      *
-     * @param enchantment Enchantment that this {@link ItemBuilder}'s {@link ItemStack} possibly has
-     * @return Enchantment level of a given enchantment of this {@link ItemBuilder}'s {@link ItemStack}
+     * @param enchantment Enchantment that the {@link ItemStack} possibly has
+     * @return Enchantment level of a given enchantment of the {@link ItemStack}
      */
     public int getEnchantmentLevel(@NotNull Enchantment enchantment) {
         return itemStack.getEnchantmentLevel(enchantment);
     }
 
     /**
-     * Returns a map of enchantments (keys) to their power levels (values) of this {@link ItemBuilder}'s {@link ItemStack}.
+     * Returns a map of enchantments (keys) to their power levels (values) of the {@link ItemStack}.
      *
-     * @return Map of enchantments to their power levels of this {@link ItemBuilder}'s {@link ItemStack}
+     * @return Map of enchantments to their power levels of the {@link ItemStack}
      */
     @NotNull
     public Map<Enchantment, Integer> getEnchantments() {
@@ -450,58 +450,29 @@ public class ItemBuilder {
     }
 
     /**
-     * Returns whether this {@link ItemBuilder}'s {@link ItemStack} has a given item flag.
+     * Returns whether the {@link ItemStack} has a given item flag.
      *
      * @param flag Item flag enum
-     * @return Whether this {@link ItemBuilder}'s {@link ItemStack} contains the given item flag
+     * @return Whether the {@link ItemStack} contains the given item flag
      */
     public boolean hasFlag(@NotNull ItemFlag flag) {
         return getItemMeta().map(meta -> flag != null && meta.hasItemFlag(flag)).orElse(false);
     }
 
     /**
-     * Returns a List of lore lines of this {@link ItemBuilder}'s {@link ItemStack}.
+     * Returns a List of lore lines of the {@link ItemStack}.
      *
-     * @return List of lore lines of this {@link ItemBuilder}'s {@link ItemStack}
+     * @return List of lore lines of the {@link ItemStack}
      */
     @NotNull
     public Optional<List<String>> getLore() {
-        return Optional.ofNullable(getItemMeta().map(ItemMeta::getLore).orElse(null));
+        return getItemMeta().map(ItemMeta::getLore);
     }
 
     /**
-     * Returns the localized name (this is most likely part of a language locale) of this {@link ItemBuilder}'s {@link ItemStack}.
+     * Returns the {@link ItemMeta} of the {@link ItemStack}.
      *
-     * @return Localized name of this {@link ItemBuilder}'s {@link ItemStack}
-     */
-    @NotNull
-    public String getLocalizedName() {
-        return getItemMeta().map(ItemMeta::getLocalizedName).orElse("");
-    }
-
-    /**
-     * Returns whether this {@link ItemBuilder}'s {@link ItemStack} can lose it's durability through use.
-     *
-     * @return Whether this {@link ItemBuilder}'s {@link ItemStack} can lose it's durability through use
-     */
-    public boolean isUnbreakable() {
-        return getItemMeta().map(ItemMeta::isUnbreakable).orElse(false);
-    }
-
-    /**
-     * Returns the type (material) of this {@link ItemBuilder}'s {@link ItemStack}.
-     *
-     * @return Type (material) of this {@link ItemBuilder}'s {@link ItemStack}
-     */
-    @NotNull
-    public Material getMaterial() {
-        return itemStack.getType();
-    }
-
-    /**
-     * Returns the {@link ItemMeta} of this {@link ItemBuilder}'s {@link ItemStack}.
-     *
-     * @return {@link ItemMeta} of this {@link ItemBuilder}'s {@link ItemStack} (possibly a subclass)
+     * @return {@link ItemMeta} of the {@link ItemStack}
      */
     @NotNull
     public Optional<ItemMeta> getItemMeta() {
@@ -509,9 +480,47 @@ public class ItemBuilder {
     }
 
     /**
-     * Returns the display name (title) of this {@link ItemBuilder}'s {@link ItemStack}.
+     * Returns whether the {@link ItemStack} has an existing {@link ItemMeta}.
      *
-     * @return Display name (title) of this {@link ItemBuilder}'s {@link ItemStack}
+     * @return Whether the {@link ItemStack} has an existing {@link ItemMeta}
+     */
+    public boolean hasItemMeta() {
+        return itemStack.hasItemMeta();
+    }
+
+    /**
+     * Returns the localized name (this is most likely part of a language locale) of the {@link ItemStack}.
+     *
+     * @return Localized name of the {@link ItemStack}
+     */
+    @NotNull
+    public String getLocalizedName() {
+        return getItemMeta().map(ItemMeta::getLocalizedName).orElse("");
+    }
+
+    /**
+     * Returns whether the {@link ItemStack} can lose it's durability through use.
+     *
+     * @return Whether the {@link ItemStack} can lose it's durability through use
+     */
+    public boolean isBreakable() {
+        return getItemMeta().map(meta -> !meta.isUnbreakable()).orElse(true);
+    }
+
+    /**
+     * Returns the type (material) of the {@link ItemStack}.
+     *
+     * @return Type (material) of the {@link ItemStack}
+     */
+    @NotNull
+    public Material getMaterial() {
+        return itemStack.getType();
+    }
+
+    /**
+     * Returns the display name (title) of the {@link ItemStack}.
+     *
+     * @return Display name (title) of the {@link ItemStack}
      */
     @NotNull
     public String getTitle() {
@@ -529,9 +538,9 @@ public class ItemBuilder {
     }
 
     /**
-     * Returns the amount of items in this {@link ItemBuilder}'s {@link ItemStack}.
+     * Returns the amount of items in the {@link ItemStack}.
      *
-     * @return Amount of items in this {@link ItemBuilder}'s {@link ItemStack}
+     * @return Amount of items in the {@link ItemStack}
      */
     public int getAmount() {
         return itemStack.getAmount();

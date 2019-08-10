@@ -4,9 +4,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
 
-/**
- * A lack of documentation here as I, the developer, lack the knowledge on this.
- */
 public class Resolver {
 
     private Class<?> clazz;
@@ -15,6 +12,7 @@ public class Resolver {
         this.clazz = object;
     }
 
+    // Could use an Optional<Field> here..
     public Field resolveField(@NotNull String name) {
         try {
             Field field = clazz.getDeclaredField(name);
