@@ -159,7 +159,7 @@ public class MenuManager implements Listener {
 
         InventoryHolder holder = inventory.getHolder();
 
-        return Optional.ofNullable(holder instanceof AbstractMenu ? (AbstractMenu) holder : null);
+        return Optional.ofNullable(holder instanceof AbstractMenu && holder.getInventory().equals(inventory) ? (AbstractMenu) holder : null);
     }
 
     /**
@@ -289,7 +289,7 @@ public class MenuManager implements Listener {
     public void onInventoryClick(InventoryClickEvent event) {
         getMenu(event.getWhoClicked()).ifPresent(menu -> {
             try {
-                menu.onClick(event, event.getClickedInventory() == null || event.getClickedInventory() != menu.getInventory());
+                menu.onClick(event, event.getClickedInventory() == null || event.getClickedInventory().equals(menu.getInventory()));
             } catch (Exception e) {
                 getPlugin().ifPresent(p -> p.getLogger().warning("An error occurred while handling a menu click event."));
                 e.printStackTrace();
