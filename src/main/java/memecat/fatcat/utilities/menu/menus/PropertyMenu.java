@@ -20,6 +20,7 @@ import java.util.function.Consumer;
  * Implementation of {@link InventoryMenu} with an {@link AbstractSlotProperty} array with the same size as the
  * inventory, with many methods for working with these properties.
  *
+ * @author Alan B.
  * @see AbstractSlotProperty
  * @see InventoryMenu
  */
@@ -158,12 +159,7 @@ public class PropertyMenu extends InventoryMenu implements Iterable<PropertyMenu
      */
     @NotNull
     public PropertyMenu fillSkip(@Nullable AbstractSlotProperty property, int fromSlot, int toSlot, int skipForSlots) {
-        if (fromSlot > toSlot) {
-            throw new IllegalArgumentException("From-slot index argument (" + fromSlot + ") is greater than to-slot index (" + toSlot + ") argument.");
-        }
-
-        Preconditions.checkPositionIndex(fromSlot, getSize(), "Invalid from-slot index argument of " + fromSlot + " with size " + getSize());
-        Preconditions.checkPositionIndex(toSlot, getSize(), "Invalid to-slot index argument of " + toSlot + " with size " + getSize());
+        checkRange(fromSlot, toSlot, getSize());
 
         if (skipForSlots < 1) {
             for (int i = fromSlot; i < toSlot; i++) {
@@ -225,12 +221,7 @@ public class PropertyMenu extends InventoryMenu implements Iterable<PropertyMenu
      */
     @NotNull
     public PropertyMenu fillInterval(@Nullable AbstractSlotProperty property, int fromSlot, int toSlot) {
-        if (fromSlot > toSlot) {
-            throw new IllegalArgumentException("From-slot index argument (" + fromSlot + ") is greater than to-slot index (" + toSlot + ") argument.");
-        }
-
-        Preconditions.checkPositionIndex(fromSlot, getSize(), "Invalid from-slot index argument of " + fromSlot + " with size " + getSize());
-        Preconditions.checkPositionIndex(toSlot, getSize(), "Invalid to-slot index argument of " + toSlot + " with size " + getSize());
+        checkRange(fromSlot, toSlot, getSize());
 
         for (int i = fromSlot; i < toSlot; i++) {
             setAndUpdate(property, i);
@@ -284,7 +275,6 @@ public class PropertyMenu extends InventoryMenu implements Iterable<PropertyMenu
         properties[slot] = property;
     }
 
-
     /**
      * Runs a property in this menu at the given slot with the given event and this menu as arguments.
      *
@@ -330,6 +320,7 @@ public class PropertyMenu extends InventoryMenu implements Iterable<PropertyMenu
      *
      * @param slot Slot index location of the {@link AbstractSlotProperty} in the inventory
      * @return {@link Optional} of nullable {@link AbstractSlotProperty}
+     * @throws IndexOutOfBoundsException If the given slot argument is out of the inventory's array bounds
      */
     @NotNull
     public Optional<AbstractSlotProperty> getSlotProperty(int slot) {
@@ -338,10 +329,45 @@ public class PropertyMenu extends InventoryMenu implements Iterable<PropertyMenu
     }
 
     /**
-     * Creates and returns a new {@link SlotIterator} with the given beginning index for this inventory menu.
+     * Creates a new {@link SlotIterator} that will iterate within a range of the {@link PropertyMenu} {@link SlotData}
+     * array with a given beginning index.
      *
-     * @param start Beginning slot index, ranging from -1 to [getSize() - 1]
-     * @return New instance of {@link SlotIterator}
+     * @param from  Slot index from which this {@link SlotIterator} will range
+     * @param to    Slot index to which this {@link SlotIterator} will range
+     * @param start Beginning slot index of the new {@link SlotIterator} instance
+     * @return {@link SlotIterator} of this {@link PropertyMenu} with beginning index of start argument, with a range of
+     * from-slot argument and to-slot argument
+     * @throws IndexOutOfBoundsException If the 'from' and 'to' argument aren't within the inventory's boundaries,
+     *                                   or the 'start' argument isn't between the given boundaries
+     * @throws IllegalArgumentException  If the 'from' is greater than 'to' argument
+     */
+    @NotNull
+    public SlotIterator iterator(int from, int to, int start) {
+        return new SlotIterator(from, to, start);
+    }
+
+    /**
+     * Creates a new {@link SlotIterator} that will iterate within a range of the {@link PropertyMenu} {@link SlotData}
+     * array.
+     *
+     * @param from Slot index from which this {@link SlotIterator} will range
+     * @param to   Slot index to which this {@link SlotIterator} will range
+     * @return {@link SlotIterator} of this {@link PropertyMenu} with beginning index of from-slot argument with a range
+     * to to-slot argument
+     * @throws IndexOutOfBoundsException If the 'from' and 'to' argument aren't within the inventory's boundaries
+     * @throws IllegalArgumentException  If the 'from' is greater than 'to' argument
+     */
+    @NotNull
+    public SlotIterator iterator(int from, int to) {
+        return new SlotIterator(from, to);
+    }
+
+    /**
+     * Creates a new {@link SlotIterator} with a given beginning index.
+     *
+     * @param start Beginning slot index of the new {@link SlotIterator} instance
+     * @return {@link SlotIterator} of this {@link PropertyMenu} with beginning index of start argument
+     * @throws IndexOutOfBoundsException If the 'start' argument isn't between the given boundaries
      */
     @NotNull
     public SlotIterator iterator(int start) {
@@ -349,13 +375,13 @@ public class PropertyMenu extends InventoryMenu implements Iterable<PropertyMenu
     }
 
     /**
-     * Creates and returns a new {@link SlotIterator} for this inventory menu.
+     * Creates a new {@link SlotIterator} with the beginning index of 0 and ending index of this inventory's size - 1.
      *
-     * @return New instance of {@link SlotIterator}
+     * @return {@link SlotIterator} of this {@link PropertyMenu} with beginning index of 0
      */
     @NotNull
     public SlotIterator iterator() {
-        return iterator(0);
+        return new SlotIterator();
     }
 
     /**
@@ -364,24 +390,70 @@ public class PropertyMenu extends InventoryMenu implements Iterable<PropertyMenu
      * @see SlotData
      */
     public class SlotIterator implements Iterator<SlotData> {
-        private final int lastSlot = getSize() - 1;
-        private int currentIndex;
+
+        private int index = 0;
+        private int from = 0;
+        private int to = getSize() - 1;
+
+        /**
+         * Creates a new instance that will iterate within a range of the {@link PropertyMenu} {@link SlotData} array
+         * with a given beginning index.
+         *
+         * @param from  Slot index from which this {@link SlotIterator} will range
+         * @param to    Slot index to which this {@link SlotIterator} will range
+         * @param start Beginning slot index of the new {@link SlotIterator} instance
+         * @throws IndexOutOfBoundsException If the 'from' and 'to' argument aren't within the inventory's boundaries,
+         *                                   or the 'start' argument isn't between the given boundaries
+         * @throws IllegalArgumentException  If the 'from' is greater than 'to' argument
+         */
+        public SlotIterator(int from, int to, int start) {
+            checkRange(from, to, this.to);
+            checkStart(from, to, start);
+
+            this.from = from;
+            this.to = to;
+            index = start;
+        }
+
+        /**
+         * Creates a new instance that will iterate within a range of the {@link PropertyMenu} {@link SlotData} array.
+         *
+         * @param from Slot index from which this {@link SlotIterator} will range
+         * @param to   Slot index to which this {@link SlotIterator} will range
+         * @throws IndexOutOfBoundsException If the 'from' and 'to' argument aren't within the inventory's boundaries
+         * @throws IllegalArgumentException  If the 'from' is greater than 'to' argument
+         */
+        public SlotIterator(int from, int to) {
+            checkRange(from, to, getSize());
+
+            this.from = index = from;
+            this.to = to;
+        }
 
         /**
          * Creates a new instance with a given beginning index.
          *
-         * @param start Beginning slot index in this inventory
+         * @param start Beginning slot index of the new {@link SlotIterator} instance
+         * @throws IndexOutOfBoundsException If the 'start' argument isn't between the given boundaries
          */
         public SlotIterator(int start) {
-            Preconditions.checkPositionIndex(start, getSize(), "Invalid starting index for new SlotIterator of " + start + " with size " + getSize());
-            currentIndex = start;
+            checkStart(from, to, start);
+
+            index = start;
         }
 
         /**
-         * Creates a new instance with the beginning index of 0.
+         * Creates a new instance with the beginning index of 0 and ending index of this inventory's size - 1.
          */
         public SlotIterator() {
-            this(0);
+        }
+
+        private void checkStart(int from, int to, int start) {
+            if (start < from) {
+                throw new IndexOutOfBoundsException("Iterator index start argument (" + from + ") shouldn't be smaller than from-slot argument");
+            } else if (start > to) {
+                throw new IndexOutOfBoundsException("Iterator index start argument (" + from + ") shouldn't be greater than to-slot argument");
+            }
         }
 
         /**
@@ -389,7 +461,7 @@ public class PropertyMenu extends InventoryMenu implements Iterable<PropertyMenu
          */
         @Override
         public void remove() {
-            new SlotData(currentIndex).set(null, null);
+            new SlotData(index).set(null, null);
         }
 
         /**
@@ -403,12 +475,13 @@ public class PropertyMenu extends InventoryMenu implements Iterable<PropertyMenu
         }
 
         /**
-         * Returns the slot index of this inventory menu that this {@link SlotIterator} is currently at.
+         * Returns the next slot index that this inventory menu {@link SlotIterator} will get to unless
+         * {@link #hasNext()} returns false.
          *
-         * @return Current slot index, ranging from -1 to [getSize() - 1]
+         * @return Next slot index that this {@link SlotIterator} will get to
          */
-        public int getCurrentIndex() {
-            return currentIndex;
+        public int getNextIndex() {
+            return index;
         }
 
         /**
@@ -417,7 +490,7 @@ public class PropertyMenu extends InventoryMenu implements Iterable<PropertyMenu
          * @return Whether this slot iterator can have a previous element
          */
         public boolean hasPrevious() {
-            return currentIndex > 0;
+            return index > from;
         }
 
         /**
@@ -427,11 +500,11 @@ public class PropertyMenu extends InventoryMenu implements Iterable<PropertyMenu
          */
         @NotNull
         public SlotData previous() {
-            if (currentIndex == 0) {
+            if (index == from) {
                 throw new NoSuchElementException();
             }
 
-            return new SlotData(currentIndex--);
+            return new SlotData(index--);
         }
 
         /**
@@ -440,7 +513,7 @@ public class PropertyMenu extends InventoryMenu implements Iterable<PropertyMenu
          * @return Whether this slot iterator can have a next element
          */
         public boolean hasNext() {
-            return currentIndex < lastSlot;
+            return index < to;
         }
 
         /**
@@ -451,11 +524,11 @@ public class PropertyMenu extends InventoryMenu implements Iterable<PropertyMenu
         @NotNull
         @Override
         public SlotData next() {
-            if (currentIndex == getSize()) {
+            if (index == to) {
                 throw new NoSuchElementException();
             }
 
-            return new SlotData(currentIndex++);
+            return new SlotData(index++);
         }
     }
 

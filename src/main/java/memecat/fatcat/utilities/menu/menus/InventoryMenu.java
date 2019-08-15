@@ -18,8 +18,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
- * Implementation of the {@link AbstractMenu} class with many useful functions, it can be easily instantiated,
- * subclassed and modified.
+ * Implementation of the {@link AbstractMenu} class.
  *
  * @author Alan B.
  * @see PropertyMenu
@@ -131,10 +130,10 @@ public class InventoryMenu extends AbstractMenu {
      * @param inventory Inventory that'll function as a menu
      */
     public InventoryMenu(@NotNull Inventory inventory) {
-        if ((this.inventory = inventory) == null) {
-            throw new IllegalArgumentException("Inventory argument should never be null");
-        }
+        Preconditions.checkArgument(inventory != null, "Inventory argument shouldn't be null");
+        Preconditions.checkArgument(inventory.getHolder() instanceof AbstractMenu, "New inventory menus shouldn't be created from inventory menus.");
 
+        this.inventory = inventory;
         rows = null;
     }
 
@@ -159,12 +158,7 @@ public class InventoryMenu extends AbstractMenu {
      */
     @NotNull
     public InventoryMenu fillSkip(@Nullable ItemStack item, int fromSlot, int toSlot, int skipForSlots) {
-        if (fromSlot > toSlot) {
-            throw new IllegalArgumentException("From-slot index argument (" + fromSlot + ") is greater than to-slot index (" + toSlot + ") argument.");
-        }
-
-        Preconditions.checkPositionIndex(fromSlot, getSize(), "Invalid from-slot index argument of " + fromSlot + " with size " + getSize());
-        Preconditions.checkPositionIndex(toSlot, getSize(), "Invalid to-slot index argument of " + toSlot + " with size " + getSize());
+        checkRange(fromSlot, toSlot, getSize());
 
         if (skipForSlots <= 1) {
             for (int i = fromSlot; i < toSlot; i++) {
@@ -193,12 +187,7 @@ public class InventoryMenu extends AbstractMenu {
      */
     @NotNull
     public InventoryMenu fillInterval(@Nullable ItemStack item, int fromSlot, int toSlot) {
-        if (fromSlot > toSlot) {
-            throw new IllegalArgumentException("From-slot index argument (" + fromSlot + ") is greater than to-slot index (" + toSlot + ") argument.");
-        }
-
-        Preconditions.checkPositionIndex(fromSlot, getSize(), "Invalid from-slot index argument of " + fromSlot + " with size " + getSize());
-        Preconditions.checkPositionIndex(toSlot, getSize(), "Invalid to-slot index argument of " + toSlot + " with size " + getSize());
+        checkRange(fromSlot, toSlot, getSize());
 
         for (int i = fromSlot; i < toSlot; i++) {
             setAndUpdate(item, i);
@@ -297,6 +286,17 @@ public class InventoryMenu extends AbstractMenu {
         return this;
     }
 
+    protected void checkRange(int from, int to, int max) {
+        if (from > to) {
+            throw new IllegalArgumentException("From-slot argument (" + from + ") shouldn't be greater than to-slot argument (" + to + ")");
+        } else if (from < 0) {
+            throw new IndexOutOfBoundsException("From-slot argument (" + from + ") shouldn't be smaller than 0");
+        } else if (from > max) {
+            throw new IndexOutOfBoundsException("From-slot argument (" + from + ") shouldn't be greater than the inventory size (" + max + ")");
+        } else if (to > max) {
+            throw new IndexOutOfBoundsException("To-slot argument (" + from + ") shouldn't be greater than the inventory size (" + max + ")");
+        }
+    }
 
     /**
      * Clears the whole inventory of it's contents (array of item stacks).

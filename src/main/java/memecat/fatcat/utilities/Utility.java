@@ -13,10 +13,11 @@ public class Utility {
      *
      * @param numbers Array of integers
      * @return Greatest integer from the given array
+     * @throws IllegalArgumentException If the numbers argument is null
      */
     public static int max(@NotNull int... numbers) {
         Preconditions.checkArgument(numbers != null, "Array of integers shouldn't be null");
-        int max = numbers[0];
+        int max = Integer.MIN_VALUE;
 
         for (int number : numbers) {
             if (number > max) {

@@ -2,12 +2,14 @@ package memecat.fatcat.utilities.file;
 
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Files;
+import java.util.Objects;
 
 /**
  * This class can be extended to create instances that represent a file that belongs to a specific plugin.
@@ -29,7 +31,7 @@ public abstract class PluginFile extends File {
      * @param path   Folder file or a directory in which this file should be, also called a "parent" file
      * @param name   File name or path to file, also called a "child" file, ending with a file extension
      */
-    public PluginFile(Plugin plugin, File path, String name) {
+    public PluginFile(@NotNull Plugin plugin, @Nullable File path, @NotNull String name) {
         super(path, name);
 
         this.plugin = plugin;
@@ -45,7 +47,7 @@ public abstract class PluginFile extends File {
      * @param path   Folder file or a directory in which this file should be, also called a "parent" file
      * @param name   File name or path to file, also called a "child" file, ending with a file extension
      */
-    public PluginFile(Plugin plugin, String path, String name) {
+    public PluginFile(@NotNull Plugin plugin, @Nullable String path, @NotNull String name) {
         super(path, name);
 
         this.plugin = plugin;
@@ -57,7 +59,7 @@ public abstract class PluginFile extends File {
      * @param plugin Plugin that this file belongs to
      * @param path   File path to this file, ending with it's name and an extension
      */
-    public PluginFile(Plugin plugin, String path) {
+    public PluginFile(@NotNull Plugin plugin, @NotNull String path) {
         super(path);
 
         this.plugin = plugin;
@@ -69,7 +71,7 @@ public abstract class PluginFile extends File {
      * @param plugin Plugin that this file belongs to
      * @param uri    URI parameter that is used in the creation of {@link java.io.File}
      */
-    public PluginFile(Plugin plugin, URI uri) {
+    public PluginFile(@NotNull Plugin plugin, @NotNull URI uri) {
         super(uri);
 
         this.plugin = plugin;
@@ -83,9 +85,11 @@ public abstract class PluginFile extends File {
      */
     public boolean createFile() {
         if (!exists()) {
-            this.getParentFile().mkdirs();
+            getParentFile().mkdirs();
             try (InputStream inputStream = plugin.getResource(getName())) {
-                Files.copy(inputStream, this.toPath());
+                Objects.requireNonNull(inputStream, "Unable to find plugin " + getPlugin().getDescription().getFullName()
+                        + "'s file /resources/" + getName() + "!");
+                Files.copy(inputStream, toPath());
             } catch (IOException e) {
                 e.printStackTrace();
             }

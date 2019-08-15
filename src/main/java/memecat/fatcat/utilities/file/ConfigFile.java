@@ -4,6 +4,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,7 +33,7 @@ public class ConfigFile extends PluginFile {
      * @param path   Folder file or a directory in which this file should be, also called a "parent" file
      * @param name   File name or path to file, also called a "child" file, ending with a file extension
      */
-    public ConfigFile(Plugin plugin, File path, String name) {
+    public ConfigFile(@NotNull Plugin plugin, @Nullable File path, @NotNull String name) {
         super(plugin, path, name);
 
         reloadFile();
@@ -48,7 +49,7 @@ public class ConfigFile extends PluginFile {
      * @param path   Folder file or a directory in which this file should be, also called a "parent" file
      * @param name   File name or path to file, also called a "child" file, ending with a file extension
      */
-    public ConfigFile(Plugin plugin, String path, String name) {
+    public ConfigFile(@NotNull Plugin plugin, @Nullable String path, @NotNull String name) {
         super(plugin, path, name);
 
         reloadFile();
@@ -60,7 +61,7 @@ public class ConfigFile extends PluginFile {
      * @param plugin Plugin that this file belongs to
      * @param path   File path to this file, ending with it's name and an extension
      */
-    public ConfigFile(Plugin plugin, String path) {
+    public ConfigFile(@NotNull Plugin plugin, @NotNull String path) {
         super(plugin, path);
 
         reloadFile();
@@ -72,7 +73,7 @@ public class ConfigFile extends PluginFile {
      * @param plugin Plugin that this file belongs to
      * @param uri    URI parameter that is used in the creation of {@link java.io.File}
      */
-    public ConfigFile(Plugin plugin, URI uri) {
+    public ConfigFile(@NotNull Plugin plugin, @NotNull URI uri) {
         super(plugin, uri);
 
         reloadFile();

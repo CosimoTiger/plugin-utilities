@@ -1,9 +1,9 @@
 package memecat.fatcat.utilities.menu.menus;
 
+import memecat.fatcat.utilities.UtilitiesPlugin;
 import memecat.fatcat.utilities.menu.MenuManager;
 import memecat.fatcat.utilities.menu.attribute.Rows;
 import org.bukkit.entity.HumanEntity;
-import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -65,10 +65,10 @@ public abstract class AbstractMenu implements InventoryHolder {
      * Handles the {@link MenuManager} {@link MenuManager#getPlugin} {@link Plugin} event handler.
      *
      * @param event   PluginDisableEvent event
-     * @param manager {@link MenuManager} that can receive a new {@link Plugin}, stopping all other menus from having to
-     *                handle the given event
+     * @param manager {@link MenuManager} that is passing this event
      */
     public void onDisable(@NotNull PluginDisableEvent event, @NotNull MenuManager manager) {
+        close();
     }
 
     /**
@@ -126,8 +126,8 @@ public abstract class AbstractMenu implements InventoryHolder {
     public void onDrag(@NotNull InventoryDragEvent event) {
         int topEndSlot = event.getView().getTopInventory().getSize() - 1;
 
-        for (int i : event.getRawSlots()) {
-            if (i <= topEndSlot) {
+        for (int slot : event.getRawSlots()) {
+            if (slot <= topEndSlot) {
                 event.setCancelled(true);
                 return;
             }
@@ -162,8 +162,8 @@ public abstract class AbstractMenu implements InventoryHolder {
      *
      * @param viewers Players that will see this {@link AbstractMenu} inventory
      */
-    public void openMenu(@NotNull Player... viewers) {
-        MenuManager.getInstance().openMenu(this, viewers);
+    public void openMenu(@NotNull HumanEntity... viewers) {
+        UtilitiesPlugin.getMenuManager().ifPresent(manager -> manager.openMenu(this, viewers));
     }
 
     /**
@@ -182,8 +182,8 @@ public abstract class AbstractMenu implements InventoryHolder {
      * @return This instance, useful for chaining
      */
     @NotNull
-    public final AbstractMenu closeMenus() {
-        MenuManager.getInstance().closeMenus(getClass());
+    public final AbstractMenu close() {
+        getViewers().forEach(HumanEntity::closeInventory);
         return this;
     }
 

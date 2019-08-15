@@ -14,7 +14,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -187,12 +186,12 @@ public class ItemBuilder {
      */
     @NotNull
     public ItemBuilder addLoreAt(int index, @NotNull Collection<String> lines) {
-        Preconditions.checkArgument(lines != null, "List<String> of lore lines argument shouldn't be null");
+        Preconditions.checkArgument(lines != null, "Collection<String> of lore lines argument shouldn't be null");
 
-        Optional<List<String>> list = getLore();
-        list.ifPresent(l -> l.addAll(index, lines));
+        List<String> lore = getLore();
+        lore.addAll(index, lines);
 
-        return lore(list.orElse(Collections.emptyList()));
+        return lore(lore);
     }
 
     /**
@@ -223,13 +222,14 @@ public class ItemBuilder {
         Preconditions.checkArgument(line != null, "Lore line argument shouldn't be null");
         Preconditions.checkArgument(indexes != null, "Array of lore line indexes argument shouldn't be null");
 
-        List<String> list = getLore().orElse(new ArrayList<>(Utility.max(indexes) + 1));
+        List<String> lore = getLore();
+        lore = lore.isEmpty() ? new ArrayList<>(Utility.max(indexes) + 1) : lore;
 
         for (int index : indexes) {
-            list.set(index, line);
+            lore.set(index, line);
         }
 
-        return lore(list);
+        return lore(lore);
     }
 
     /**
@@ -280,14 +280,15 @@ public class ItemBuilder {
     public ItemBuilder removeLoreAt(@NotNull int... indexes) {
         Preconditions.checkArgument(indexes != null, "Array of lore line indexes argument shouldn't be null");
 
-        Optional<List<String>> list = getLore();
-        list.ifPresent(l -> {
-            for (int i : indexes) {
-                l.remove(i);
-            }
-        });
+        List<String> lore = getLore();
 
-        return lore(list.orElse(null));
+        if (!lore.isEmpty()) {
+            for (int index : indexes) {
+                lore.remove(index);
+            }
+        }
+
+        return lore(lore);
     }
 
     /**
@@ -323,10 +324,10 @@ public class ItemBuilder {
     public ItemBuilder addLore(@NotNull List<String> lines) {
         Preconditions.checkArgument(lines != null, "List<String> of lore lines argument shouldn't be null");
 
-        Optional<List<String>> lore = getLore();
-        lore.ifPresent(l -> l.addAll(lines));
+        List<String> lore = getLore();
+        lore.addAll(lines);
 
-        return lore(lore.orElse(lines));
+        return lore(lore);
     }
 
     /**
@@ -387,17 +388,6 @@ public class ItemBuilder {
     }
 
     /**
-     * Sets whether the {@link ItemStack} can lose it's durability through use.
-     *
-     * @param breakable Whether the {@link ItemStack} can lose it's durability through use
-     * @return This instance, useful for chaining
-     */
-    @NotNull
-    public ItemBuilder breakable(boolean breakable) {
-        return changeMeta(meta -> meta.setUnbreakable(!breakable));
-    }
-
-    /**
      * Sets a new given display name/title for the {@link ItemStack}.
      *
      * @param title New display name/title of an {@link ItemStack}
@@ -406,6 +396,17 @@ public class ItemBuilder {
     @NotNull
     public ItemBuilder title(@Nullable String title) {
         return changeMeta(meta -> meta.setDisplayName(title));
+    }
+
+    /**
+     * Sets whether the {@link ItemStack} can lose it's durability through use.
+     *
+     * @param breakable Whether the {@link ItemStack} can lose it's durability through use
+     * @return This instance, useful for chaining
+     */
+    @NotNull
+    public ItemBuilder breakable(boolean breakable) {
+        return changeMeta(meta -> meta.setUnbreakable(!breakable));
     }
 
     /**
@@ -426,7 +427,7 @@ public class ItemBuilder {
      */
     @NotNull
     public ItemBuilder clearLore() {
-        return changeMeta(meta -> Optional.ofNullable(meta.getLore()).ifPresent(List::clear));
+        return lore((ArrayList<String>) null);
     }
 
     /**
@@ -460,16 +461,6 @@ public class ItemBuilder {
     }
 
     /**
-     * Returns a List of lore lines of the {@link ItemStack}.
-     *
-     * @return List of lore lines of the {@link ItemStack}
-     */
-    @NotNull
-    public Optional<List<String>> getLore() {
-        return getItemMeta().map(ItemMeta::getLore);
-    }
-
-    /**
      * Returns the {@link ItemMeta} of the {@link ItemStack}.
      *
      * @return {@link ItemMeta} of the {@link ItemStack}
@@ -480,15 +471,6 @@ public class ItemBuilder {
     }
 
     /**
-     * Returns whether the {@link ItemStack} has an existing {@link ItemMeta}.
-     *
-     * @return Whether the {@link ItemStack} has an existing {@link ItemMeta}
-     */
-    public boolean hasItemMeta() {
-        return itemStack.hasItemMeta();
-    }
-
-    /**
      * Returns the localized name (this is most likely part of a language locale) of the {@link ItemStack}.
      *
      * @return Localized name of the {@link ItemStack}
@@ -496,6 +478,25 @@ public class ItemBuilder {
     @NotNull
     public String getLocalizedName() {
         return getItemMeta().map(ItemMeta::getLocalizedName).orElse("");
+    }
+
+    /**
+     * Returns a List of lore lines of the {@link ItemStack}.
+     *
+     * @return List of lore lines of the {@link ItemStack}, possibly empty
+     */
+    @NotNull
+    public List<String> getLore() {
+        return getItemMeta().map(ItemMeta::getLore).orElse(new ArrayList<>());
+    }
+
+    /**
+     * Returns whether the {@link ItemStack} has an existing {@link ItemMeta}.
+     *
+     * @return Whether the {@link ItemStack} has an existing {@link ItemMeta}
+     */
+    public boolean hasItemMeta() {
+        return itemStack.hasItemMeta();
     }
 
     /**
