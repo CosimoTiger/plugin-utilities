@@ -3,7 +3,6 @@ package memecat.fatcat.utilities.menu.menus;
 import com.google.common.base.Preconditions;
 import memecat.fatcat.utilities.menu.attribute.Rows;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
@@ -13,7 +12,6 @@ import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -315,24 +313,6 @@ public class InventoryMenu extends AbstractMenu {
         return clearContents();
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @throws IndexOutOfBoundsException If the given slot argument is out of the inventory's array bounds
-     */
-    @NotNull
-    @Override
-    public Optional<ItemStack> getItem(int slot) {
-        Preconditions.checkElementIndex(slot, getSize(), "Invalid ItemStack index of " + slot + " with size " + getSize());
-        return Optional.ofNullable(getInventory().getItem(slot));
-    }
-
-    @NotNull
-    @Override
-    public List<HumanEntity> getViewers() {
-        return getInventory().getViewers();
-    }
-
     @NotNull
     public Optional<Rows> getRows() {
         return Optional.ofNullable(rows);
@@ -344,11 +324,6 @@ public class InventoryMenu extends AbstractMenu {
         return inventory;
     }
 
-    @NotNull
-    public InventoryType getType() {
-        return getInventory().getType();
-    }
-
     /**
      * Returns the identifier number of the {@link BukkitTask} that is stored in this instance and running while it's open.
      *
@@ -356,10 +331,5 @@ public class InventoryMenu extends AbstractMenu {
      */
     public int getBukkitTask() {
         return taskId;
-    }
-
-    @Override
-    public int getSize() {
-        return getInventory().getSize();
     }
 }

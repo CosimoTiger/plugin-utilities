@@ -1,5 +1,6 @@
 package memecat.fatcat.utilities.menu.menus;
 
+import com.google.common.base.Preconditions;
 import memecat.fatcat.utilities.UtilitiesPlugin;
 import memecat.fatcat.utilities.menu.MenuManager;
 import memecat.fatcat.utilities.menu.attribute.Rows;
@@ -172,7 +173,10 @@ public abstract class AbstractMenu implements InventoryHolder {
      * @return This instance, useful for chaining
      */
     @NotNull
-    public abstract AbstractMenu clear();
+    public AbstractMenu clear() {
+        getInventory().clear();
+        return this;
+    }
 
     /**
      * Closes all {@link AbstractMenu}s of this instance for all viewers who are viewing it.
@@ -192,9 +196,13 @@ public abstract class AbstractMenu implements InventoryHolder {
      *
      * @param slot Slot index location of the item in the inventory
      * @return Optional of a nullable ItemStack
+     * @throws IndexOutOfBoundsException If the given slot argument is out of the inventory's array bounds
      */
     @NotNull
-    public abstract Optional<ItemStack> getItem(int slot);
+    public Optional<ItemStack> getItem(int slot) {
+        Preconditions.checkElementIndex(slot, getSize(), "Invalid ItemStack index of " + slot + " with size " + getSize());
+        return Optional.ofNullable(getInventory().getItem(slot));
+    }
 
     /**
      * Returns a List of human entities (usually players) that are currently viewing this inventory menu.
@@ -202,7 +210,9 @@ public abstract class AbstractMenu implements InventoryHolder {
      * @return List of human entities (usually players)
      */
     @NotNull
-    public abstract List<HumanEntity> getViewers();
+    public List<HumanEntity> getViewers() {
+        return getInventory().getViewers();
+    }
 
     /**
      * Returns the {@link AbstractMenu} that will be opened next after this one's closed.
@@ -230,12 +240,16 @@ public abstract class AbstractMenu implements InventoryHolder {
      * @return Not null inventory type of this inventory {@link AbstractMenu}
      */
     @NotNull
-    public abstract InventoryType getType();
+    public InventoryType getType() {
+        return getInventory().getType();
+    }
 
     /**
      * Returns the slot amount that this {@link AbstractMenu} has.
      *
      * @return Amount of slots of this inventory {@link AbstractMenu}
      */
-    public abstract int getSize();
+    public int getSize() {
+        return getInventory().getSize();
+    }
 }

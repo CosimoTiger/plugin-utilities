@@ -22,7 +22,8 @@ public class UtilitiesPlugin extends JavaPlugin {
     }
 
     /**
-     * Returns the {@link MenuManager} of this {@link UtilitiesPlugin} if it's enabled, or else a
+     * Returns the {@link MenuManager} of this {@link UtilitiesPlugin} if it's enabled, or else a new {@link MenuManager}
+     * instantiated with the given {@link Plugin} argument.
      *
      * @param failure {@link Plugin} that will be used for the creation or providing for this {@link UtilitiesPlugin}'s
      *                {@link MenuManager}

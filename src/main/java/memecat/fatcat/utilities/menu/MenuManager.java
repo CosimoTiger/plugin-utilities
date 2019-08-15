@@ -130,7 +130,7 @@ public class MenuManager implements Listener {
 
         for (AbstractMenu openMenu : holderMenus) {
             if (menuClass.isInstance(openMenu)) {
-                openMenu.getViewers().forEach(HumanEntity::closeInventory);
+                openMenu.close();
             }
         }
 
@@ -147,7 +147,7 @@ public class MenuManager implements Listener {
      * Not all inventory menus might be closed because each menu handler can decide to be reopened.
      */
     public void closeAllMenus() {
-        holderMenus.forEach(menu -> menu.getViewers().forEach(HumanEntity::closeInventory));
+        holderMenus.forEach(AbstractMenu::close);
         Bukkit.getOnlinePlayers().forEach(viewer -> getHeldMenu(viewer).ifPresent(menu -> viewer.closeInventory()));
     }
 
