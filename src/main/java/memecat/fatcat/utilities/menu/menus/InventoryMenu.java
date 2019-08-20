@@ -126,10 +126,12 @@ public class InventoryMenu extends AbstractMenu {
      * Creates a new {@link InventoryMenu} with the given inventory and it's attributes equal to it.
      *
      * @param inventory Inventory that'll function as a menu
+     * @throws IllegalArgumentException If the inventory argument is null or already has an {@link AbstractMenu} as it's
+     *                                  {@link InventoryHolder}
      */
     public InventoryMenu(@NotNull Inventory inventory) {
-        Preconditions.checkArgument(inventory != null, "Inventory argument shouldn't be null");
-        Preconditions.checkArgument(inventory.getHolder() instanceof AbstractMenu, "New inventory menus shouldn't be created from inventory menus.");
+        Preconditions.checkArgument(inventory != null, "Inventory argument can't be null");
+        Preconditions.checkArgument(inventory.getHolder() instanceof AbstractMenu, "New inventory menus can't be created from inventory menus.");
 
         this.inventory = inventory;
         rows = null;
@@ -157,15 +159,10 @@ public class InventoryMenu extends AbstractMenu {
     @NotNull
     public InventoryMenu fillSkip(@Nullable ItemStack item, int fromSlot, int toSlot, int skipForSlots) {
         checkRange(fromSlot, toSlot, getSize());
+        Preconditions.checkArgument(skipForSlots > 0, "Skip-for-slots argument can't be smaller than 1");
 
-        if (skipForSlots <= 1) {
-            for (int i = fromSlot; i < toSlot; i++) {
-                setAndUpdate(item, i);
-            }
-        } else {
-            for (int i = fromSlot; i < toSlot; i += skipForSlots) {
-                setAndUpdate(item, i);
-            }
+        for (int slot = fromSlot; slot < toSlot; slot += skipForSlots) {
+            getInventory().setItem(slot, item);
         }
 
         return this;
@@ -187,8 +184,8 @@ public class InventoryMenu extends AbstractMenu {
     public InventoryMenu fillInterval(@Nullable ItemStack item, int fromSlot, int toSlot) {
         checkRange(fromSlot, toSlot, getSize());
 
-        for (int i = fromSlot; i < toSlot; i++) {
-            setAndUpdate(item, i);
+        for (int slot = fromSlot; slot < toSlot; slot++) {
+            getInventory().setItem(slot, item);
         }
 
         return this;
@@ -200,10 +197,12 @@ public class InventoryMenu extends AbstractMenu {
      * @param applyItem Lambda method that'll take an ItemStack as an argument and perform operations on it
      * @param slot      Slot at which an ItemStack that is being modified is located at
      * @return This instance, useful for chaining
+     * @throws IndexOutOfBoundsException If the slot argument is out of this inventory's array boundaries
+     * @throws IllegalArgumentException  If the Consumer&lt;ItemStack&gt; argument is null
      */
     @NotNull
     public InventoryMenu changeItem(@NotNull Consumer<ItemStack> applyItem, int slot) {
-        Preconditions.checkArgument(applyItem != null, "Consumer<ItemStack> argument shouldn't be null");
+        Preconditions.checkArgument(applyItem != null, "Consumer<ItemStack> argument can't be null");
         getItem(slot).ifPresent(applyItem);
         return this;
     }
@@ -216,15 +215,15 @@ public class InventoryMenu extends AbstractMenu {
      * @return This instance, useful for chaining
      */
     @NotNull
-    public InventoryMenu fillAll(@Nullable ItemStack item, boolean replace) {
+    public InventoryMenu fill(@Nullable ItemStack item, boolean replace) {
         if (replace) {
-            for (int i = 0; i < getSize(); i++) {
-                setAndUpdate(item, i);
+            for (int slot = 0; slot < getSize(); slot++) {
+                getInventory().setItem(slot, item);
             }
         } else {
-            for (int i = 0; i < getSize(); i++) {
-                if (!getItem(i).isPresent()) {
-                    setAndUpdate(item, i);
+            for (int slot = 0; slot < getSize(); slot++) {
+                if (getInventory().getItem(slot) == null) {
+                    getInventory().setItem(slot, item);
                 }
             }
         }
@@ -235,27 +234,20 @@ public class InventoryMenu extends AbstractMenu {
     /**
      * {@inheritDoc}
      *
-     * @throws IndexOutOfBoundsException If the given slot argument is out of the inventory's array bounds
+     * @throws IndexOutOfBoundsException If a slot in the slot array argument is out of this inventory's array bounds
+     * @throws IllegalArgumentException  If the slot array argument is null
      */
     @NotNull
     @Override
-    public InventoryMenu set(@Nullable ItemStack item, int... slots) {
+    public InventoryMenu set(@Nullable ItemStack item, @NotNull int... slots) {
+        Preconditions.checkArgument(slots != null, "Array of slots can't be null");
+
         for (int slot : slots) {
             Preconditions.checkElementIndex(slot, getSize(), "Invalid ItemStack index of " + slot + " with size " + getSize());
-            setAndUpdate(item, slot);
+            getInventory().setItem(slot, item);
         }
 
         return this;
-    }
-
-    /**
-     * Directly sets an inventory item at the appropriate (expected) given slot index.
-     *
-     * @param item Inventory item stack object
-     * @param slot Inventory slot index
-     */
-    protected void setAndUpdate(@Nullable ItemStack item, int slot) {
-        getInventory().setItem(slot, item);
     }
 
     /**
@@ -279,20 +271,20 @@ public class InventoryMenu extends AbstractMenu {
             Bukkit.getScheduler().cancelTask(taskId);
         }
 
-        taskId = Optional.ofNullable(task).map(BukkitTask::getTaskId).orElse(-1);
+        taskId = task == null ? -1 : task.getTaskId();
 
         return this;
     }
 
     protected void checkRange(int from, int to, int max) {
         if (from > to) {
-            throw new IllegalArgumentException("From-slot argument (" + from + ") shouldn't be greater than to-slot argument (" + to + ")");
+            throw new IllegalArgumentException("From-slot argument (" + from + ") can't be greater than to-slot argument (" + to + ")");
         } else if (from < 0) {
-            throw new IndexOutOfBoundsException("From-slot argument (" + from + ") shouldn't be smaller than 0");
+            throw new IndexOutOfBoundsException("From-slot argument (" + from + ") can't be smaller than 0");
         } else if (from > max) {
-            throw new IndexOutOfBoundsException("From-slot argument (" + from + ") shouldn't be greater than the inventory size (" + max + ")");
+            throw new IndexOutOfBoundsException("From-slot argument (" + from + ") can't be greater than the inventory size (" + max + ")");
         } else if (to > max) {
-            throw new IndexOutOfBoundsException("To-slot argument (" + from + ") shouldn't be greater than the inventory size (" + max + ")");
+            throw new IndexOutOfBoundsException("To-slot argument (" + from + ") can't be greater than the inventory size (" + max + ")");
         }
     }
 
@@ -314,14 +306,14 @@ public class InventoryMenu extends AbstractMenu {
     }
 
     @NotNull
-    public Optional<Rows> getRows() {
-        return Optional.ofNullable(rows);
-    }
-
-    @NotNull
     @Override
     public Inventory getInventory() {
         return inventory;
+    }
+
+    @NotNull
+    public Optional<Rows> getRows() {
+        return Optional.ofNullable(rows);
     }
 
     /**

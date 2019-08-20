@@ -22,8 +22,23 @@ public class UtilitiesPlugin extends JavaPlugin {
     }
 
     /**
-     * Returns the {@link MenuManager} of this {@link UtilitiesPlugin} if it's enabled, or else a new {@link MenuManager}
-     * instantiated with the given {@link Plugin} argument.
+     * Checks whether a given {@link Plugin} argument is not null and enabled or else an exception is thrown.
+     *
+     * @param provider {@link Plugin} argument that's being checked for
+     * @return The given {@link Plugin} provider argument
+     * @throws IllegalArgumentException If the provider argument is null
+     * @throws IllegalStateException    If the provider argument is not enabled
+     */
+    public static Plugin checkProvider(@NotNull Plugin provider) {
+        Preconditions.checkArgument(provider != null, "Plugin provider argument can't be null");
+        Preconditions.checkState(provider.isEnabled(), "Plugin provider argument can't be disabled");
+
+        return provider;
+    }
+
+    /**
+     * Returns the {@link MenuManager} of this {@link UtilitiesPlugin} if it's enabled, or else the {@link Plugin}
+     * argument is provided or a new {@link MenuManager} is instantiated with the given {@link Plugin} argument.
      *
      * @param failure {@link Plugin} that will be used for the creation or providing for this {@link UtilitiesPlugin}'s
      *                {@link MenuManager}
@@ -60,20 +75,5 @@ public class UtilitiesPlugin extends JavaPlugin {
     @NotNull
     public static Optional<MenuManager> getMenuManager() {
         return Optional.ofNullable(menuManager);
-    }
-
-    /**
-     * Checks whether a given {@link Plugin} argument is not null and enabled or else an exception is thrown.
-     *
-     * @param provider {@link Plugin} argument that's being checked for
-     * @return The given {@link Plugin} provider argument
-     * @throws IllegalArgumentException If the provider argument is null
-     * @throws IllegalStateException    If the provider argument is not enabled
-     */
-    public static Plugin checkProvider(@NotNull Plugin provider) {
-        Preconditions.checkArgument(provider != null, "Plugin provider argument shouldn't be null");
-        Preconditions.checkState(provider.isEnabled(), "Plugin provider argument shouldn't be disabled");
-
-        return provider;
     }
 }

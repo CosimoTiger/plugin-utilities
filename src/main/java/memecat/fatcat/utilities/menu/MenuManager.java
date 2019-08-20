@@ -93,17 +93,17 @@ public class MenuManager implements Listener {
      */
     public void openMenu(@NotNull AbstractMenu menu, @NotNull HumanEntity... viewers) {
         Preconditions.checkState(isRegistered(), "MenuManager has no plugin registered to handle inventory menu events");
-        Preconditions.checkArgument(menu != null, "Menu argument shouldn't be null");
-        Preconditions.checkArgument(viewers != null && viewers.length > 0 && viewers[0] != null, "Viewers array argument shouldn't be null");
+        Preconditions.checkArgument(menu != null, "Menu argument can't be null");
+        Preconditions.checkArgument(viewers != null && viewers.length > 0 && viewers[0] != null, "Viewers array argument can't be null");
 
-        Inventory inventory = Objects.requireNonNull(menu.getInventory(), "Menu inventory shouldn't be null (AbstractMenu.getInventory()) for menu " + menu.getClass().getSimpleName());
+        Inventory inventory = Objects.requireNonNull(menu.getInventory(), "Menu inventory can't be null (AbstractMenu.getInventory()) for menu " + menu.getClass().getSimpleName());
 
         if (!(inventory.getHolder() instanceof AbstractMenu)) {
             holderMenus.add(menu);
         }
 
         for (HumanEntity viewer : viewers) {
-            Objects.requireNonNull(viewer, "Viewer argument in the viewers array shouldn't be null");
+            Objects.requireNonNull(viewer, "Viewer argument in the viewers array can't be null");
             Optional<AbstractMenu> currentMenu = getMenu(viewer.getOpenInventory().getTopInventory());
 
             if (currentMenu.isPresent()) {
@@ -121,16 +121,16 @@ public class MenuManager implements Listener {
      * @param menuClass {@link AbstractMenu} subclass class, or the superclass (in that case, it'll close all menus)
      */
     public void closeMenus(@NotNull Class<? extends AbstractMenu> menuClass) {
-        Preconditions.checkArgument(menuClass != null, "Menu class argument shouldn't be null");
+        Preconditions.checkArgument(menuClass != null, "Menu class argument can't be null");
 
         if (menuClass == AbstractMenu.class) {
             closeAllMenus();
             return;
         }
 
-        for (AbstractMenu openMenu : holderMenus) {
-            if (menuClass.isInstance(openMenu)) {
-                openMenu.close();
+        for (AbstractMenu holderMenu : holderMenus) {
+            if (menuClass.isInstance(holderMenu)) {
+                holderMenu.close();
             }
         }
 
@@ -148,7 +148,12 @@ public class MenuManager implements Listener {
      */
     public void closeAllMenus() {
         holderMenus.forEach(AbstractMenu::close);
-        Bukkit.getOnlinePlayers().forEach(viewer -> getHeldMenu(viewer).ifPresent(menu -> viewer.closeInventory()));
+
+        for (Player viewer : Bukkit.getOnlinePlayers()) {
+            if (viewer.getOpenInventory().getTopInventory().getHolder() instanceof AbstractMenu) {
+                viewer.closeInventory();
+            }
+        }
     }
 
     /**
@@ -159,8 +164,8 @@ public class MenuManager implements Listener {
      * @throws IllegalArgumentException If the viewer argument is null
      */
     @NotNull
-    public Optional<AbstractMenu> getHeldMenu(@NotNull HumanEntity viewer) {
-        Preconditions.checkArgument(viewer != null, "Viewer argument shouldn't be null");
+    public static Optional<AbstractMenu> getHeldMenu(@NotNull HumanEntity viewer) {
+        Preconditions.checkArgument(viewer != null, "Viewer argument can't be null");
         return getHeldMenu(viewer.getOpenInventory().getTopInventory());
     }
 
@@ -173,8 +178,8 @@ public class MenuManager implements Listener {
      * @throws IllegalArgumentException If the inventory argument is null
      */
     @NotNull
-    public Optional<AbstractMenu> getHeldMenu(@NotNull Inventory inventory) {
-        Preconditions.checkArgument(inventory != null, "Inventory argument shouldn't be null");
+    public static Optional<AbstractMenu> getHeldMenu(@NotNull Inventory inventory) {
+        Preconditions.checkArgument(inventory != null, "Inventory argument can't be null");
 
         InventoryHolder holder = inventory.getHolder();
 
@@ -191,7 +196,7 @@ public class MenuManager implements Listener {
      */
     @NotNull
     public Optional<AbstractMenu> getTileMenu(@NotNull HumanEntity viewer) {
-        Preconditions.checkArgument(viewer != null, "Viewer argument shouldn't be null");
+        Preconditions.checkArgument(viewer != null, "Viewer argument can't be null");
         return getTileMenu(viewer.getOpenInventory().getTopInventory());
     }
 
@@ -205,7 +210,7 @@ public class MenuManager implements Listener {
      */
     @NotNull
     public Optional<AbstractMenu> getTileMenu(@NotNull Inventory inventory) {
-        Preconditions.checkArgument(inventory != null, "Inventory argument shouldn't be null");
+        Preconditions.checkArgument(inventory != null, "Inventory argument can't be null");
 
         for (AbstractMenu openMenu : holderMenus) {
             if (openMenu.getInventory().equals(inventory)) {
@@ -228,7 +233,7 @@ public class MenuManager implements Listener {
      */
     @NotNull
     public Optional<AbstractMenu> getMenu(@NotNull HumanEntity viewer) {
-        Preconditions.checkArgument(viewer != null, "Viewer argument shouldn't be null");
+        Preconditions.checkArgument(viewer != null, "Viewer argument can't be null");
         return getMenu(viewer.getOpenInventory().getTopInventory());
     }
 
@@ -293,9 +298,9 @@ public class MenuManager implements Listener {
      */
     @EventHandler(ignoreCancelled = true)
     public void onInventoryClick(InventoryClickEvent event) {
-        getMenu(event.getWhoClicked()).ifPresent(menu -> {
+        getMenu(event.getInventory()).ifPresent(menu -> {
             try {
-                menu.onClick(event, event.getClickedInventory() == null || event.getClickedInventory().equals(menu.getInventory()));
+                menu.onClick(event, event.getClickedInventory() == null || !event.getClickedInventory().equals(menu.getInventory()));
             } catch (Exception e) {
                 getPlugin().ifPresent(p -> p.getLogger().warning("An error occurred while handling a menu click event."));
                 e.printStackTrace();
@@ -362,7 +367,7 @@ public class MenuManager implements Listener {
      */
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onInventoryDrag(InventoryDragEvent event) {
-        getMenu(event.getWhoClicked()).ifPresent(menu -> {
+        getMenu(event.getInventory()).ifPresent(menu -> {
             try {
                 menu.onDrag(event);
             } catch (Exception e) {
@@ -417,11 +422,11 @@ public class MenuManager implements Listener {
      */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPluginDisable(PluginDisableEvent event) {
-        if (provider == null || !provider.equals(event.getPlugin())) {
+        if (provider == null) {
             return;
+        } else if (!provider.equals(event.getPlugin())) {
+            provider = null;
         }
-
-        provider = null;
 
         holderMenus.forEach(menu -> menu.onDisable(event, this));
 

@@ -80,10 +80,11 @@ public class ItemBuilder {
      *
      * @param item  {@link ItemStack} that's being wrapped by this class for further modification
      * @param title Display name or visible title of an item
+     * @throws IllegalArgumentException If the ItemStack argument is null or of Material.AIR type
      */
     public ItemBuilder(@NotNull ItemStack item, @Nullable String title) {
-        Preconditions.checkArgument(item != null, "Item argument shouldn't be null");
-        Preconditions.checkArgument(!item.getType().equals(Material.AIR), "Item type shouldn't be Material.AIR");
+        Preconditions.checkArgument(item != null, "Item argument can't be null");
+        Preconditions.checkArgument(!item.getType().equals(Material.AIR), "Item type can't be of Material.AIR type");
 
         this.itemStack = item;
         title(title);
@@ -113,6 +114,7 @@ public class ItemBuilder {
      * Creates a new {@link ItemBuilder} from a given {@link ItemStack}.
      *
      * @param item {@link ItemStack} that's being wrapped by this class for further modification
+     * @throws IllegalArgumentException If the ItemStack argument is null or of Material.AIR type
      */
     public ItemBuilder(@NotNull ItemStack item) {
         this(item, null);
@@ -130,15 +132,15 @@ public class ItemBuilder {
      */
     @NotNull
     public <T extends ItemMeta> ItemBuilder changeMeta(@NotNull Class<T> metaClass, @NotNull Consumer<T> metaConsumer) {
-        Preconditions.checkArgument(metaClass != null, "Class<T extends ItemMeta> argument shouldn't be null");
-        Preconditions.checkArgument(metaConsumer != null, "Consumer<T extends ItemMeta> argument shouldn't be null");
+        Preconditions.checkArgument(metaClass != null, "Class<T extends ItemMeta> argument can't be null");
+        Preconditions.checkArgument(metaConsumer != null, "Consumer<T extends ItemMeta> argument can't be null");
 
-        getItemMeta().ifPresent(meta -> {
-            if (metaClass.isInstance(meta)) {
-                metaConsumer.accept(metaClass.cast(meta));
-                itemMeta(meta);
-            }
-        });
+        ItemMeta meta = getItemMeta();
+
+        if (metaClass.isInstance(meta)) {
+            metaConsumer.accept(metaClass.cast(meta));
+            itemMeta(meta);
+        }
 
         return this;
     }
@@ -151,12 +153,8 @@ public class ItemBuilder {
      */
     @NotNull
     public ItemBuilder removeEnchantments(@NotNull Collection<Enchantment> enchantments) {
-        Preconditions.checkArgument(enchantments != null, "Enchantments list argument shouldn't be null");
-
-        for (Enchantment enchantment : enchantments) {
-            itemStack.removeEnchantment(enchantment);
-        }
-
+        Preconditions.checkArgument(enchantments != null, "Enchantments list argument can't be null");
+        enchantments.forEach(enchantment -> itemStack.removeEnchantment(enchantment));
         return this;
     }
 
@@ -168,7 +166,7 @@ public class ItemBuilder {
      */
     @NotNull
     public ItemBuilder removeEnchantments(@NotNull Enchantment... enchantments) {
-        Preconditions.checkArgument(enchantments != null, "Enchantments array argument shouldn't be null");
+        Preconditions.checkArgument(enchantments != null, "Enchantments array argument can't be null");
 
         for (Enchantment enchantment : enchantments) {
             itemStack.removeEnchantment(enchantment);
@@ -186,7 +184,7 @@ public class ItemBuilder {
      */
     @NotNull
     public ItemBuilder addLoreAt(int index, @NotNull Collection<String> lines) {
-        Preconditions.checkArgument(lines != null, "Collection<String> of lore lines argument shouldn't be null");
+        Preconditions.checkArgument(lines != null, "Collection<String> of lore lines argument can't be null");
 
         List<String> lore = getLore();
         lore.addAll(index, lines);
@@ -202,13 +200,13 @@ public class ItemBuilder {
      */
     @NotNull
     public ItemBuilder changeItem(@NotNull Consumer<ItemStack> itemConsumer) {
-        Preconditions.checkArgument(itemConsumer != null, "Consumer<ItemStack> argument shouldn't be null");
+        Preconditions.checkArgument(itemConsumer != null, "Consumer<ItemStack> argument can't be null");
         itemConsumer.accept(itemStack);
         return this;
     }
 
     /**
-     * Sets/repeats a new given line of lore at given indexes of the {@link ItemStack}'s lore.
+     * Sets/repeats a new given line of lore at given <strong>existing</strong> indexes of the {@link ItemStack}'s lore.
      * <p>
      * If there is no existing lore, this method will create a new list with the initial size of the biggest given index
      * plus 1 and proceed to set the line at given indexes.
@@ -218,12 +216,11 @@ public class ItemBuilder {
      * @return This instance, useful for chaining
      */
     @NotNull
-    public ItemBuilder loreAt(@NotNull String line, @NotNull int... indexes) {
-        Preconditions.checkArgument(line != null, "Lore line argument shouldn't be null");
-        Preconditions.checkArgument(indexes != null, "Array of lore line indexes argument shouldn't be null");
+    public ItemBuilder loreAt(@Nullable String line, @NotNull int... indexes) {
+        Preconditions.checkArgument(indexes != null, "Array of lore line indexes argument can't be null");
 
-        List<String> lore = getLore();
-        lore = lore.isEmpty() ? new ArrayList<>(Utility.max(indexes) + 1) : lore;
+        List<String> lore = getItemMeta().getLore();
+        lore = lore == null || lore.isEmpty() ? new ArrayList<>(Utility.max(indexes) + 1) : lore;
 
         for (int index : indexes) {
             lore.set(index, line);
@@ -253,7 +250,7 @@ public class ItemBuilder {
      */
     @NotNull
     public ItemBuilder addLoreAt(int index, @NotNull String... lines) {
-        Preconditions.checkArgument(lines != null, "String array of lore lines argument shouldn't be null");
+        Preconditions.checkArgument(lines != null, "String array of lore lines argument can't be null");
         return addLoreAt(index, Arrays.asList(lines));
     }
 
@@ -265,20 +262,22 @@ public class ItemBuilder {
      */
     @NotNull
     public ItemBuilder removeFlags(@NotNull ItemFlag... flags) {
-        Preconditions.checkArgument(flags != null, "ItemFlag array of enums argument shouldn't be null");
+        Preconditions.checkArgument(flags != null, "ItemFlag array of enums argument can't be null");
         return changeMeta(meta -> meta.removeItemFlags(flags));
     }
 
     /**
      * Removes a line of lore at each given list index of the {@link ItemStack}'s lore.
      * <p>
-     * This method loops through the given list of indexes and removes a line at each given index.
+     * This method loops through the given list of indexes and removes a line at each given index. Removing an element
+     * at an index will cause the {@link ArrayList} to shift in size and move it's elements towards the removed element
+     * each time. If you want to remove a line and next lines after it, you would have to repeat the same index then.
      *
      * @param indexes Array of indexes at which each lore line should be removed
      * @return This instance, useful for chaining
      */
     public ItemBuilder removeLoreAt(@NotNull int... indexes) {
-        Preconditions.checkArgument(indexes != null, "Array of lore line indexes argument shouldn't be null");
+        Preconditions.checkArgument(indexes != null, "Array of lore line indexes argument can't be null");
 
         List<String> lore = getLore();
 
@@ -299,7 +298,7 @@ public class ItemBuilder {
      */
     @NotNull
     public ItemBuilder material(@NotNull Material material) {
-        Preconditions.checkArgument(material != null, "Material argument shouldn't be null");
+        Preconditions.checkArgument(material != null, "Material argument can't be null");
         return changeItem(item -> item.setType(material));
     }
 
@@ -322,7 +321,7 @@ public class ItemBuilder {
      */
     @NotNull
     public ItemBuilder addLore(@NotNull List<String> lines) {
-        Preconditions.checkArgument(lines != null, "List<String> of lore lines argument shouldn't be null");
+        Preconditions.checkArgument(lines != null, "List<String> of lore lines argument can't be null");
 
         List<String> lore = getLore();
         lore.addAll(lines);
@@ -338,7 +337,7 @@ public class ItemBuilder {
      */
     @NotNull
     public ItemBuilder addFlags(@NotNull ItemFlag... flags) {
-        Preconditions.checkArgument(flags != null, "ItemFlag array of enums argument shouldn't be null");
+        Preconditions.checkArgument(flags != null, "ItemFlag array of enums argument can't be null");
         return changeMeta(meta -> meta.addItemFlags(flags));
     }
 
@@ -361,7 +360,7 @@ public class ItemBuilder {
      */
     @NotNull
     public ItemBuilder addLore(@NotNull String... lines) {
-        Preconditions.checkArgument(lines != null, "String array of lore lines argument shouldn't be null");
+        Preconditions.checkArgument(lines != null, "String array of lore lines argument can't be null");
         return addLore(Arrays.asList(lines));
     }
 
@@ -457,7 +456,8 @@ public class ItemBuilder {
      * @return Whether the {@link ItemStack} contains the given item flag
      */
     public boolean hasFlag(@NotNull ItemFlag flag) {
-        return getItemMeta().map(meta -> flag != null && meta.hasItemFlag(flag)).orElse(false);
+        Preconditions.checkArgument(flag != null, "ItemFlag argument can't be null");
+        return getItemMeta().hasItemFlag(flag);
     }
 
     /**
@@ -466,8 +466,8 @@ public class ItemBuilder {
      * @return {@link ItemMeta} of the {@link ItemStack}
      */
     @NotNull
-    public Optional<ItemMeta> getItemMeta() {
-        return Optional.ofNullable(itemStack.getItemMeta());
+    public ItemMeta getItemMeta() {
+        return itemStack.getItemMeta();
     }
 
     /**
@@ -477,17 +477,17 @@ public class ItemBuilder {
      */
     @NotNull
     public String getLocalizedName() {
-        return getItemMeta().map(ItemMeta::getLocalizedName).orElse("");
+        return getItemMeta().getLocalizedName();
     }
 
     /**
-     * Returns a List of lore lines of the {@link ItemStack}.
+     * Returns a {@link List} of lore lines of the {@link ItemStack}.
      *
-     * @return List of lore lines of the {@link ItemStack}, possibly empty
+     * @return Not null list of lore lines of the {@link ItemStack}, possibly empty
      */
     @NotNull
     public List<String> getLore() {
-        return getItemMeta().map(ItemMeta::getLore).orElse(new ArrayList<>());
+        return Optional.ofNullable(getItemMeta().getLore()).orElse(new ArrayList<>());
     }
 
     /**
@@ -505,7 +505,7 @@ public class ItemBuilder {
      * @return Whether the {@link ItemStack} can lose it's durability through use
      */
     public boolean isBreakable() {
-        return getItemMeta().map(meta -> !meta.isUnbreakable()).orElse(true);
+        return getItemMeta().isUnbreakable();
     }
 
     /**
@@ -525,7 +525,7 @@ public class ItemBuilder {
      */
     @NotNull
     public String getTitle() {
-        return getItemMeta().map(ItemMeta::getDisplayName).orElse("");
+        return getItemMeta().getDisplayName();
     }
 
     /**
