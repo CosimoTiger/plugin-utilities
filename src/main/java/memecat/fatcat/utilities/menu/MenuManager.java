@@ -31,7 +31,7 @@ import java.util.Set;
  * On instantiation, {@link AbstractMenu}s should try to make themselves an {@link InventoryHolder} of their own
  * {@link Inventory} if it has no holder. This will make them faster to find for all of the events that this
  * {@link MenuManager} supports, except for {@link PluginDisableEvent} which is actually faster for the special case of
- * menus that are stored in this class's HashSet of {@link AbstractMenu} with an already occupied
+ * menus that are stored in this class's {@link HashSet} of {@link AbstractMenu}s with an already occupied
  * {@link InventoryHolder}.
  * <p>
  * <strong>Warning: Multiple instances of this class that are also registered as {@link Listener}s will cause multiple event
@@ -48,7 +48,7 @@ public class MenuManager implements Listener {
      * to allow events to access them as their {@link InventoryHolder} variable is already taken by a tile block or
      * entity (chest, furnace, horse..).
      */
-    private Set<AbstractMenu> holderMenus;
+    private static Set<AbstractMenu> holderMenus = holderMenus = new HashSet<>(2);
 
     /**
      * Currently registered plugin that has this listener registered under it's instance.
@@ -56,30 +56,15 @@ public class MenuManager implements Listener {
     private Plugin provider;
 
     /**
-     * Creates a new instance that registers itself with the enabled {@link Listener} provider {@link Plugin} and
-     * creates a new {@link HashSet} with initial capacity for holding tile {@link AbstractMenu}s.
+     * Creates a new instance that registers itself with the enabled {@link Listener} provider {@link Plugin}.
      *
-     * @param provider              Not null enabled {@link Plugin} for registering this {@link Listener} instance's
-     *                              event handlers
-     * @param holderInitialCapacity Initial capacity for this instance's {@link HashSet} variable
+     * @param provider Not null enabled {@link Plugin} for registering this {@link Listener} instance's
+     *                 event handlers
      * @throws IllegalArgumentException If the provider argument is null
      * @throws IllegalStateException    If the provider argument is not enabled
      */
-    public MenuManager(@NotNull Plugin provider, int holderInitialCapacity) {
+    public MenuManager(@NotNull Plugin provider) {
         Bukkit.getPluginManager().registerEvents(this, this.provider = UtilitiesPlugin.checkProvider(provider));
-        holderMenus = new HashSet<>(holderInitialCapacity);
-    }
-
-    /**
-     * Creates a new instance that registers itself with the enabled {@link Listener} provider {@link Plugin} and
-     * creates a new {@link HashSet} with initial capacity of 2 for holding tile {@link AbstractMenu}s.
-     *
-     * @param provider Not null enabled {@link Plugin} for registering this {@link Listener} instance's event handlers
-     * @throws IllegalArgumentException If the provider argument is null
-     * @throws IllegalStateException    If the provider argument is not enabled
-     */
-    public MenuManager(Plugin provider) {
-        this(provider, 2);
     }
 
     /**
@@ -139,6 +124,24 @@ public class MenuManager implements Listener {
                 viewer.closeInventory();
             }
         }
+    }
+
+    /**
+     * Provides a new {@link Plugin} to register this {@link Listener}'s events if it's current provider is null or
+     * disabled.
+     *
+     * @param provider Not null enabled {@link Plugin} for registering this {@link Listener} instance's event handlers
+     * @return Whether this {@link Listener} was successfully registered
+     * @throws IllegalArgumentException If the provider argument is null
+     * @throws IllegalStateException    If the provider argument is not enabled
+     */
+    public boolean provide(@NotNull Plugin provider) {
+        if (isRegistered()) {
+            return false;
+        }
+
+        Bukkit.getPluginManager().registerEvents(this, this.provider = UtilitiesPlugin.checkProvider(provider));
+        return true;
     }
 
     /**
@@ -212,29 +215,13 @@ public class MenuManager implements Listener {
     public Optional<AbstractMenu> getTileMenu(@NotNull Inventory inventory) {
         Preconditions.checkArgument(inventory != null, "Inventory argument can't be null");
 
-        for (AbstractMenu openMenu : holderMenus) {
-            if (openMenu.getInventory().equals(inventory)) {
-                return Optional.of(openMenu);
+        for (AbstractMenu holderMenu : holderMenus) {
+            if (holderMenu.getInventory().equals(inventory)) {
+                return Optional.of(holderMenu);
             }
         }
 
         return Optional.empty();
-    }
-
-    /**
-     * Returns the current inventory {@link AbstractMenu} that a given player is viewing.
-     * <p>
-     * This method first uses the method {@link #getHeldMenu(Inventory)} and then {@link #getTileMenu(Inventory)} if an
-     * {@link AbstractMenu} is not found.
-     *
-     * @param viewer Player that's viewing an inventory
-     * @return Optional of nullable {@link AbstractMenu} of the given viewer's top inventory
-     * @throws IllegalArgumentException If the viewer argument is null
-     */
-    @NotNull
-    public Optional<AbstractMenu> getMenu(@NotNull HumanEntity viewer) {
-        Preconditions.checkArgument(viewer != null, "Viewer argument can't be null");
-        return getMenu(viewer.getOpenInventory().getTopInventory());
     }
 
     /**
@@ -254,21 +241,19 @@ public class MenuManager implements Listener {
     }
 
     /**
-     * Provides a new {@link Plugin} to register this {@link Listener}'s events if it's current provider is null or
-     * disabled.
+     * Returns the current inventory {@link AbstractMenu} that a given player is viewing.
+     * <p>
+     * This method first uses the method {@link #getHeldMenu(Inventory)} and then {@link #getTileMenu(Inventory)} if an
+     * {@link AbstractMenu} is not found.
      *
-     * @param provider Not null enabled {@link Plugin} for registering this {@link Listener} instance's event handlers
-     * @return Whether this {@link Listener} was successfully registered
-     * @throws IllegalArgumentException If the provider argument is null
-     * @throws IllegalStateException    If the provider argument is not enabled
+     * @param viewer Player that's viewing an inventory
+     * @return Optional of nullable {@link AbstractMenu} of the given viewer's top inventory
+     * @throws IllegalArgumentException If the viewer argument is null
      */
-    public boolean provide(@NotNull Plugin provider) {
-        if (isRegistered()) {
-            return false;
-        }
-
-        Bukkit.getPluginManager().registerEvents(this, this.provider = UtilitiesPlugin.checkProvider(provider));
-        return true;
+    @NotNull
+    public Optional<AbstractMenu> getMenu(@NotNull HumanEntity viewer) {
+        Preconditions.checkArgument(viewer != null, "Viewer argument can't be null");
+        return getMenu(viewer.getOpenInventory().getTopInventory());
     }
 
     /**
@@ -391,13 +376,13 @@ public class MenuManager implements Listener {
         if (menu.isPresent()) {
             equalsDestination = true;
         } else if (!(menu = getHeldMenu(event.getSource())).isPresent()) {
-            for (AbstractMenu openMenu : holderMenus) {
-                if (openMenu.getInventory().equals(event.getDestination())) {
-                    menu = Optional.of(openMenu);
+            for (AbstractMenu holderMenu : holderMenus) {
+                if (holderMenu.getInventory().equals(event.getDestination())) {
+                    menu = Optional.of(holderMenu);
                     equalsDestination = true;
                     break;
-                } else if (openMenu.getInventory().equals(event.getSource())) {
-                    menu = Optional.of(openMenu);
+                } else if (holderMenu.getInventory().equals(event.getSource())) {
+                    menu = Optional.of(holderMenu);
                     break;
                 }
             }

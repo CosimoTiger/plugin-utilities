@@ -243,7 +243,7 @@ public class InventoryMenu extends AbstractMenu {
         Preconditions.checkArgument(slots != null, "Array of slots can't be null");
 
         for (int slot : slots) {
-            Preconditions.checkElementIndex(slot, getSize(), "Invalid ItemStack index of " + slot + " with size " + getSize());
+            checkElement(slot, getSize());
             getInventory().setItem(slot, item);
         }
 
@@ -276,15 +276,23 @@ public class InventoryMenu extends AbstractMenu {
         return this;
     }
 
-    protected void checkRange(int from, int to, int max) {
+    protected static void checkRange(int from, int to, int size) {
         if (from > to) {
             throw new IllegalArgumentException("From-slot argument (" + from + ") can't be greater than to-slot argument (" + to + ")");
         } else if (from < 0) {
             throw new IndexOutOfBoundsException("From-slot argument (" + from + ") can't be smaller than 0");
-        } else if (from > max) {
-            throw new IndexOutOfBoundsException("From-slot argument (" + from + ") can't be greater than the inventory size (" + max + ")");
-        } else if (to > max) {
-            throw new IndexOutOfBoundsException("To-slot argument (" + from + ") can't be greater than the inventory size (" + max + ")");
+        } else if (from > size) {
+            throw new IndexOutOfBoundsException("From-slot argument (" + from + ") can't be greater than the inventory size (" + size + ")");
+        } else if (to > size) {
+            throw new IndexOutOfBoundsException("To-slot argument (" + from + ") can't be greater than the inventory size (" + size + ")");
+        }
+    }
+
+    protected static void checkElement(int index, int size) {
+        if (index < 0) {
+            throw new IllegalArgumentException("Slot index argument (" + index + ") can't be smaller 0");
+        } else if (index >= size) {
+            throw new IllegalArgumentException("Slot index argument (" + index + ") can't be greater or equal to the size");
         }
     }
 

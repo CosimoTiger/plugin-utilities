@@ -129,9 +129,14 @@ public class PropertyMenu extends InventoryMenu {
      */
     @Override
     public void onClick(@NotNull InventoryClickEvent event, boolean external) {
-        super.onClick(event, external);
+        switch (event.getAction()) {
+            case COLLECT_TO_CURSOR:
+            case MOVE_TO_OTHER_INVENTORY:
+                event.setCancelled(true);
+                break;
+        }
 
-        if (event.isCancelled()) {
+        if (external) {
             return;
         }
 
@@ -139,8 +144,11 @@ public class PropertyMenu extends InventoryMenu {
          * By default, a slot that lacks a slot property will cancel any interactions with it. This is why every existing
          * slot property in a slot needs to control the event result via Event.setCancelled(boolean cancelled).
          */
+        Optional<AbstractSlotProperty> property = getSlotProperty(event.getSlot());
 
-        if (!runProperty(event)) {
+        if (property.isPresent()) {
+            property.get().run(event, this);
+        } else {
             event.setCancelled(true);
         }
     }
@@ -187,7 +195,7 @@ public class PropertyMenu extends InventoryMenu {
         Preconditions.checkArgument(slots != null, "Array of slots can't be null");
 
         for (int slot : slots) {
-            Preconditions.checkElementIndex(slot, getSize(), "Invalid slot property index of " + slot + " with size " + getSize());
+            checkElement(slot, getSize());
             properties[slot] = property;
             getInventory().setItem(slot, item);
         }
@@ -274,27 +282,11 @@ public class PropertyMenu extends InventoryMenu {
         Preconditions.checkArgument(slots != null, "Array of slots can't be null");
 
         for (int slot : slots) {
-            Preconditions.checkElementIndex(slot, getSize(), "Invalid slot property index of " + slot + " with size " + getSize());
+            checkElement(slot, getSize());
             properties[slot] = property;
         }
 
         return this;
-    }
-
-    /**
-     * Runs a property in this menu at the given slot with the given event and this menu as arguments.
-     *
-     * @param event InventoryClickEvent event
-     * @return Whether a property at the given slot exists
-     * @throws IllegalArgumentException If the event argument is null
-     */
-    public boolean runProperty(@NotNull InventoryClickEvent event) {
-        Preconditions.checkArgument(event != null, "Event argument can't be null");
-
-        return getSlotProperty(event.getSlot()).map(property -> {
-            property.run(event, this);
-            return true;
-        }).orElse(false);
     }
 
     /**
@@ -329,7 +321,7 @@ public class PropertyMenu extends InventoryMenu {
      */
     @NotNull
     public Optional<AbstractSlotProperty> getSlotProperty(int slot) {
-        Preconditions.checkElementIndex(slot, getSize(), "Invalid slot property index of " + slot + " with size " + getSize());
+        checkElement(slot, getSize());
         return Optional.ofNullable(properties[slot]);
     }
 }

@@ -1,6 +1,5 @@
 package memecat.fatcat.utilities.menu.menus;
 
-import com.google.common.base.Preconditions;
 import memecat.fatcat.utilities.UtilitiesPlugin;
 import memecat.fatcat.utilities.menu.MenuManager;
 import memecat.fatcat.utilities.menu.attribute.Rows;
@@ -89,8 +88,6 @@ public abstract class AbstractMenu implements InventoryHolder {
             case MOVE_TO_OTHER_INVENTORY:
                 event.setCancelled(true);
                 break;
-            default:
-                break;
         }
 
         if (!external) {
@@ -163,19 +160,8 @@ public abstract class AbstractMenu implements InventoryHolder {
      *
      * @param viewers Players that will see this {@link AbstractMenu} inventory
      */
-    public void openMenu(@NotNull HumanEntity... viewers) {
+    public void open(@NotNull HumanEntity... viewers) {
         UtilitiesPlugin.getMenuManager().ifPresent(manager -> manager.openMenu(this, viewers));
-    }
-
-    /**
-     * Clears all of this inventory menu's contents.
-     *
-     * @return This instance, useful for chaining
-     */
-    @NotNull
-    public AbstractMenu clear() {
-        getInventory().clear();
-        return this;
     }
 
     /**
@@ -192,6 +178,17 @@ public abstract class AbstractMenu implements InventoryHolder {
     }
 
     /**
+     * Clears all of this inventory menu's contents.
+     *
+     * @return This instance, useful for chaining
+     */
+    @NotNull
+    public AbstractMenu clear() {
+        getInventory().clear();
+        return this;
+    }
+
+    /**
      * Returns an ItemStack at the given slot of this inventory menu or null if it doesn't exist.
      *
      * @param slot Slot index location of the item in the inventory
@@ -200,18 +197,8 @@ public abstract class AbstractMenu implements InventoryHolder {
      */
     @NotNull
     public Optional<ItemStack> getItem(int slot) {
-        Preconditions.checkElementIndex(slot, getSize(), "Invalid ItemStack index of " + slot + " with size " + getSize());
+        InventoryMenu.checkElement(slot, getSize());
         return Optional.ofNullable(getInventory().getItem(slot));
-    }
-
-    /**
-     * Returns a List of human entities (usually players) that are currently viewing this inventory menu.
-     *
-     * @return List of human entities (usually players)
-     */
-    @NotNull
-    public List<HumanEntity> getViewers() {
-        return getInventory().getViewers();
     }
 
     /**
@@ -231,6 +218,16 @@ public abstract class AbstractMenu implements InventoryHolder {
      */
     @NotNull
     public abstract Optional<Rows> getRows();
+
+    /**
+     * Returns a List of human entities (usually players) that are currently viewing this inventory menu.
+     *
+     * @return List of human entities (usually players)
+     */
+    @NotNull
+    public List<HumanEntity> getViewers() {
+        return getInventory().getViewers();
+    }
 
     /**
      * Returns the inventory type of this {@link AbstractMenu}.

@@ -461,16 +461,6 @@ public class ItemBuilder {
     }
 
     /**
-     * Returns the {@link ItemMeta} of the {@link ItemStack}.
-     *
-     * @return {@link ItemMeta} of the {@link ItemStack}
-     */
-    @NotNull
-    public ItemMeta getItemMeta() {
-        return itemStack.getItemMeta();
-    }
-
-    /**
      * Returns the localized name (this is most likely part of a language locale) of the {@link ItemStack}.
      *
      * @return Localized name of the {@link ItemStack}
@@ -478,6 +468,16 @@ public class ItemBuilder {
     @NotNull
     public String getLocalizedName() {
         return getItemMeta().getLocalizedName();
+    }
+
+    /**
+     * Returns the {@link ItemMeta} of the {@link ItemStack}.
+     *
+     * @return {@link ItemMeta} of the {@link ItemStack}
+     */
+    @NotNull
+    public ItemMeta getItemMeta() {
+        return itemStack.getItemMeta();
     }
 
     /**
