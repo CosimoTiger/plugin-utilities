@@ -198,7 +198,7 @@ public class MenuManager implements Listener {
      * @throws IllegalArgumentException If the viewer argument is null
      */
     @NotNull
-    public Optional<AbstractMenu> getTileMenu(@NotNull HumanEntity viewer) {
+    public static Optional<AbstractMenu> getTileMenu(@NotNull HumanEntity viewer) {
         Preconditions.checkArgument(viewer != null, "Viewer argument can't be null");
         return getTileMenu(viewer.getOpenInventory().getTopInventory());
     }
@@ -212,7 +212,7 @@ public class MenuManager implements Listener {
      * @throws IllegalArgumentException If the inventory argument is null
      */
     @NotNull
-    public Optional<AbstractMenu> getTileMenu(@NotNull Inventory inventory) {
+    public static Optional<AbstractMenu> getTileMenu(@NotNull Inventory inventory) {
         Preconditions.checkArgument(inventory != null, "Inventory argument can't be null");
 
         for (AbstractMenu holderMenu : holderMenus) {
@@ -235,7 +235,7 @@ public class MenuManager implements Listener {
      * @throws IllegalArgumentException If the inventory argument is null
      */
     @NotNull
-    public Optional<AbstractMenu> getMenu(@NotNull Inventory inventory) {
+    public static Optional<AbstractMenu> getMenu(@NotNull Inventory inventory) {
         Optional<AbstractMenu> menu = getHeldMenu(inventory);
         return menu.isPresent() ? menu : getTileMenu(inventory);
     }
@@ -251,7 +251,7 @@ public class MenuManager implements Listener {
      * @throws IllegalArgumentException If the viewer argument is null
      */
     @NotNull
-    public Optional<AbstractMenu> getMenu(@NotNull HumanEntity viewer) {
+    public static Optional<AbstractMenu> getMenu(@NotNull HumanEntity viewer) {
         Preconditions.checkArgument(viewer != null, "Viewer argument can't be null");
         return getMenu(viewer.getOpenInventory().getTopInventory());
     }
