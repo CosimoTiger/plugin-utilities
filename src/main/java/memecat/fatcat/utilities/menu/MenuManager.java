@@ -48,7 +48,7 @@ public class MenuManager implements Listener {
      * to allow events to access them as their {@link InventoryHolder} variable is already taken by a tile block or
      * entity (chest, furnace, horse..).
      */
-    private static Set<AbstractMenu> holderMenus = holderMenus = new HashSet<>(2);
+    private static Set<AbstractMenu> holderMenus = new HashSet<>(2);
 
     /**
      * Currently registered plugin that has this listener registered under it's instance.
@@ -151,7 +151,6 @@ public class MenuManager implements Listener {
      */
     public void closeAllMenus() {
         holderMenus.forEach(AbstractMenu::close);
-
         for (Player viewer : Bukkit.getOnlinePlayers()) {
             if (viewer.getOpenInventory().getTopInventory().getHolder() instanceof AbstractMenu) {
                 viewer.closeInventory();
@@ -281,7 +280,7 @@ public class MenuManager implements Listener {
      * @param event InventoryClickEvent event
      * @see AbstractMenu#onClick(InventoryClickEvent, boolean)
      */
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         getMenu(event.getInventory()).ifPresent(menu -> {
             try {
@@ -332,7 +331,7 @@ public class MenuManager implements Listener {
      * @param event InventoryOpenEvent event object
      * @see AbstractMenu#onOpen(InventoryOpenEvent)
      */
-    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    @EventHandler
     public void onInventoryOpen(InventoryOpenEvent event) {
         getMenu(event.getInventory()).ifPresent(menu -> {
             try {
@@ -350,7 +349,7 @@ public class MenuManager implements Listener {
      * @param event InventoryDragEvent event object
      * @see AbstractMenu#onDrag(InventoryDragEvent)
      */
-    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    @EventHandler
     public void onInventoryDrag(InventoryDragEvent event) {
         getMenu(event.getInventory()).ifPresent(menu -> {
             try {
@@ -368,18 +367,18 @@ public class MenuManager implements Listener {
      * @param event InventoryMoveItemEvent event
      * @see AbstractMenu#onItemMove(InventoryMoveItemEvent, boolean)
      */
-    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    @EventHandler
     public void onItemMove(InventoryMoveItemEvent event) {
-        boolean equalsDestination = false;
+        boolean isDestination = false;
         Optional<AbstractMenu> menu = getHeldMenu(event.getDestination());
 
         if (menu.isPresent()) {
-            equalsDestination = true;
+            isDestination = true;
         } else if (!(menu = getHeldMenu(event.getSource())).isPresent()) {
             for (AbstractMenu holderMenu : holderMenus) {
                 if (holderMenu.getInventory().equals(event.getDestination())) {
                     menu = Optional.of(holderMenu);
-                    equalsDestination = true;
+                    isDestination = true;
                     break;
                 } else if (holderMenu.getInventory().equals(event.getSource())) {
                     menu = Optional.of(holderMenu);
@@ -393,7 +392,7 @@ public class MenuManager implements Listener {
         }
 
         try {
-            menu.get().onItemMove(event, equalsDestination);
+            menu.get().onItemMove(event, isDestination);
         } catch (Exception e) {
             getPlugin().ifPresent(p -> p.getLogger().warning("An error occurred while handling a menu item movement event."));
             e.printStackTrace();
@@ -405,19 +404,34 @@ public class MenuManager implements Listener {
      *
      * @param event PluginDisableEvent event
      */
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onPluginDisable(PluginDisableEvent event) {
-        if (provider == null) {
+        if (!event.getPlugin().equals(provider)) {
             return;
-        } else if (!provider.equals(event.getPlugin())) {
-            provider = null;
         }
 
-        holderMenus.forEach(menu -> menu.onDisable(event, this));
+        provider = null;
+
+        for (AbstractMenu holderMenu : holderMenus) {
+            try {
+                holderMenu.onDisable(event, this);
+            } catch (Exception e) {
+                getPlugin().ifPresent(p -> p.getLogger().warning("An error occurred while handling a menu plugin disable event."));
+                e.printStackTrace();
+            }
+        }
 
         Set<AbstractMenu> toDisable = new HashSet<>();
 
         Bukkit.getOnlinePlayers().forEach(player -> getHeldMenu(player).ifPresent(toDisable::add));
-        toDisable.forEach(menu -> menu.onDisable(event, this));
+
+        for (AbstractMenu menu : toDisable) {
+            try {
+                menu.onDisable(event, this);
+            } catch (Exception e) {
+                getPlugin().ifPresent(p -> p.getLogger().warning("An error occurred while handling a menu plugin disable event."));
+                e.printStackTrace();
+            }
+        }
     }
 }

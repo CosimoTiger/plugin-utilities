@@ -17,7 +17,33 @@ public class Cooldowns {
      * Contains cooldown entries consisting of unique name keys and a system millisecond (System.currentTimeMillis())
      * end time value.
      */
-    private Map<String, Long> cooldowns = new HashMap<>();
+    private Map<String, Long> cooldowns;
+
+    /**
+     * Creates a new {@link Cooldowns} with a given initial capacity and load factor arguments for it's {@link HashMap}.
+     *
+     * @param initialCapacity Initial capacity of this instance's {@link HashMap}
+     * @param loadFactor      Load facor of this instance's {@link HashMap}
+     */
+    public Cooldowns(int initialCapacity, float loadFactor) {
+        cooldowns = new HashMap<>(initialCapacity, loadFactor);
+    }
+
+    /**
+     * Creates a new {@link Cooldowns} with a given initial capacity argument for it's {@link HashMap}.
+     *
+     * @param initialCapacity Initial capacity of this instance's {@link HashMap}
+     */
+    public Cooldowns(int initialCapacity) {
+        cooldowns = new HashMap<>(initialCapacity);
+    }
+
+    /**
+     * Creates a new {@link Cooldowns} with a default {@link HashMap}.
+     */
+    public Cooldowns() {
+        cooldowns = new HashMap<>();
+    }
 
     /**
      * Puts a cooldown entry converted into milliseconds from a given {@link TimeUnit} if the same cooldown expired or
@@ -27,15 +53,11 @@ public class Cooldowns {
      * @param unit {@link TimeUnit} of the given time parameter
      * @param time Time in the given time unit for how long the cooldown will last for
      * @return System millisecond ending time of the given cooldown or the current one that wasn't replaced
-     * @throws IllegalArgumentException If the cooldowns key or TimeUnit argument is null
+     * @throws IllegalArgumentException If the cooldowns name or TimeUnit argument is null
      */
     public long putIfAbsent(@NotNull String name, @NotNull TimeUnit unit, long time) {
-        Preconditions.checkArgument(name != null, "Cooldowns key name can't be null");
         Preconditions.checkArgument(unit != null, "TimeUnit argument can't be null");
-
-        final long current = System.currentTimeMillis();
-
-        return cooldowns.compute(name, (key, value) -> value == null || value <= current ? current + unit.toMillis(time) : value);
+        return putIfAbsent(name, unit.toMillis(time));
     }
 
     /**
@@ -45,11 +67,27 @@ public class Cooldowns {
      * @param unit {@link TimeUnit} of the given time parameter
      * @param time Time in the given time unit for how long the cooldown will last for
      * @return Calculated system millisecond ending time of this cooldown
-     * @throws IllegalArgumentException If the cooldowns key or TimeUnit argument is null
+     * @throws IllegalArgumentException If the cooldowns name or TimeUnit argument is null
      */
     public long put(@NotNull String name, @NotNull TimeUnit unit, long time) {
         Preconditions.checkArgument(unit != null, "TimeUnit argument can't be null");
         return put(name, unit.toMillis(time));
+    }
+
+    /**
+     * Puts a cooldown entry in milliseconds of given time if the same cooldown expired or doesn't exist.
+     *
+     * @param name Unique name that the cooldown will be stored under
+     * @param time Time in milliseconds for how long the cooldown will last for
+     * @return System millisecond ending time of the given cooldown or the current one that wasn't replaced
+     * @throws IllegalArgumentException If the cooldowns name is null
+     */
+    public long putIfAbsent(@NotNull String name, long time) {
+        Preconditions.checkArgument(name != null, "Cooldowns key name can't be null");
+
+        final long current = System.currentTimeMillis();
+
+        return cooldowns.compute(name, (key, value) -> value == null || value <= current ? current + time : value);
     }
 
     /**
@@ -58,7 +96,7 @@ public class Cooldowns {
      * @param name Unique name that the cooldown will be stored under
      * @param time Time in milliseconds for how long the cooldown will last for
      * @return Calculated system millisecond ending time of this cooldown
-     * @throws IllegalArgumentException If the cooldowns key argument is null
+     * @throws IllegalArgumentException If the cooldowns name argument is null
      */
     public long put(@NotNull String name, long time) {
         Preconditions.checkArgument(name != null, "Cooldowns key name can't be null");
@@ -74,7 +112,7 @@ public class Cooldowns {
      *
      * @param name Unique name that a cooldown is stored under
      * @return Cooldown that was found or else an expired empty
-     * @throws IllegalArgumentException If the cooldowns key argument is null
+     * @throws IllegalArgumentException If the cooldowns name argument is null
      */
     @NotNull
     public Cooldown remove(@NotNull String name) {
@@ -115,7 +153,7 @@ public class Cooldowns {
      * @param unit {@link TimeUnit} in which the remaining milliseconds should be converted to
      * @param name Unique name that a cooldown is stored under
      * @return The remaining cooldown time, expressed as a decimal number for a converted time unit
-     * @throws IllegalArgumentException If the cooldowns key or TimeUnit argument is null
+     * @throws IllegalArgumentException If the cooldowns name or TimeUnit argument is null
      */
     public double getRemaining(@NotNull TimeUnit unit, @NotNull String name) {
         Preconditions.checkArgument(unit != null, "TimeUnit argument can't be null");
@@ -127,7 +165,7 @@ public class Cooldowns {
      *
      * @param name Unique name or key of a cooldown
      * @return True if the cooldown has expired (the cooldown also gets removed if true).
-     * @throws IllegalArgumentException If the cooldowns key argument is null
+     * @throws IllegalArgumentException If the cooldowns name argument is null
      */
     public boolean hasExpired(@NotNull String name) {
         return get(name).hasExpired();
@@ -138,7 +176,7 @@ public class Cooldowns {
      *
      * @param name Unique name or key of a cooldown
      * @return At what system millisecond time this cooldown will end, zero if the given cooldown hasn't been found
-     * @throws IllegalArgumentException If the cooldowns key argument is null
+     * @throws IllegalArgumentException If the cooldowns name argument is null
      */
     public long getExpiration(@NotNull String name) {
         return get(name).getExpiration();
@@ -149,7 +187,7 @@ public class Cooldowns {
      *
      * @param name Unique name that a cooldown is stored under
      * @return The remaining cooldown time in milliseconds
-     * @throws IllegalArgumentException If the cooldowns key argument is null
+     * @throws IllegalArgumentException If the cooldowns name argument is null
      */
     public long getRemaining(@NotNull String name) {
         return get(name).getRemaining();
@@ -161,7 +199,7 @@ public class Cooldowns {
      *
      * @param name Unique name or key that a cooldown is stored under
      * @return Cooldown object containing two status variables
-     * @throws IllegalArgumentException If the cooldowns key argument is null
+     * @throws IllegalArgumentException If the cooldowns name argument is null
      */
     @NotNull
     public Cooldown get(@NotNull String name) {

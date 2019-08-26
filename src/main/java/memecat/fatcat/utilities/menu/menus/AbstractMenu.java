@@ -52,13 +52,12 @@ public abstract class AbstractMenu implements InventoryHolder {
      * container object and another object or inventory tries to move items to it. An example of this happening can be a
      * chest block container inventory with a hopper connecting to it that is trying to move items into it.
      *
-     * @param event             InventoryMoveItemEvent event
-     * @param equalsDestination Whether these contents are the destination inventory of this event
+     * @param event         InventoryMoveItemEvent event
+     * @param isDestination Whether this {@link org.bukkit.inventory.Inventory} is equal to the
+     *                      {@link InventoryMoveItemEvent#getDestination()}
      */
-    public void onItemMove(@NotNull InventoryMoveItemEvent event, boolean equalsDestination) {
-        if (equalsDestination) {
-            event.setCancelled(true);
-        }
+    public void onItemMove(@NotNull InventoryMoveItemEvent event, boolean isDestination) {
+        event.setCancelled(true);
     }
 
     /**
@@ -118,6 +117,8 @@ public abstract class AbstractMenu implements InventoryHolder {
 
     /**
      * Acts as an event handler for the inventory item dragging event.
+     * <p>
+     * By default, any item dragging on the menu will be cancelled.
      *
      * @param event InventoryDragEvent event
      */
@@ -192,7 +193,7 @@ public abstract class AbstractMenu implements InventoryHolder {
      * Returns an ItemStack at the given slot of this inventory menu or null if it doesn't exist.
      *
      * @param slot Slot index location of the item in the inventory
-     * @return Optional of a nullable ItemStack
+     * @return {@link Optional} of a nullable {@link ItemStack}
      * @throws IndexOutOfBoundsException If the given slot argument is out of the inventory's array bounds
      */
     @NotNull
@@ -204,7 +205,7 @@ public abstract class AbstractMenu implements InventoryHolder {
     /**
      * Returns the {@link AbstractMenu} that will be opened next after this one's closed.
      *
-     * @return {@link AbstractMenu} or null
+     * @return {@link Optional} of a nullable {@link AbstractMenu}
      */
     @NotNull
     public Optional<AbstractMenu> getOpenNext() {
@@ -214,7 +215,7 @@ public abstract class AbstractMenu implements InventoryHolder {
     /**
      * Returns the amount of rows that this {@link AbstractMenu} has.
      *
-     * @return {@link Rows} enum
+     * @return {@link Optional} of nullable {@link Rows} enum
      */
     @NotNull
     public abstract Optional<Rows> getRows();
@@ -222,7 +223,7 @@ public abstract class AbstractMenu implements InventoryHolder {
     /**
      * Returns a List of human entities (usually players) that are currently viewing this inventory menu.
      *
-     * @return List of human entities (usually players)
+     * @return {@link List} of human entities (usually players)
      */
     @NotNull
     public List<HumanEntity> getViewers() {
