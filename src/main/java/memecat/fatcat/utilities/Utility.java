@@ -9,6 +9,19 @@ import org.jetbrains.annotations.NotNull;
 public class Utility {
 
     /**
+     * Returns the input {@link String} with it's first letter capitalized.
+     *
+     * @param input Not null {@link String} to capitalize
+     * @return Input {@link String} argument with it's first letter capitalized
+     * @throws IllegalArgumentException If the input argument is null
+     */
+    @NotNull
+    public static String capitalize(@NotNull String input) {
+        Preconditions.checkArgument(input != null, "String argument can't be null");
+        return input.isEmpty() ? input : Character.toUpperCase(input.charAt(0)) + input.substring(1);
+    }
+
+    /**
      * Returns the greatest integer from a given array of integers by using simple code for performance reasons.
      *
      * @param numbers Array of integers

@@ -81,7 +81,7 @@ public class MenuManager implements Listener {
         Preconditions.checkArgument(menu != null, "Menu argument can't be null");
         Preconditions.checkArgument(viewers != null && viewers.length > 0 && viewers[0] != null, "Viewers array argument can't be null");
 
-        Inventory inventory = Objects.requireNonNull(menu.getInventory(), "Menu inventory can't be null (AbstractMenu.getInventory()) for menu " + menu.getClass().getSimpleName());
+        Inventory inventory = Objects.requireNonNull(menu.getInventory(), "Menu inventory can't be null (AbstractMenu.getInventory()) for menu " + menu);
 
         if (!(inventory.getHolder() instanceof AbstractMenu)) {
             holderMenus.add(menu);
@@ -108,8 +108,8 @@ public class MenuManager implements Listener {
     public void closeMenus(@NotNull Class<? extends AbstractMenu> menuClass) {
         Preconditions.checkArgument(menuClass != null, "Menu class argument can't be null");
 
-        if (menuClass == AbstractMenu.class) {
-            closeAllMenus();
+        if (AbstractMenu.class == menuClass) {
+            closeMenus();
             return;
         }
 
@@ -149,7 +149,7 @@ public class MenuManager implements Listener {
      * <p>
      * Not all inventory menus might be closed because each menu handler can decide to be reopened.
      */
-    public void closeAllMenus() {
+    public void closeMenus() {
         holderMenus.forEach(AbstractMenu::close);
         for (Player viewer : Bukkit.getOnlinePlayers()) {
             if (viewer.getOpenInventory().getTopInventory().getHolder() instanceof AbstractMenu) {
