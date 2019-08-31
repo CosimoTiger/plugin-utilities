@@ -20,7 +20,8 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
- * A class that wraps around a given or created {@link ItemStack}, allowing easier and chained modifications of the item.
+ * A class that wraps around a given or created {@link ItemStack}, allowing easier and chained modifications of the
+ * item.
  */
 public class ItemBuilder {
 
@@ -35,7 +36,8 @@ public class ItemBuilder {
      *
      * @param configuration YAML configuration file in which the item is stored
      * @param path          Path at which the item is stored at
-     * @param failure       {@link ItemStack} object that will be used instead if the configuration value is non-existent
+     * @param failure       {@link ItemStack} object that will be used instead if the configuration value is
+     *                      non-existent
      */
     public ItemBuilder(@NotNull FileConfiguration configuration, @NotNull String path, @NotNull ItemStack failure) {
         this(configuration.getItemStack(path, failure));
@@ -154,7 +156,7 @@ public class ItemBuilder {
     @NotNull
     public ItemBuilder removeEnchantments(@NotNull Collection<Enchantment> enchantments) {
         Preconditions.checkArgument(enchantments != null, "Enchantments list argument can't be null");
-        enchantments.forEach(enchantment -> itemStack.removeEnchantment(enchantment));
+        enchantments.forEach(itemStack::removeEnchantment);
         return this;
     }
 
@@ -206,7 +208,8 @@ public class ItemBuilder {
     }
 
     /**
-     * Sets/repeats a new given line of lore at given <strong>existing</strong> indexes of the {@link ItemStack}'s lore.
+     * Sets/repeats a new given line of lore at given <strong>existing</strong> indexes of the {@link ItemStack}'s
+     * lore.
      * <p>
      * If there is no existing lore, this method will create a new list with the initial size of the biggest given index
      * plus 1 and proceed to set the line at given indexes.
@@ -320,8 +323,8 @@ public class ItemBuilder {
      * @return This instance, useful for chaining
      */
     @NotNull
-    public ItemBuilder addLore(@NotNull List<String> lines) {
-        Preconditions.checkArgument(lines != null, "List<String> of lore lines argument can't be null");
+    public ItemBuilder addLore(@NotNull Collection<String> lines) {
+        Preconditions.checkArgument(lines != null, "Collection<String> of lore lines argument can't be null");
 
         List<String> lore = getLore();
         lore.addAll(lines);

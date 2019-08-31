@@ -1,8 +1,8 @@
 package memecat.fatcat.utilities.menu.menus;
 
+import com.google.common.base.Preconditions;
 import memecat.fatcat.utilities.UtilitiesPlugin;
 import memecat.fatcat.utilities.menu.MenuManager;
-import memecat.fatcat.utilities.menu.attribute.Rows;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -12,6 +12,7 @@ import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.server.PluginDisableEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
@@ -26,10 +27,8 @@ import java.util.Optional;
  * Represents a collection of functional actions and features of an inventory that multiple viewers can see and interact
  * with, containing many different features that can be customised and extended by a developer.
  * <p>
- * This means that a developer can extend this class and create their own menu with their own features and ways of
- * processing input, although it's limited to exist with some of the preexisting features of this API. This is done by
- * overriding methods even though most of them are already defined, but superclass methods can be called from subclasses
- * with the form super.superClassMethod(arguments) if those methods are useful or needed.
+ * A developer can subclass this class, override the methods or add them to customise the ways of processing inputs for
+ * inventory menu events or modifying the inventories.
  *
  * @author Alan B.
  * @see InventoryMenu
@@ -38,12 +37,22 @@ import java.util.Optional;
 public abstract class AbstractMenu implements InventoryHolder {
 
     /**
-     * An inventory that is set to be opened after this one's closed.
+     * Main, constant part of an {@link AbstractMenu} that identifies it
+     */
+    protected final Inventory inventory;
+
+    /**
+     * An {@link AbstractMenu} that is set to be opened after this one's closed, handled by a {@link MenuManager}.
      *
      * @see #setOpenNext(AbstractMenu)
      * @see #getOpenNext()
      */
-    private AbstractMenu openNext = null;
+    private AbstractMenu openNext;
+
+    public AbstractMenu(@NotNull Inventory inventory) {
+        Preconditions.checkArgument(inventory != null, "Inventory argument can't be null");
+        this.inventory = inventory;
+    }
 
     /**
      * Acts as an event handler for an ItemStack movement from source to destination inventory.
@@ -53,8 +62,8 @@ public abstract class AbstractMenu implements InventoryHolder {
      * chest block container inventory with a hopper connecting to it that is trying to move items into it.
      *
      * @param event         InventoryMoveItemEvent event
-     * @param isDestination Whether this {@link org.bukkit.inventory.Inventory} is equal to the
-     *                      {@link InventoryMoveItemEvent#getDestination()}
+     * @param isDestination Whether this {@link org.bukkit.inventory.Inventory} is equal to the {@link
+     *                      InventoryMoveItemEvent#getDestination()}
      */
     public void onItemMove(@NotNull InventoryMoveItemEvent event, boolean isDestination) {
         event.setCancelled(true);
@@ -67,14 +76,13 @@ public abstract class AbstractMenu implements InventoryHolder {
      * @param manager {@link MenuManager} that is passing this event
      */
     public void onDisable(@NotNull PluginDisableEvent event, @NotNull MenuManager manager) {
-        close();
     }
 
     /**
      * Handles any {@link InventoryClickEvent} related to this inventory menu.
      * <p>
      * By default, the {@link InventoryAction} {@code COLLECT_TO_CURSOR} and {@code MOVE_TO_OTHER_INVENTORY} are
-     * cancelled and any non-external action is cancelled from interaction.
+     * cancelled and any menu action is cancelled from interaction.
      *
      * @param event    InventoryClickEvent event
      * @param external Whether the clicked inventory is not this menu, possibly not any
@@ -89,17 +97,19 @@ public abstract class AbstractMenu implements InventoryHolder {
                 break;
         }
 
-        if (!external) {
-            event.setCancelled(true);
+        if (external) {
+            return;
         }
+
+        event.setCancelled(true);
     }
 
     /**
      * Handles the inventory close events of this menu and opens a next menu after this one.
      * <p>
-     * Inventory menus can be immediately reopened by {@link MenuManager} after a menu processes
-     * {@link InventoryCloseEvent} with this method. This can be done by setting a menu that will be opened after the next inventory close
-     * event with the {@link #setOpenNext(AbstractMenu)} method, including inside this handler.
+     * Inventory menus can be immediately reopened by {@link MenuManager} after a menu processes {@link
+     * InventoryCloseEvent} with this method. This can be done by setting a menu that will be opened after the next
+     * inventory close event with the {@link #setOpenNext(AbstractMenu)} method, including inside this handler.
      *
      * @param event InventoryCloseEvent event
      * @see #getOpenNext()
@@ -139,9 +149,20 @@ public abstract class AbstractMenu implements InventoryHolder {
      * @param item  Item stack object
      * @param slots Slots that this item stack will be placed at
      * @return This instance, useful for chaining
+     * @throws IndexOutOfBoundsException If a slot in the slot array argument is out of this inventory's array bounds
+     * @throws IllegalArgumentException  If the slot array argument is null
      */
     @NotNull
-    public abstract AbstractMenu set(@Nullable ItemStack item, int... slots);
+    public AbstractMenu set(@Nullable ItemStack item, @NotNull int... slots) {
+        Preconditions.checkArgument(slots != null, "Array of slots can't be null");
+
+        for (int slot : slots) {
+            InventoryMenu.checkElement(slot, getSize());
+            getInventory().setItem(slot, item);
+        }
+
+        return this;
+    }
 
     /**
      * Sets the given menu to be opened immediately after this one's closed.
@@ -168,7 +189,7 @@ public abstract class AbstractMenu implements InventoryHolder {
     /**
      * Closes all {@link AbstractMenu}s of this instance for all viewers who are viewing it.
      * <p>
-     * Closing inventories might not always work because their event handlers might disallow them to be closed.
+     * Closing inventories might not always work because their {@link #onClose(InventoryCloseEvent)} might reopen them.
      *
      * @return This instance, useful for chaining
      */
@@ -213,14 +234,6 @@ public abstract class AbstractMenu implements InventoryHolder {
     }
 
     /**
-     * Returns the amount of rows that this {@link AbstractMenu} has.
-     *
-     * @return {@link Optional} of nullable {@link Rows} enum
-     */
-    @NotNull
-    public abstract Optional<Rows> getRows();
-
-    /**
      * Returns a List of human entities (usually players) that are currently viewing this inventory menu.
      *
      * @return {@link List} of human entities (usually players)
@@ -228,6 +241,12 @@ public abstract class AbstractMenu implements InventoryHolder {
     @NotNull
     public List<HumanEntity> getViewers() {
         return getInventory().getViewers();
+    }
+
+    @NotNull
+    @Override
+    public final Inventory getInventory() {
+        return inventory;
     }
 
     /**

@@ -124,8 +124,8 @@ public class PropertyMenu extends InventoryMenu {
     }
 
     /**
-     * {@inheritDoc}
-     * By default, runs an {@link AbstractSlotProperty} at the event's slot or cancels the event if it doesn't exist.
+     * {@inheritDoc} By default, runs an {@link AbstractSlotProperty} at the event's slot or cancels the event if it
+     * doesn't exist.
      */
     @Override
     public void onClick(@NotNull InventoryClickEvent event, boolean external) {
@@ -156,8 +156,8 @@ public class PropertyMenu extends InventoryMenu {
     /**
      * Fills inventory slots with slot properties by skipping an amount of given slots from a start to the end.
      * <p>
-     * This method places a property in the first slot and keeps on adding the skipForSlots amount until the
-     * current slot is bigger than toSlot.
+     * This method places a property in the first slot and keeps on adding the skipForSlots amount until the current
+     * slot is bigger than toSlot.
      *
      * @param property     Slot property object or null
      * @param fromSlot     Start index location of a slot in an inventory
@@ -206,7 +206,8 @@ public class PropertyMenu extends InventoryMenu {
     /**
      * Modifies an {@link AbstractSlotProperty} located at a given slot with given operations to perform.
      *
-     * @param applyProperty Lambda method that'll take a slot property object as an argument and perform operations on it
+     * @param applyProperty Lambda method that'll take a slot property object as an argument and perform operations on
+     *                      it
      * @param slot          Slot at which an {@link AbstractSlotProperty} that is being modified is located at
      * @return This instance, useful for chaining
      * @throws IndexOutOfBoundsException If the slot argument is out of this inventory's array boundaries

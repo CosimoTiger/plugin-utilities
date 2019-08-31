@@ -20,7 +20,8 @@ public class Cooldowns {
     private Map<String, Long> cooldowns;
 
     /**
-     * Creates a new {@link Cooldowns} with a given initial capacity and load factor arguments for it's {@link HashMap}.
+     * Creates a new {@link Cooldowns} with a given initial capacity and load factor arguments for it's {@link
+     * HashMap}.
      *
      * @param initialCapacity Initial capacity of this instance's {@link HashMap}
      * @param loadFactor      Load facor of this instance's {@link HashMap}

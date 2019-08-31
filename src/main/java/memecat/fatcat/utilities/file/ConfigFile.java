@@ -14,14 +14,17 @@ import java.io.InputStreamReader;
 import java.net.URI;
 
 /**
- * Represents a YAML file that is stored inside of a plugin's data folder, holding the FileConfiguration object variable.
+ * Represents a YAML file that is stored inside of a plugin's data folder, holding the FileConfiguration object
+ * variable. When creating a new instance or using the superclass constructor as a subclass, reloadFile() should be
+ * called to initialise the {@link FileConfiguration} variable. This isn't done by default because calling superclass
+ * constructors and waiting on them can be a problem when defining class variables.
  */
 public class ConfigFile extends PluginFile {
 
     /**
      * This file, in the form of a Spigot/Bukkit YAML file object.
      */
-    private FileConfiguration fileConfig;
+    protected FileConfiguration fileConfig;
 
     /**
      * Creates a new {@link ConfigFile} from a given file name in it's given file path.
@@ -35,8 +38,6 @@ public class ConfigFile extends PluginFile {
      */
     public ConfigFile(@NotNull Plugin plugin, @Nullable File path, @NotNull String name) {
         super(plugin, path, name);
-
-        reloadFile();
     }
 
     /**
@@ -51,8 +52,6 @@ public class ConfigFile extends PluginFile {
      */
     public ConfigFile(@NotNull Plugin plugin, @Nullable String path, @NotNull String name) {
         super(plugin, path, name);
-
-        reloadFile();
     }
 
     /**
@@ -63,8 +62,6 @@ public class ConfigFile extends PluginFile {
      */
     public ConfigFile(@NotNull Plugin plugin, @NotNull String path) {
         super(plugin, path);
-
-        reloadFile();
     }
 
     /**
@@ -75,18 +72,21 @@ public class ConfigFile extends PluginFile {
      */
     public ConfigFile(@NotNull Plugin plugin, @NotNull URI uri) {
         super(plugin, uri);
-
-        reloadFile();
     }
 
+    /**
+     * Uses {@link #createFile()} first to make sure this file exists, then proceeds to load the {@link
+     * FileConfiguration} which can be accessed through the {@link #getConfig()} getter method or the protected
+     * variable.
+     */
     @Override
     public void reloadFile() {
         createFile();
 
-        this.fileConfig = YamlConfiguration.loadConfiguration(this);
+        fileConfig = YamlConfiguration.loadConfiguration(this);
 
         try (InputStream inputStream = new FileInputStream(this)) {
-            this.fileConfig.setDefaults(YamlConfiguration.loadConfiguration(new InputStreamReader(inputStream)));
+            fileConfig.setDefaults(YamlConfiguration.loadConfiguration(new InputStreamReader(inputStream)));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -106,12 +106,12 @@ public class ConfigFile extends PluginFile {
     }
 
     /**
-     * Returns the configuration file that this class holds.
+     * Returns the {@link FileConfiguration} that this class holds.
      *
-     * @return Spigot/Bukkit FileConfiguration object, possibly NULL
+     * @return {@link FileConfiguration} object
      */
     @NotNull
-    public FileConfiguration getFile() {
+    public FileConfiguration getConfig() {
         return fileConfig;
     }
 }

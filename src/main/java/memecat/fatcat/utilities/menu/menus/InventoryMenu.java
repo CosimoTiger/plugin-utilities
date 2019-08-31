@@ -24,19 +24,14 @@ import java.util.function.Consumer;
 public class InventoryMenu extends AbstractMenu {
 
     /**
-     * Main, constant part of an {@link InventoryMenu} that identifies it
-     */
-    private final Inventory inventory;
-
-    /**
      * Amount of rows that exist in this chest inventory, or null if the inventory isn't a chest
      */
     private final Rows rows;
 
     /**
-     * The identifier (ID) of a BukkitTask task that's relevant to this inventory. The task is automatically
-     * cancelled when the menu is closed with no viewers left, but this can be modified by overriding the
-     * {@link #onClose(InventoryCloseEvent)} method.
+     * The identifier (ID) of a BukkitTask task that's relevant to this inventory. The task is automatically cancelled
+     * when the menu is closed with no viewers left, but this can be modified by overriding the {@link
+     * #onClose(InventoryCloseEvent)} method.
      */
     private int taskId = -1;
 
@@ -48,7 +43,7 @@ public class InventoryMenu extends AbstractMenu {
      * @param title  Display name of this inventory
      */
     public InventoryMenu(@NotNull InventoryType type, @Nullable InventoryHolder holder, @Nullable String title) {
-        inventory = Bukkit.createInventory(holder == null ? this : holder, type, title == null ? type.getDefaultTitle() : title);
+        super(Bukkit.createInventory(holder, type, title == null ? type.getDefaultTitle() : title));
         rows = null;
     }
 
@@ -89,8 +84,9 @@ public class InventoryMenu extends AbstractMenu {
      * @param title  Display name of this inventory
      */
     public InventoryMenu(@NotNull Rows rows, @Nullable InventoryHolder holder, @Nullable String title) {
-        inventory = Bukkit.createInventory(holder == null ? this : holder, (this.rows = rows).getSize(), title == null ?
-                InventoryType.CHEST.getDefaultTitle() : title);
+        super(Bukkit.createInventory(holder, rows.getSize(), title == null ?
+                InventoryType.CHEST.getDefaultTitle() : title));
+        this.rows = rows;
     }
 
     /**
@@ -130,11 +126,8 @@ public class InventoryMenu extends AbstractMenu {
      *                                  {@link InventoryHolder}
      */
     public InventoryMenu(@NotNull Inventory inventory) {
-        Preconditions.checkArgument(inventory != null, "Inventory argument can't be null");
-        Preconditions.checkArgument(inventory.getHolder() instanceof AbstractMenu, "New inventory menus can't be created from inventory menus.");
-
-        this.inventory = inventory;
-        rows = null;
+        super(inventory);
+        rows = Rows.fromInventory(getInventory()).orElse(null);
     }
 
     @Override
@@ -147,8 +140,8 @@ public class InventoryMenu extends AbstractMenu {
     /**
      * Fills inventory slots with an item by skipping an amount of given slots from a start to the end.
      * <p>
-     * This method places an item in the first slot and keeps on adding the skipForSlots amount until the
-     * current slot is bigger than toSlot.
+     * This method places an item in the first slot and keeps on adding the skipForSlots amount until the current slot
+     * is bigger than toSlot.
      *
      * @param item         Item stack or null
      * @param fromSlot     Beginning index of a slot in an inventory
@@ -171,9 +164,9 @@ public class InventoryMenu extends AbstractMenu {
     /**
      * Fills inventory slots with an item from a given beginning slot to a given ending slot (interval).
      * <p>
-     * An "interval" in the case of this method can be defined as a set of whole numbers ranging from the given beginning
-     * slot index (inclusive) to the given slot index (exclusive). This is referenced to mathematical intervals, or
-     * simply shown with symbols: [fromSlot, toSlot&gt; or firstSlot = fromSlot, endSlot = (toSlot - 1)
+     * An "interval" in the case of this method can be defined as a set of whole numbers ranging from the given
+     * beginning slot index (inclusive) to the given slot index (exclusive). This is referenced to mathematical
+     * intervals, or simply shown with symbols: [fromSlot, toSlot&gt; or firstSlot = fromSlot, endSlot = (toSlot - 1)
      *
      * @param item     Item stack or null
      * @param fromSlot Start index location of a slot in an inventory
@@ -226,25 +219,6 @@ public class InventoryMenu extends AbstractMenu {
                     getInventory().setItem(slot, item);
                 }
             }
-        }
-
-        return this;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @throws IndexOutOfBoundsException If a slot in the slot array argument is out of this inventory's array bounds
-     * @throws IllegalArgumentException  If the slot array argument is null
-     */
-    @NotNull
-    @Override
-    public InventoryMenu set(@Nullable ItemStack item, @NotNull int... slots) {
-        Preconditions.checkArgument(slots != null, "Array of slots can't be null");
-
-        for (int slot : slots) {
-            checkElement(slot, getSize());
-            getInventory().setItem(slot, item);
         }
 
         return this;
@@ -313,19 +287,19 @@ public class InventoryMenu extends AbstractMenu {
         return clearContents();
     }
 
-    @NotNull
-    @Override
-    public Inventory getInventory() {
-        return inventory;
-    }
-
+    /**
+     * Returns the amount of rows that this {@link AbstractMenu} has.
+     *
+     * @return {@link Optional} of nullable {@link Rows} enum
+     */
     @NotNull
     public Optional<Rows> getRows() {
         return Optional.ofNullable(rows);
     }
 
     /**
-     * Returns the identifier number of the {@link BukkitTask} that is stored in this instance and running while it's open.
+     * Returns the identifier number of the {@link BukkitTask} that is stored in this instance and running while it's
+     * open.
      *
      * @return {@link BukkitTask} identifier number
      */

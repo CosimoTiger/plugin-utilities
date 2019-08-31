@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Files;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * This class can be extended to create instances that represent a file that belongs to a specific plugin.
@@ -85,7 +86,8 @@ public abstract class PluginFile extends File {
      */
     public boolean createFile() {
         if (!exists()) {
-            getParentFile().mkdirs();
+            Optional.ofNullable(getParentFile()).ifPresent(File::mkdirs);
+
             try (InputStream inputStream = plugin.getResource(getName())) {
                 Objects.requireNonNull(inputStream, "Unable to find plugin " + getPlugin().getDescription().getFullName()
                         + "'s file /resources/" + getName() + "!");
