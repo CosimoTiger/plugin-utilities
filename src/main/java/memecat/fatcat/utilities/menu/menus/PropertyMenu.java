@@ -22,6 +22,7 @@ import java.util.function.Consumer;
  * @see AbstractSlotProperty
  * @see InventoryMenu
  */
+// TODO: A failed attempt at generifying this class for AbstractSlotProperty was made..
 public class PropertyMenu extends InventoryMenu {
 
     /**

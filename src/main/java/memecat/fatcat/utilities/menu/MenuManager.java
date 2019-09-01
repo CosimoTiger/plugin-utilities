@@ -15,30 +15,22 @@ import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * A singleton class that controls inventory menus, distinguishes inventory menu events and passes them to their menus.
+ * A class that controls inventory menus, distinguishes inventory menu events and passes them to their menus.
  * <p>
- * On instantiation, {@link AbstractMenu}s should try to make themselves an {@link InventoryHolder} of their own {@link
- * Inventory} if it has no holder. This will make them faster to find for all of the events that this {@link
- * MenuManager} supports, except for {@link PluginDisableEvent} which is actually faster for the special case of menus
- * that are stored in this class's {@link HashSet} of {@link AbstractMenu}s with an already occupied {@link
- * InventoryHolder}.
- * <p>
- * <strong>Warning: Multiple instances of this class that are also registered as {@link Listener}s will cause multiple
- * event handler calls for every event. It is advised that you use {@link UtilitiesPlugin#getMenuManager()} or {@link
- * UtilitiesPlugin#getMenuManager(Plugin)} to register your own {@link MenuManager} instance there, accessible to all
- * {@link Plugin}s that are using this library.</strong>
+ * <strong>Warning: Multiple instances of this class that are also registered as {@link Listener}s may cause multiple
+ * event handler calls for every event of a menu that's registered in multiple {@link MenuManager}. It is advised that
+ * you use {@link UtilitiesPlugin#getMenuManager()} or {@link UtilitiesPlugin#getMenuManager(Plugin)} to register your
+ * own {@link MenuManager} instance there, accessible to all {@link Plugin}s that are using this library.</strong>
  *
  * @author Alan B.
  */
@@ -46,8 +38,8 @@ public class MenuManager implements Listener {
 
     /**
      * All menus are stored here at a 1:1 ratio (not tested) while being viewed, compared to a {@link HumanEntity} key
-     * to {@link AbstractMenu} which can grower much larger (example: 50 players viewing the same menu would cause 50
-     * keys), while in this case it's one {@link Inventory} for one {@link AbstractMenu}.
+     * to {@link AbstractMenu} value which can grower much larger (example: 50 players viewing the same menu would cause
+     * 50 keys), while in this case it's one {@link Inventory} key for one {@link AbstractMenu} value.
      */
     private Map<Inventory, AbstractMenu> menus = new HashMap<>(8);
 

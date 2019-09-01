@@ -44,7 +44,7 @@ public class InventoryMenu extends AbstractMenu {
      */
     public InventoryMenu(@NotNull InventoryType type, @Nullable InventoryHolder holder, @Nullable String title) {
         super(Bukkit.createInventory(holder, type, title == null ? type.getDefaultTitle() : title));
-        rows = null;
+        rows = Rows.fromInventory(getInventory()).orElse(null);
     }
 
     /**
