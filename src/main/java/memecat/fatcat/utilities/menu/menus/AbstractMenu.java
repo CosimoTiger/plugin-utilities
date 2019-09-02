@@ -184,7 +184,7 @@ public abstract class AbstractMenu implements InventoryHolder {
      * @param viewers Players that will see this {@link AbstractMenu} inventory
      */
     public void open(@NotNull HumanEntity... viewers) {
-        UtilitiesPlugin.getMenuManager().ifPresent(manager -> manager.openMenu(this, viewers));
+        UtilitiesPlugin.getMenuManager().ifPresent(manager -> manager.open(this, viewers));
     }
 
     /**

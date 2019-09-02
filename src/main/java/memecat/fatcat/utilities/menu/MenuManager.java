@@ -18,6 +18,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -64,11 +65,12 @@ public class MenuManager implements Listener {
      *
      * @param menu    Given {@link AbstractMenu} that will be shown to the given viewer
      * @param viewers Viewers who will see the given menu
+     * @return This instance, useful for chaining
      * @throws IllegalArgumentException If the menu or viewer argument is null
      * @throws IllegalStateException    If this inventory menu manager isn't registered for handling events
      * @throws NullPointerException     If a viewer is null
      */
-    public void openMenu(@NotNull AbstractMenu menu, @NotNull HumanEntity... viewers) {
+    public MenuManager open(@NotNull AbstractMenu menu, @NotNull HumanEntity... viewers) {
         Preconditions.checkState(isRegistered(), "MenuManager has no plugin registered to handle inventory menu events");
         Preconditions.checkArgument(menu != null, "Menu argument can't be null");
         Preconditions.checkArgument(viewers != null && viewers.length > 0 && viewers[0] != null, "Viewers array argument can't be null");
@@ -86,26 +88,8 @@ public class MenuManager implements Listener {
                 viewer.openInventory(menu.getInventory());
             }
         }
-    }
 
-    /**
-     * Closes all {@link AbstractMenu} inventories that are a subclass of a given menu class.
-     *
-     * @param menuClass {@link AbstractMenu} subclass class, or the superclass (in that case, it'll close all menus)
-     */
-    public void closeMenus(@NotNull Class<? extends AbstractMenu> menuClass) {
-        Preconditions.checkArgument(menuClass != null, "Menu class argument can't be null");
-
-        if (AbstractMenu.class == menuClass) {
-            closeMenus();
-            return;
-        }
-
-        menus.forEach((inventory, menu) -> {
-            if (menuClass.isInstance(menu)) {
-                menu.close();
-            }
-        });
+        return this;
     }
 
     /**
@@ -159,6 +143,16 @@ public class MenuManager implements Listener {
     public Optional<AbstractMenu> getMenu(@NotNull HumanEntity viewer) {
         Preconditions.checkArgument(viewer != null, "Viewer argument can't be null");
         return getMenu(viewer.getOpenInventory().getTopInventory());
+    }
+
+    /**
+     * Returns the unmodifiable map ({@link Collections#unmodifiableMap(Map)}) of this {@link MenuManager}'s menu {@link
+     * HashMap} of {@link Inventory} keys to {@link AbstractMenu} values.
+     *
+     * @return Unmodifiable view of this {@link MenuManager}'s {@link HashMap}
+     */
+    public Map<Inventory, AbstractMenu> getMap() {
+        return Collections.unmodifiableMap(menus);
     }
 
     /**
@@ -221,7 +215,7 @@ public class MenuManager implements Listener {
             try {
                 menu.getOpenNext().ifPresent(nextMenu -> {
                     final HumanEntity viewer = event.getPlayer();
-                    getPlugin().ifPresent(plugin -> Bukkit.getScheduler().runTask(plugin, () -> openMenu(nextMenu, viewer)));
+                    getPlugin().ifPresent(plugin -> Bukkit.getScheduler().runTask(plugin, () -> open(nextMenu, viewer)));
                 });
             } catch (Exception e) {
                 getPlugin().ifPresent(p -> p.getLogger().warning("An error occurred while attempting to open the next menu."));
