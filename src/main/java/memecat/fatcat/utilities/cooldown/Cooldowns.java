@@ -148,51 +148,6 @@ public class Cooldowns {
         return this;
     }
 
-    /**
-     * Returns how much time is left until the end of this cooldown, expressed in a given {@link TimeUnit}.
-     *
-     * @param unit {@link TimeUnit} in which the remaining milliseconds should be converted to
-     * @param name Unique name that a cooldown is stored under
-     * @return The remaining cooldown time, expressed as a decimal number for a converted time unit
-     * @throws IllegalArgumentException If the cooldowns name or TimeUnit argument is null
-     */
-    public double getRemaining(@NotNull TimeUnit unit, @NotNull String name) {
-        Preconditions.checkArgument(unit != null, "TimeUnit argument can't be null");
-        return TimeUnit.MILLISECONDS.convert(getRemaining(name), unit);
-    }
-
-    /**
-     * Returns whether a given cooldown's time has expired.
-     *
-     * @param name Unique name or key of a cooldown
-     * @return True if the cooldown has expired (the cooldown also gets removed if true).
-     * @throws IllegalArgumentException If the cooldowns name argument is null
-     */
-    public boolean hasExpired(@NotNull String name) {
-        return get(name).hasExpired();
-    }
-
-    /**
-     * Returns the system millisecond time at which a given cooldown will end at.
-     *
-     * @param name Unique name or key of a cooldown
-     * @return At what system millisecond time this cooldown will end, zero if the given cooldown hasn't been found
-     * @throws IllegalArgumentException If the cooldowns name argument is null
-     */
-    public long getExpiration(@NotNull String name) {
-        return get(name).getExpiration();
-    }
-
-    /**
-     * Returns how much time is left until the end of this cooldown, expressed in milliseconds.
-     *
-     * @param name Unique name that a cooldown is stored under
-     * @return The remaining cooldown time in milliseconds
-     * @throws IllegalArgumentException If the cooldowns name argument is null
-     */
-    public long getRemaining(@NotNull String name) {
-        return get(name).getRemaining();
-    }
 
     /**
      * Returns a {@link Cooldown} object that contains two status variables (boolean expired and time left) describing
@@ -230,7 +185,7 @@ public class Cooldowns {
     /**
      * Represents data that describes a cooldown at a specific time it was checked at.
      */
-    public class Cooldown {
+    static class Cooldown {
 
         private final long currentTime;
         private final long endTime;
@@ -248,12 +203,14 @@ public class Cooldowns {
         }
 
         /**
-         * Returns the system millisecond time of when the snapshot of this cooldown was taken at.
+         * Returns how much time is left until the end of this cooldown, expressed in a given {@link TimeUnit}.
          *
-         * @return Current millisecond time of this cooldown snapshot
+         * @param unit {@link TimeUnit} in which the remaining milliseconds should be converted to
+         * @return The remaining cooldown time, expressed as a double in the given {@link TimeUnit}
          */
-        public long getSnapshotTime() {
-            return currentTime;
+        public double getRemaining(@NotNull TimeUnit unit) {
+            Preconditions.checkArgument(unit != null, "TimeUnit argument can't be null");
+            return TimeUnit.MILLISECONDS.convert(getRemaining(), unit);
         }
 
         /**
@@ -281,6 +238,15 @@ public class Cooldowns {
          */
         public long getRemaining() {
             return endTime - currentTime;
+        }
+
+        /**
+         * Returns the system millisecond time of when the snapshot of this cooldown was taken at.
+         *
+         * @return "Current" millisecond time of this cooldown snapshot
+         */
+        public long getSnapshot() {
+            return currentTime;
         }
     }
 }

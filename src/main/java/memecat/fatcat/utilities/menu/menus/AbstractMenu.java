@@ -19,6 +19,7 @@ import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -189,13 +190,14 @@ public abstract class AbstractMenu implements InventoryHolder {
     /**
      * Closes all {@link AbstractMenu}s of this instance for all viewers who are viewing it.
      * <p>
-     * Closing inventories might not always work because their {@link #onClose(InventoryCloseEvent)} might reopen them.
+     * Closing {@link AbstractMenu}s for a {@link HumanEntity} might not always work because their {@link
+     * #onClose(InventoryCloseEvent)} can choose to open a new, possibly the same one.
      *
      * @return This instance, useful for chaining
      */
     @NotNull
     public final AbstractMenu close() {
-        getViewers().forEach(HumanEntity::closeInventory);
+        new ArrayList<>(getViewers()).forEach(HumanEntity::closeInventory);
         return this;
     }
 

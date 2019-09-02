@@ -16,7 +16,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
- * Implementation of the {@link AbstractMenu} class.
+ * Instantiable implementation of the {@link AbstractMenu} class.
  *
  * @author Alan B.
  * @see PropertyMenu
@@ -29,8 +29,8 @@ public class InventoryMenu extends AbstractMenu {
     private final Rows rows;
 
     /**
-     * The identifier (ID) of a BukkitTask task that's relevant to this inventory. The task is automatically cancelled
-     * when the menu is closed with no viewers left, but this can be modified by overriding the {@link
+     * The identifier of a BukkitTask task that's relevant to this inventory. The task is by default automatically
+     * cancelled when the menu is closed with no viewers left, but this can be modified by overriding the {@link
      * #onClose(InventoryCloseEvent)} method.
      */
     private int taskId = -1;
@@ -152,7 +152,7 @@ public class InventoryMenu extends AbstractMenu {
     @NotNull
     public InventoryMenu fillSkip(@Nullable ItemStack item, int fromSlot, int toSlot, int skipForSlots) {
         checkRange(fromSlot, toSlot, getSize());
-        Preconditions.checkArgument(skipForSlots > 0, "Skip-for-slots argument can't be smaller than 1");
+        Preconditions.checkArgument(skipForSlots > 0, "Skip-for-slots argument (" + skipForSlots + ") can't be smaller than 1");
 
         for (int slot = fromSlot; slot < toSlot; slot += skipForSlots) {
             getInventory().setItem(slot, item);
@@ -175,13 +175,7 @@ public class InventoryMenu extends AbstractMenu {
      */
     @NotNull
     public InventoryMenu fillInterval(@Nullable ItemStack item, int fromSlot, int toSlot) {
-        checkRange(fromSlot, toSlot, getSize());
-
-        for (int slot = fromSlot; slot < toSlot; slot++) {
-            getInventory().setItem(slot, item);
-        }
-
-        return this;
+        return fillSkip(item, fromSlot, toSlot, 1);
     }
 
     /**
@@ -210,9 +204,7 @@ public class InventoryMenu extends AbstractMenu {
     @NotNull
     public InventoryMenu fill(@Nullable ItemStack item, boolean replace) {
         if (replace) {
-            for (int slot = 0; slot < getSize(); slot++) {
-                getInventory().setItem(slot, item);
-            }
+            return fillSkip(item, 0, getSize(), 1);
         } else {
             for (int slot = 0; slot < getSize(); slot++) {
                 if (getInventory().getItem(slot) == null) {
