@@ -37,7 +37,7 @@ import java.util.Optional;
 public abstract class AbstractMenu implements InventoryHolder {
 
     /**
-     * Main, constant part of an {@link AbstractMenu} that identifies it
+     * Main, constant part of an {@link AbstractMenu} that identifies it.
      */
     private final Inventory inventory;
 
@@ -64,16 +64,9 @@ public abstract class AbstractMenu implements InventoryHolder {
     public AbstractMenu(@NotNull Inventory inventory, @NotNull MenuManager menuManager) {
         Preconditions.checkArgument(inventory != null, "Inventory argument can't be null");
         Preconditions.checkArgument(menuManager != null, "MenuManager argument can't be null");
+
         this.inventory = inventory;
         this.menuManager = menuManager;
-    }
-
-    /**
-     * Handles the {@link PluginDisableEvent} of {@link MenuManager}'s {@link MenuManager#getPlugin}.
-     *
-     * @param event PluginDisableEvent event
-     */
-    public void onDisable(@NotNull PluginDisableEvent event) {
     }
 
     /**
@@ -115,6 +108,14 @@ public abstract class AbstractMenu implements InventoryHolder {
         }
 
         event.setCancelled(true);
+    }
+
+    /**
+     * Handles the {@link PluginDisableEvent} of {@link MenuManager}'s {@link MenuManager#getPlugin}.
+     *
+     * @param event PluginDisableEvent event
+     */
+    public void onDisable(@NotNull PluginDisableEvent event) {
     }
 
     /**
@@ -248,7 +249,12 @@ public abstract class AbstractMenu implements InventoryHolder {
     }
 
     /**
-     * Opens this {@link AbstractMenu} for the given viewer(s).
+     * Opens this {@link AbstractMenu} for the given viewers, fail-fast.
+     * <p>
+     * If any {@link HumanEntity} in the viewers argument is null, a {@link NullPointerException} is thrown - this is to
+     * prevent this {@link AbstractMenu} from being registered unnecessarily to it's {@link MenuManager}. If a {@link
+     * HumanEntity} had a previous {@link AbstractMenu}, it is closed and {@link AbstractMenu#setNext(AbstractMenu)} is
+     * used on it to open this {@link AbstractMenu}.
      *
      * @param viewers Array of {@link HumanEntity} of which each will see this {@link AbstractMenu} {@link Inventory}
      * @return This instance, useful for chaining

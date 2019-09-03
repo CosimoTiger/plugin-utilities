@@ -70,7 +70,7 @@ public class UtilitiesPlugin extends JavaPlugin {
     /**
      * Returns the nullable {@link MenuManager} instance of this {@link UtilitiesPlugin} singleton.
      *
-     * @return {@link Optional} nullable {@link MenuManager}, not null when enabled or provided
+     * @return {@link Optional} of nullable {@link MenuManager}, not null when enabled or provided
      */
     @NotNull
     public static Optional<MenuManager> getMenuManager() {

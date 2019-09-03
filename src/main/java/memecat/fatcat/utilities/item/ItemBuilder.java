@@ -521,7 +521,7 @@ public class ItemBuilder {
      * @return Whether the {@link ItemStack} can lose it's durability through use
      */
     public boolean isBreakable() {
-        return getItemMeta().isUnbreakable();
+        return !getItemMeta().isUnbreakable();
     }
 
     /**
