@@ -21,7 +21,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -61,35 +60,27 @@ public class MenuManager implements Listener {
     }
 
     /**
-     * Closes the current inventory (menu) and opens a given {@link AbstractMenu} inventory for a given viewer.
+     * Removes a given {@link AbstractMenu} from this {@link MenuManager}'s {@link HashMap}, causing it to not be
+     * detectable by this {@link MenuManager}.
      *
-     * @param menu    Given {@link AbstractMenu} that will be shown to the given viewer
-     * @param viewers Viewers who will see the given menu
-     * @return This instance, useful for chaining
-     * @throws IllegalArgumentException If the menu or viewer argument is null
-     * @throws IllegalStateException    If this inventory menu manager isn't registered for handling events
-     * @throws NullPointerException     If a viewer is null
+     * @param menu Not null {@link AbstractMenu} that'll be unregistered
+     * @return {@link AbstractMenu} that was a value to the given {@link AbstractMenu}'s {@link Inventory}
      */
-    public MenuManager open(@NotNull AbstractMenu menu, @NotNull HumanEntity... viewers) {
-        Preconditions.checkState(isRegistered(), "MenuManager has no plugin registered to handle inventory menu events");
-        Preconditions.checkArgument(menu != null, "Menu argument can't be null");
-        Preconditions.checkArgument(viewers != null && viewers.length > 0 && viewers[0] != null, "Viewers array argument can't be null");
+    public Optional<AbstractMenu> unregisterMenu(@NotNull AbstractMenu menu) {
+        Preconditions.checkArgument(menu != null, "AbstractMenu argument can't be null");
+        return Optional.ofNullable(menus.remove(menu.getInventory()));
+    }
 
-        menus.put(menu.getInventory(), menu);
-
-        for (HumanEntity viewer : viewers) {
-            Objects.requireNonNull(viewer, "Viewer argument in the viewers array can't be null");
-            Optional<AbstractMenu> currentMenu = getMenu(viewer.getOpenInventory().getTopInventory());
-
-            if (currentMenu.isPresent()) {
-                currentMenu.get().setOpenNext(menu);
-                viewer.closeInventory();
-            } else {
-                viewer.openInventory(menu.getInventory());
-            }
-        }
-
-        return this;
+    /**
+     * Puts a given {@link AbstractMenu} into this {@link MenuManager}'s {@link HashMap}, causing any next events to be
+     * handled to the {@link AbstractMenu} until it's unregistered.
+     *
+     * @param menu Not null {@link AbstractMenu} that'll be registered
+     * @return Previous {@link AbstractMenu} that was a value to the given {@link AbstractMenu}'s {@link Inventory}
+     */
+    public Optional<AbstractMenu> registerMenu(@NotNull AbstractMenu menu) {
+        Preconditions.checkArgument(menu != null, "AbstractMenu argument can't be null");
+        return Optional.ofNullable(menus.put(menu.getInventory(), menu));
     }
 
     /**
@@ -194,6 +185,10 @@ public class MenuManager implements Listener {
 
     /**
      * Handles any inventory closing event that is related to an inventory menu, and opens next inventory menus.
+     * <p>
+     * An {@link AbstractMenu} is removed in this event handler when it's viewer count is less than 2. This is to make
+     * sure that {@link AbstractMenu}s are removed and not piled up into the {@link HashMap}&lt;{@link Inventory},
+     * {@link AbstractMenu}&gt; which could result in too much memory usage.
      *
      * @param event InventoryCloseEvent event
      * @see AbstractMenu#onClose(InventoryCloseEvent)
@@ -201,7 +196,7 @@ public class MenuManager implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onInventoryClose(@NotNull InventoryCloseEvent event) {
         getMenu(event.getInventory()).ifPresent(menu -> {
-            if (menu.getViewers().size() < 2) {
+            if (menu.getInventory().getViewers().size() < 2) {
                 menus.remove(menu.getInventory());
             }
 
@@ -213,9 +208,9 @@ public class MenuManager implements Listener {
             }
 
             try {
-                menu.getOpenNext().ifPresent(nextMenu -> {
+                menu.getNext().ifPresent(nextMenu -> {
                     final HumanEntity viewer = event.getPlayer();
-                    getPlugin().ifPresent(plugin -> Bukkit.getScheduler().runTask(plugin, () -> open(nextMenu, viewer)));
+                    getPlugin().ifPresent(plugin -> Bukkit.getScheduler().runTask(plugin, () -> nextMenu.open(viewer)));
                 });
             } catch (Exception e) {
                 getPlugin().ifPresent(p -> p.getLogger().warning("An error occurred while attempting to open the next menu."));
@@ -303,7 +298,7 @@ public class MenuManager implements Listener {
 
         menus.forEach((inventory, menu) -> {
             try {
-                menu.onDisable(event, this);
+                menu.onDisable(event);
             } catch (Exception e) {
                 getPlugin().ifPresent(p -> p.getLogger().warning("An error occurred while handling a menu plugin disable event."));
                 e.printStackTrace();

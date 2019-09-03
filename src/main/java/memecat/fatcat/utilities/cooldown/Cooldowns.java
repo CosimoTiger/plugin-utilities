@@ -24,7 +24,7 @@ public class Cooldowns {
      * HashMap}.
      *
      * @param initialCapacity Initial capacity of this instance's {@link HashMap}
-     * @param loadFactor      Load facor of this instance's {@link HashMap}
+     * @param loadFactor      Load factor of this instance's {@link HashMap}
      */
     public Cooldowns(int initialCapacity, float loadFactor) {
         cooldowns = new HashMap<>(initialCapacity, loadFactor);

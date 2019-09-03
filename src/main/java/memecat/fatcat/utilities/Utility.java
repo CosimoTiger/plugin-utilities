@@ -10,17 +10,6 @@ import org.jetbrains.annotations.Nullable;
 public class Utility {
 
     /**
-     * Returns the input {@link String} with it's first letter capitalized.
-     *
-     * @param input Nullable {@link String} to capitalize
-     * @return Input {@link String} argument with it's first letter capitalized
-     */
-    @Nullable
-    public static String capitalize(@Nullable String input) {
-        return input == null || input.isEmpty() ? input : Character.toUpperCase(input.charAt(0)) + input.substring(1);
-    }
-
-    /**
      * Returns the greatest integer from a given {@link Iterable} object of {@link Integer}s by using simple code for
      * performance reasons.
      *
@@ -39,6 +28,17 @@ public class Utility {
         }
 
         return max;
+    }
+
+    /**
+     * Returns the input {@link String} with it's first letter capitalized.
+     *
+     * @param input Nullable {@link String} to capitalize
+     * @return Input {@link String} argument with it's first letter capitalized
+     */
+    @Nullable
+    public static String capitalize(@Nullable String input) {
+        return input == null || input.isEmpty() ? input : Character.toUpperCase(input.charAt(0)) + input.substring(1);
     }
 
     /**

@@ -26,9 +26,9 @@ import java.util.function.Consumer;
 public class ItemBuilder {
 
     /**
-     * {@link ItemStack} that is ready for modification.
+     * Mutable {@link ItemStack}.
      */
-    private ItemStack itemStack;
+    protected ItemStack itemStack;
 
     /**
      * Creates a new {@link ItemBuilder} from an item stored in a given configuration file's path or a certain item in
@@ -80,15 +80,15 @@ public class ItemBuilder {
     /**
      * Creates a new {@link ItemBuilder} from the given item, renaming it to a given title.
      *
-     * @param item  {@link ItemStack} that's being wrapped by this class for further modification
-     * @param title Display name or visible title of an item
+     * @param itemStack {@link ItemStack} that's being wrapped by this class for further modification
+     * @param title     Display name or visible title of an item
      * @throws IllegalArgumentException If the ItemStack argument is null or of Material.AIR type
      */
-    public ItemBuilder(@NotNull ItemStack item, @Nullable String title) {
-        Preconditions.checkArgument(item != null, "Item argument can't be null");
-        Preconditions.checkArgument(!item.getType().equals(Material.AIR), "Item type can't be of Material.AIR type");
+    public ItemBuilder(@NotNull ItemStack itemStack, @Nullable String title) {
+        Preconditions.checkArgument(itemStack != null, "ItemStack argument can't be null");
+        Preconditions.checkArgument(!itemStack.getType().equals(Material.AIR), "ItemStack type can't be of Material.AIR type");
 
-        this.itemStack = item;
+        this.itemStack = itemStack;
         title(title);
     }
 
@@ -195,19 +195,6 @@ public class ItemBuilder {
     }
 
     /**
-     * Modifies the {@link ItemStack} with given operations.
-     *
-     * @param itemConsumer Consumer or anonymous function that'll take this instance's item as an argument
-     * @return This instance, useful for chaining
-     */
-    @NotNull
-    public ItemBuilder changeItem(@NotNull Consumer<ItemStack> itemConsumer) {
-        Preconditions.checkArgument(itemConsumer != null, "Consumer<ItemStack> argument can't be null");
-        itemConsumer.accept(itemStack);
-        return this;
-    }
-
-    /**
      * Sets/repeats a new given line of lore at given <strong>existing</strong> indexes of the {@link ItemStack}'s
      * lore.
      * <p>
@@ -233,6 +220,19 @@ public class ItemBuilder {
     }
 
     /**
+     * Modifies the {@link ItemStack} with given operations.
+     *
+     * @param itemConsumer Consumer or anonymous function that'll take this instance's item as an argument
+     * @return This instance, useful for chaining
+     */
+    @NotNull
+    public ItemBuilder changeItem(@NotNull Consumer<ItemStack> itemConsumer) {
+        Preconditions.checkArgument(itemConsumer != null, "Consumer<ItemStack> argument can't be null");
+        itemConsumer.accept(itemStack);
+        return this;
+    }
+
+    /**
      * Modifies the {@link ItemStack}'s {@link ItemMeta} with given operations.
      *
      * @param metaConsumer Consumer or anonymous function that'll take this instance's item's {@link ItemMeta} as an
@@ -241,7 +241,12 @@ public class ItemBuilder {
      */
     @NotNull
     public ItemBuilder changeMeta(@NotNull Consumer<ItemMeta> metaConsumer) {
-        return changeMeta(ItemMeta.class, metaConsumer);
+        Preconditions.checkArgument(metaConsumer != null, "Consumer<T extends ItemMeta> argument can't be null");
+
+        ItemMeta meta = getItemMeta();
+        metaConsumer.accept(meta);
+
+        return itemMeta(meta);
     }
 
     /**
@@ -255,6 +260,22 @@ public class ItemBuilder {
     public ItemBuilder addLoreAt(int index, @NotNull String... lines) {
         Preconditions.checkArgument(lines != null, "String array of lore lines argument can't be null");
         return addLoreAt(index, Arrays.asList(lines));
+    }
+
+    /**
+     * Appends new lines of lore at the end of the {@link ItemStack}'s lore from a given list.
+     *
+     * @param lines List of lore lines that'll be added
+     * @return This instance, useful for chaining
+     */
+    @NotNull
+    public ItemBuilder addLore(@NotNull Collection<String> lines) {
+        Preconditions.checkArgument(lines != null, "Collection<String> of lore lines argument can't be null");
+
+        List<String> lore = getLore();
+        lore.addAll(lines);
+
+        return lore(lore);
     }
 
     /**
@@ -284,10 +305,8 @@ public class ItemBuilder {
 
         List<String> lore = getLore();
 
-        if (!lore.isEmpty()) {
-            for (int index : indexes) {
-                lore.remove(index);
-            }
+        for (int index : indexes) {
+            lore.remove(index);
         }
 
         return lore(lore);
@@ -314,22 +333,6 @@ public class ItemBuilder {
     @NotNull
     public ItemBuilder localizedName(@Nullable String name) {
         return changeMeta(meta -> meta.setLocalizedName(name));
-    }
-
-    /**
-     * Appends new lines of lore at the end of the {@link ItemStack}'s lore from a given list.
-     *
-     * @param lines List of lore lines that'll be added
-     * @return This instance, useful for chaining
-     */
-    @NotNull
-    public ItemBuilder addLore(@NotNull Collection<String> lines) {
-        Preconditions.checkArgument(lines != null, "Collection<String> of lore lines argument can't be null");
-
-        List<String> lore = getLore();
-        lore.addAll(lines);
-
-        return lore(lore);
     }
 
     /**
@@ -474,6 +477,16 @@ public class ItemBuilder {
     }
 
     /**
+     * Returns the type (material) of the {@link ItemStack}.
+     *
+     * @return Type (material) of the {@link ItemStack}
+     */
+    @NotNull
+    public Material getMaterial() {
+        return itemStack.getType();
+    }
+
+    /**
      * Returns the {@link ItemMeta} of the {@link ItemStack}.
      *
      * @return {@link ItemMeta} of the {@link ItemStack}
@@ -509,16 +522,6 @@ public class ItemBuilder {
      */
     public boolean isBreakable() {
         return getItemMeta().isUnbreakable();
-    }
-
-    /**
-     * Returns the type (material) of the {@link ItemStack}.
-     *
-     * @return Type (material) of the {@link ItemStack}
-     */
-    @NotNull
-    public Material getMaterial() {
-        return itemStack.getType();
     }
 
     /**

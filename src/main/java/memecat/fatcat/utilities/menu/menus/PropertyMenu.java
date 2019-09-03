@@ -1,12 +1,10 @@
 package memecat.fatcat.utilities.menu.menus;
 
 import com.google.common.base.Preconditions;
-import memecat.fatcat.utilities.menu.attribute.Rows;
+import memecat.fatcat.utilities.menu.MenuManager;
 import memecat.fatcat.utilities.menu.slot.AbstractSlotProperty;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -19,9 +17,10 @@ import java.util.function.Consumer;
  * the inventory, with many methods for working with these properties. This class is generified to allow different
  * subclasses of {@link AbstractSlotProperty} to be used.
  *
+ * @param <E> Type that is a subclass of {@link AbstractSlotProperty}, can be left empty ({@code <>}, but never nothing)
+ *            to allow any subclass
  * @author Alan B.
  * @see AbstractSlotProperty
- * @see InventoryMenu
  */
 public class PropertyMenu<E extends AbstractSlotProperty> extends InventoryMenu {
 
@@ -31,97 +30,16 @@ public class PropertyMenu<E extends AbstractSlotProperty> extends InventoryMenu 
     protected E[] properties;
 
     /**
-     * Creates a new {@link PropertyMenu} from the given inventory type, holder and display name (title).
+     * Creates a new {@link PropertyMenu} using the default constructor for {@link InventoryMenu}, with an array of this
+     * instance's generic type.
      *
-     * @param type   Type of an inventory
-     * @param holder Object that this inventory belongs to (chest, player, horse..)
-     * @param title  Display name of this inventory
+     * @param inventory   Not null {@link Inventory} that will be wrapped and controlled by an {@link AbstractMenu}
+     * @param menuManager Not null {@link MenuManager} that will be used for (un)registering this {@link AbstractMenu}
+     *                    and passing events to it
      */
-    public PropertyMenu(@NotNull InventoryType type, @Nullable InventoryHolder holder, @Nullable String title) {
-        super(type, holder, title);
+    public PropertyMenu(@NotNull Inventory inventory, @NotNull MenuManager menuManager) {
+        super(inventory, menuManager);
 
-        properties = (E[]) new AbstractSlotProperty[getSize()];
-    }
-
-    /**
-     * Creates a new {@link InventoryMenu} from the given inventory type and holder.
-     *
-     * @param type   Type of an inventory
-     * @param holder Object that this inventory belongs to (chest, player, horse..)
-     */
-    public PropertyMenu(@NotNull InventoryType type, @Nullable InventoryHolder holder) {
-        this(type, holder, null);
-    }
-
-    /**
-     * Creates a new {@link InventoryMenu} from the given inventory type and display name (title).
-     *
-     * @param type  Type of an inventory
-     * @param title Display name of this inventory
-     */
-    public PropertyMenu(@NotNull InventoryType type, @Nullable String title) {
-        this(type, null, title);
-    }
-
-    /**
-     * Creates a new {@link InventoryMenu} from the given inventory type.
-     *
-     * @param type Type of an inventory
-     */
-    public PropertyMenu(@NotNull InventoryType type) {
-        this(type, null, null);
-    }
-
-    /**
-     * Creates a new chest {@link InventoryMenu} from the given amount of rows, it's holder and display name (title).
-     *
-     * @param rows   {@link Rows} enum, amount of rows in this chest inventory
-     * @param holder Object that this inventory belongs to (chest, player, horse..)
-     * @param title  Display name of this inventory
-     */
-    public PropertyMenu(@NotNull Rows rows, @Nullable InventoryHolder holder, @Nullable String title) {
-        super(rows, holder, title);
-        properties = (E[]) new AbstractSlotProperty[getSize()];
-    }
-
-    /**
-     * Creates a new chest {@link InventoryMenu} from the given amount of rows and it's holder.
-     *
-     * @param rows   {@link Rows} enum, amount of rows in this chest inventory
-     * @param holder Object that this inventory belongs to (chest, player, horse..)
-     */
-    public PropertyMenu(@NotNull Rows rows, @Nullable InventoryHolder holder) {
-        this(rows, holder, null);
-    }
-
-    /**
-     * Creates a new chest {@link InventoryMenu} from the given amount of rows and display name (title).
-     *
-     * @param rows  {@link Rows} enum, amount of rows in this chest inventory
-     * @param title Display name of this inventory
-     */
-    public PropertyMenu(@NotNull Rows rows, @Nullable String title) {
-        this(rows, null, title);
-    }
-
-    /**
-     * Creates a new chest {@link InventoryMenu} from the given amount of rows.
-     *
-     * @param rows {@link Rows} enum, amount of rows in this chest inventory
-     */
-    public PropertyMenu(@NotNull Rows rows) {
-        this(rows, null, null);
-    }
-
-    /**
-     * Creates a new {@link InventoryMenu} with the given inventory and it's attributes equal to it.
-     *
-     * @param inventory Inventory that'll function as a menu
-     * @throws IllegalArgumentException If the inventory argument is null or already has an {@link AbstractMenu} as it's
-     *                                  {@link InventoryHolder}
-     */
-    public PropertyMenu(@NotNull Inventory inventory) {
-        super(inventory);
         properties = (E[]) new AbstractSlotProperty[getSize()];
     }
 
@@ -246,7 +164,9 @@ public class PropertyMenu<E extends AbstractSlotProperty> extends InventoryMenu 
      */
     public PropertyMenu<E> fill(@Nullable E property, boolean replace) {
         if (replace) {
-            return fillSkip(property, 0, getSize(), 1);
+            for (int slot = 0; slot < getSize(); slot++) {
+                properties[slot] = property;
+            }
         } else {
             for (int slot = 0; slot < getSize(); slot++) {
                 if (!getItem(slot).isPresent()) {
