@@ -5,17 +5,19 @@ import memecat.fatcat.utilities.menu.menus.AbstractMenu;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
 /**
- * Stores slot property data and runs actions of an inventory slot in {@link AbstractMenu}s on each slot interaction.
+ * This type is used by {@link memecat.fatcat.utilities.menu.menus.PropertyMenu} to store an action or even a value at
+ * specific slots and react to an {@link InventoryClickEvent} at the slot. Of course, developers are able to implement
+ * this for their own way and usage.
  *
  * @see SlotProperty
  */
-public abstract class AbstractSlotProperty {
+public interface AbstractSlotProperty {
 
     /**
-     * Runs an action with a given event and menu argument.
+     * Runs an action with a given {@link InventoryClickEvent} and {@link AbstractMenu} argument.
      *
-     * @param event InventoryClickEvent event
-     * @param menu  Inventory menu that is related to this event
+     * @param event {@link InventoryClickEvent} inventory event
+     * @param menu  {@link AbstractMenu} that the {@link InventoryClickEvent} is referring to
      */
-    public abstract void run(@NotNull InventoryClickEvent event, @NotNull AbstractMenu menu);
+    void run(@NotNull InventoryClickEvent event, @NotNull AbstractMenu menu);
 }

@@ -1,5 +1,6 @@
 package memecat.fatcat.utilities.menu.slot;
 
+import com.google.common.base.Preconditions;
 import memecat.fatcat.utilities.menu.menus.AbstractMenu;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.jetbrains.annotations.NotNull;
@@ -11,7 +12,7 @@ import java.util.function.BiConsumer;
  * An implementation subclass of {@link AbstractSlotProperty} that functions with lambdas (anonymous methods) as a way
  * of storing and running an action.
  */
-public class SlotProperty extends AbstractSlotProperty {
+public class SlotProperty implements AbstractSlotProperty {
 
     private BiConsumer<InventoryClickEvent, AbstractMenu> eventConsumer;
 
@@ -37,10 +38,10 @@ public class SlotProperty extends AbstractSlotProperty {
     }
 
     /**
-     * Returns the BiConsumer&lt;InventoryClickEvent, AbstractMenu&gt; object that contains the actions that'll be run
-     * with the given InventoryClickEvent event and menu parameter.
+     * Returns the {@link BiConsumer}&lt;{@link InventoryClickEvent}, {@link AbstractMenu}&gt; object that contains the
+     * actions that'll be run with the given InventoryClickEvent event and menu parameter.
      *
-     * @return BiConsumer&lt;InventoryClickEvent, AbstractMenu&gt; runnable object
+     * @return {@link BiConsumer}&lt;{@link InventoryClickEvent}, {@link AbstractMenu}&gt; runnable object
      */
     @Nullable
     public BiConsumer<InventoryClickEvent, AbstractMenu> getAction() {
@@ -48,14 +49,21 @@ public class SlotProperty extends AbstractSlotProperty {
     }
 
     /**
-     * Runs the BiConsumer&lt;InventoryClickEvent, AbstractMenu&gt; object with the given event and menu parameter, if
-     * arguments and event handler object aren't NULL.
+     * Runs the {@link #getAction()} object (if not null) with the given {@link InventoryClickEvent} and {@link
+     * AbstractMenu} argument.
      *
-     * @param event InventoryClickEvent inventory event
+     * @param event {@link InventoryClickEvent} inventory event
+     * @param menu  {@link AbstractMenu} that the {@link InventoryClickEvent} is referring to
+     * @throws IllegalArgumentException If {@link InventoryClickEvent} or {@link AbstractMenu} argument is null
      */
-    public void run(@Nullable InventoryClickEvent event, @Nullable AbstractMenu menu) {
-        if (getAction() != null && event != null && menu != null) {
-            getAction().accept(event, menu);
+    public void run(@NotNull InventoryClickEvent event, @NotNull AbstractMenu menu) {
+        if (getAction() == null) {
+            return;
         }
+
+        Preconditions.checkArgument(event != null, "InventoryClickEvent argument can't be null");
+        Preconditions.checkArgument(menu != null, "AbstractMenu argument can't be null");
+
+        getAction().accept(event, menu);
     }
 }
