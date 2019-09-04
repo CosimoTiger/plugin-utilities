@@ -22,15 +22,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * A class that controls inventory menus, distinguishes inventory menu events and passes them to their menus.
- * <p>
- * <strong>Warning: Multiple instances of this class that are also registered as {@link Listener}s may cause multiple
- * event handler calls for every event of a menu that's registered in multiple {@link MenuManager}. It is advised that
- * you use {@link UtilitiesPlugin#getMenuManager()} or {@link UtilitiesPlugin#getMenuManager(Plugin)} to register your
- * own {@link MenuManager} instance there, accessible to all {@link Plugin}s that are using this library.</strong>
+ * <p> <strong>Warning: {@link AbstractMenu}s in multiple instances of {@link MenuManager}s might cause multiple event
+ * handler calls. It is advised that you use {@link UtilitiesPlugin#getMenuManager()} or {@link
+ * UtilitiesPlugin#getMenuManager(Plugin)} to register your own {@link MenuManager} instance there, accessible and
+ * common to all {@link Plugin}s that are using this library.</strong>
  *
  * @author Alan B.
  */
@@ -41,12 +39,12 @@ public class MenuManager implements Listener {
      * to {@link AbstractMenu} value which can grower much larger (example: 50 players viewing the same menu would cause
      * 50 keys), while in this case it's one {@link Inventory} key for one {@link AbstractMenu} value.
      */
-    private Map<Inventory, AbstractMenu> menus = new HashMap<>(8);
+    protected Map<Inventory, AbstractMenu> menus = new HashMap<>(8);
 
     /**
      * Currently registered plugin that has this listener registered under it's instance.
      */
-    private Plugin provider;
+    protected Plugin provider;
 
     /**
      * Creates a new instance that registers itself with the enabled {@link Listener} provider {@link Plugin}.
@@ -60,11 +58,24 @@ public class MenuManager implements Listener {
     }
 
     /**
-     * Removes a given {@link AbstractMenu} from this {@link MenuManager}'s {@link HashMap}, causing it to not be
-     * detectable by this {@link MenuManager}.
+     * Removes an {@link AbstractMenu} that matches a given {@link Inventory} from this {@link MenuManager}'s {@link
+     * HashMap}.
+     *
+     * @param inventory Not null {@link Inventory} whose {@link AbstractMenu} will be unregistered
+     * @return {@link AbstractMenu} that was a value to the given {@link Inventory}'s {@link AbstractMenu}
+     * @throws IllegalArgumentException If the {@link Inventory} argument is null
+     */
+    public Optional<AbstractMenu> unregisterMenu(@NotNull Inventory inventory) {
+        Preconditions.checkArgument(inventory != null, "Inventory argument can't be null");
+        return Optional.ofNullable(menus.remove(inventory));
+    }
+
+    /**
+     * Removes a given {@link AbstractMenu} from this {@link MenuManager}'s {@link HashMap}.
      *
      * @param menu Not null {@link AbstractMenu} that'll be unregistered
      * @return {@link AbstractMenu} that was a value to the given {@link AbstractMenu}'s {@link Inventory}
+     * @throws IllegalArgumentException If the {@link AbstractMenu} argument is null
      */
     public Optional<AbstractMenu> unregisterMenu(@NotNull AbstractMenu menu) {
         Preconditions.checkArgument(menu != null, "AbstractMenu argument can't be null");
@@ -77,6 +88,7 @@ public class MenuManager implements Listener {
      *
      * @param menu Not null {@link AbstractMenu} that'll be registered
      * @return Previous {@link AbstractMenu} that was a value to the given {@link AbstractMenu}'s {@link Inventory}
+     * @throws IllegalArgumentException If the {@link AbstractMenu} argument is null
      */
     public Optional<AbstractMenu> registerMenu(@NotNull AbstractMenu menu) {
         Preconditions.checkArgument(menu != null, "AbstractMenu argument can't be null");
@@ -103,8 +115,8 @@ public class MenuManager implements Listener {
 
     /**
      * Closes all inventory menus that are currently open.
-     * <p>
-     * Not all inventory menus might be closed because each menu handler can decide to be reopened.
+     * <p> Closing an {@link AbstractMenu} for a {@link HumanEntity} might not always work because their {@link
+     * AbstractMenu#onClose(InventoryCloseEvent)} can choose to open a new {@link AbstractMenu}, possibly the same one.
      */
     public void closeMenus() {
         menus.forEach((inventory, menu) -> menu.close());
@@ -115,7 +127,7 @@ public class MenuManager implements Listener {
      *
      * @param inventory Inventory that possibly belongs to an {@link AbstractMenu}
      * @return Optional of nullable {@link AbstractMenu} that matches the given inventory
-     * @throws IllegalArgumentException If the inventory argument is null
+     * @throws IllegalArgumentException If the {@link Inventory} argument is null
      */
     @NotNull
     public Optional<AbstractMenu> getMenu(@NotNull Inventory inventory) {
@@ -173,21 +185,24 @@ public class MenuManager implements Listener {
      */
     @EventHandler
     public void onInventoryClick(@NotNull InventoryClickEvent event) {
-        getMenu(event.getInventory()).ifPresent(menu -> {
-            try {
-                menu.onClick(event, event.getClickedInventory() == null || !event.getClickedInventory().equals(menu.getInventory()));
-            } catch (Exception e) {
-                getPlugin().ifPresent(p -> p.getLogger().warning("An error occurred while handling a menu click event."));
-                e.printStackTrace();
-            }
-        });
+        AbstractMenu menu = menus.get(event.getInventory());
+
+        if (menu == null) {
+            return;
+        }
+
+        try {
+            menu.onClick(event, event.getClickedInventory() == null || !event.getClickedInventory().equals(menu.getInventory()));
+        } catch (Exception e) {
+            getPlugin().ifPresent(p -> p.getLogger().warning("An error occurred while handling a menu click event."));
+            e.printStackTrace();
+        }
     }
 
     /**
      * Handles any inventory closing event that is related to an inventory menu, and opens next inventory menus.
-     * <p>
-     * An {@link AbstractMenu} is removed in this event handler when it's viewer count is less than 2. This is to make
-     * sure that {@link AbstractMenu}s are removed and not piled up into the {@link HashMap}&lt;{@link Inventory},
+     * <p> An {@link AbstractMenu} is removed in this event handler when it's viewer count is less than 2. This is to
+     * make sure that {@link AbstractMenu}s are removed and not piled up into the {@link HashMap}&lt;{@link Inventory},
      * {@link AbstractMenu}&gt; which could result in too much memory usage.
      *
      * @param event InventoryCloseEvent event
@@ -195,29 +210,24 @@ public class MenuManager implements Listener {
      */
     @EventHandler(priority = EventPriority.MONITOR)
     public void onInventoryClose(@NotNull InventoryCloseEvent event) {
-        getMenu(event.getInventory()).ifPresent(menu -> {
-            if (menu.getInventory().getViewers().size() < 2) {
-                menus.remove(menu.getInventory());
-            }
+        AbstractMenu menu = menus.get(event.getInventory());
 
-            try {
-                menu.onClose(event);
-            } catch (Exception e) {
-                getPlugin().ifPresent(p -> p.getLogger().warning("An error occurred while handling a menu closing event."));
-                e.printStackTrace();
-            }
+        if (menu == null) {
+            return;
+        }
 
-            try {
-                menu.getNext().ifPresent(nextMenu -> {
-                    final HumanEntity viewer = event.getPlayer();
-                    getPlugin().ifPresent(plugin -> Bukkit.getScheduler().runTask(plugin, () -> nextMenu.open(viewer)));
-                });
-            } catch (Exception e) {
-                getPlugin().ifPresent(p -> p.getLogger().warning("An error occurred while attempting to open the next menu."));
-                e.printStackTrace();
-            }
-        });
+        if (menu.getInventory().getViewers().size() < 2) {
+            menus.remove(menu.getInventory());
+        }
+
+        try {
+            menu.onClose(event);
+        } catch (Exception e) {
+            getPlugin().ifPresent(p -> p.getLogger().warning("An error occurred while handling a menu closing event."));
+            e.printStackTrace();
+        }
     }
+
 
     /**
      * Handles any inventory opening events that are related to inventory menus.
@@ -227,14 +237,19 @@ public class MenuManager implements Listener {
      */
     @EventHandler
     public void onInventoryOpen(@NotNull InventoryOpenEvent event) {
-        getMenu(event.getInventory()).ifPresent(menu -> {
-            try {
-                menu.onOpen(event);
-            } catch (Exception e) {
-                getPlugin().ifPresent(p -> p.getLogger().warning("An error occurred while handling a menu opening event."));
-                e.printStackTrace();
-            }
-        });
+        AbstractMenu menu = menus.get(event.getInventory());
+
+        if (menu == null) {
+            return;
+        }
+
+        try {
+            menu.onOpen(event);
+        } catch (Exception e) {
+            getPlugin().ifPresent(p -> p.getLogger().warning("An error occurred while handling a menu opening event."));
+            e.printStackTrace();
+        }
+
     }
 
     /**
@@ -245,14 +260,18 @@ public class MenuManager implements Listener {
      */
     @EventHandler
     public void onInventoryDrag(@NotNull InventoryDragEvent event) {
-        getMenu(event.getInventory()).ifPresent(menu -> {
-            try {
-                menu.onDrag(event);
-            } catch (Exception e) {
-                getPlugin().ifPresent(p -> p.getLogger().warning("An error occurred while handling a menu open event."));
-                e.printStackTrace();
-            }
-        });
+        AbstractMenu menu = menus.get(event.getInventory());
+
+        if (menu == null) {
+            return;
+        }
+
+        try {
+            menu.onDrag(event);
+        } catch (Exception e) {
+            getPlugin().ifPresent(p -> p.getLogger().warning("An error occurred while handling a menu open event."));
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -263,23 +282,21 @@ public class MenuManager implements Listener {
      */
     @EventHandler
     public void onItemMove(@NotNull InventoryMoveItemEvent event) {
-        Optional<AbstractMenu> m = getMenu(event.getDestination());
-        AtomicBoolean isDestination = new AtomicBoolean();
+        AbstractMenu menu = menus.get(event.getDestination());
+        boolean isDestination = false;
 
-        if (m.isPresent()) {
-            isDestination.set(true);
+        if (menu == null) {
+            menu = menus.get(event.getSource());
         } else {
-            m = getMenu(event.getSource());
+            isDestination = true;
         }
 
-        m.ifPresent(menu -> {
-            try {
-                menu.onItemMove(event, isDestination.get());
-            } catch (Exception e) {
-                getPlugin().ifPresent(p -> p.getLogger().warning("An error occurred while handling a menu item movement event."));
-                e.printStackTrace();
-            }
-        });
+        try {
+            menu.onItemMove(event, isDestination);
+        } catch (Exception e) {
+            getPlugin().ifPresent(p -> p.getLogger().warning("An error occurred while handling a menu item movement event."));
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -300,7 +317,7 @@ public class MenuManager implements Listener {
             try {
                 menu.onDisable(event);
             } catch (Exception e) {
-                getPlugin().ifPresent(p -> p.getLogger().warning("An error occurred while handling a menu plugin disable event."));
+                Bukkit.getLogger().warning("An error occurred while handling a menu plugin disable event.");
                 e.printStackTrace();
             }
         });
