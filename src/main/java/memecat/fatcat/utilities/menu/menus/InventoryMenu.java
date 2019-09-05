@@ -58,7 +58,7 @@ public class InventoryMenu extends AbstractMenu {
      */
     @NotNull
     public InventoryMenu fillSkip(@Nullable ItemStack item, int fromSlot, int toSlot, int skipForSlots) {
-        checkRange(fromSlot, toSlot, getSize());
+        checkRange(fromSlot, toSlot, getInventory().getSize());
         Preconditions.checkArgument(skipForSlots > 0, "Skip-for-slots argument (" + skipForSlots + ") can't be smaller than 1");
 
         for (int slot = fromSlot; slot < toSlot; slot += skipForSlots) {
@@ -113,11 +113,11 @@ public class InventoryMenu extends AbstractMenu {
     @NotNull
     public InventoryMenu fill(@Nullable ItemStack item, boolean replace) {
         if (replace) {
-            for (int slot = 0; slot < getSize(); slot++) {
+            for (int slot = 0; slot < getInventory().getSize(); slot++) {
                 getInventory().setItem(slot, item);
             }
         } else {
-            for (int slot = 0; slot < getSize(); slot++) {
+            for (int slot = 0; slot < getInventory().getSize(); slot++) {
                 if (getInventory().getItem(slot) == null) {
                     getInventory().setItem(slot, item);
                 }

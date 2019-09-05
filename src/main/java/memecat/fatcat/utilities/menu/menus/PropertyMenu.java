@@ -40,7 +40,7 @@ public class PropertyMenu<E extends AbstractSlotProperty> extends InventoryMenu 
     public PropertyMenu(@NotNull Inventory inventory, @NotNull MenuManager menuManager) {
         super(inventory, menuManager);
 
-        properties = (E[]) new AbstractSlotProperty[getSize()];
+        properties = (E[]) new AbstractSlotProperty[getInventory().getSize()];
     }
 
     /**
@@ -87,7 +87,7 @@ public class PropertyMenu<E extends AbstractSlotProperty> extends InventoryMenu 
      *                                   argument is lower than 1
      */
     public PropertyMenu<E> fillSkip(@Nullable E property, int fromSlot, int toSlot, int skipForSlots) {
-        checkRange(fromSlot, toSlot, getSize());
+        checkRange(fromSlot, toSlot, getInventory().getSize());
         Preconditions.checkArgument(skipForSlots > 0, "Skip-for-slots argument (" + skipForSlots + ") can't be smaller than 1");
 
         for (int slot = fromSlot; slot < toSlot; slot += skipForSlots) {
@@ -111,7 +111,7 @@ public class PropertyMenu<E extends AbstractSlotProperty> extends InventoryMenu 
         Preconditions.checkArgument(slots != null, "Array of slots can't be null");
 
         for (int slot : slots) {
-            checkElement(slot, getSize());
+            checkElement(slot, getInventory().getSize());
             properties[slot] = property;
             getInventory().setItem(slot, item);
         }
@@ -162,11 +162,11 @@ public class PropertyMenu<E extends AbstractSlotProperty> extends InventoryMenu 
      */
     public PropertyMenu<E> fill(@Nullable E property, boolean replace) {
         if (replace) {
-            for (int slot = 0; slot < getSize(); slot++) {
+            for (int slot = 0; slot < getInventory().getSize(); slot++) {
                 properties[slot] = property;
             }
         } else {
-            for (int slot = 0; slot < getSize(); slot++) {
+            for (int slot = 0; slot < getInventory().getSize(); slot++) {
                 if (!getItem(slot).isPresent()) {
                     properties[slot] = property;
                 }
@@ -187,9 +187,10 @@ public class PropertyMenu<E extends AbstractSlotProperty> extends InventoryMenu 
      */
     public PropertyMenu<E> set(@Nullable E property, @NotNull int... slots) {
         Preconditions.checkArgument(slots != null, "Array of slots can't be null");
+        int size = getInventory().getSize();
 
         for (int slot : slots) {
-            checkElement(slot, getSize());
+            checkElement(slot, size);
             properties[slot] = property;
         }
 
@@ -202,7 +203,7 @@ public class PropertyMenu<E extends AbstractSlotProperty> extends InventoryMenu 
      * @return This instance, useful for chaining
      */
     public PropertyMenu<E> clearProperties() {
-        properties = (E[]) new AbstractSlotProperty[getSize()];
+        properties = (E[]) new AbstractSlotProperty[getInventory().getSize()];
         return this;
     }
 
@@ -227,7 +228,7 @@ public class PropertyMenu<E extends AbstractSlotProperty> extends InventoryMenu 
      */
     @NotNull
     public Optional<E> getSlotProperty(int slot) {
-        checkElement(slot, getSize());
+        checkElement(slot, getInventory().getSize());
         return Optional.ofNullable(properties[slot]);
     }
 }

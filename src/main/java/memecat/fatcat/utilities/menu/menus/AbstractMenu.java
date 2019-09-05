@@ -162,7 +162,7 @@ public abstract class AbstractMenu {
         Preconditions.checkArgument(slots != null, "Array of slots can't be null");
 
         for (int slot : slots) {
-            InventoryMenu.checkElement(slot, getSize());
+            InventoryMenu.checkElement(slot, getInventory().getSize());
             getInventory().setItem(slot, item);
         }
 
@@ -266,7 +266,7 @@ public abstract class AbstractMenu {
      */
     @NotNull
     public Optional<ItemStack> getItem(int slot) {
-        InventoryMenu.checkElement(slot, getSize());
+        InventoryMenu.checkElement(slot, getInventory().getSize());
         return Optional.ofNullable(getInventory().getItem(slot));
     }
 
@@ -289,14 +289,5 @@ public abstract class AbstractMenu {
     @NotNull
     public MenuManager getMenuManager() {
         return menuManager;
-    }
-
-    /**
-     * Returns the slot amount that this {@link AbstractMenu} has.
-     *
-     * @return Amount of slots of this inventory {@link AbstractMenu}
-     */
-    public final int getSize() {
-        return getInventory().getSize();
     }
 }
