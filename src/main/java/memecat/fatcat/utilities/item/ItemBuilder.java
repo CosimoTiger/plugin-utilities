@@ -131,6 +131,7 @@ public class ItemBuilder {
      *                     as an argument
      * @param <T>          {@link ItemMeta} subclass type
      * @return This instance, useful for chaining
+     * @throws IllegalArgumentException If the {@link Class}&lt;T&gt; or {@link Consumer}&lt;T&gt; argument is null
      */
     @NotNull
     public <T extends ItemMeta> ItemBuilder changeMeta(@NotNull Class<T> metaClass, @NotNull Consumer<T> metaConsumer) {
@@ -152,6 +153,7 @@ public class ItemBuilder {
      *
      * @param enchantments Enchantment(s) that will be removed from the {@link ItemStack}
      * @return This instance, useful for chaining
+     * @throws IllegalArgumentException If the {@link Collection}&lt;{@link Enchantment}&gt; argument is null
      */
     @NotNull
     public ItemBuilder removeEnchantments(@NotNull Collection<Enchantment> enchantments) {
@@ -165,6 +167,7 @@ public class ItemBuilder {
      *
      * @param enchantments Enchantment(s) that will be removed from the {@link ItemStack}
      * @return This instance, useful for chaining
+     * @throws IllegalArgumentException If the {@link Enchantment} array argument is null
      */
     @NotNull
     public ItemBuilder removeEnchantments(@NotNull Enchantment... enchantments) {
@@ -183,6 +186,7 @@ public class ItemBuilder {
      * @param index Index at which the specified new lines of lore will be added
      * @param lines List of lore lines that'll be added
      * @return This instance, useful for chaining
+     * @throws IllegalArgumentException If the {@link Collection}&lt;{@link String}&gt; argument is null
      */
     @NotNull
     public ItemBuilder addLoreAt(int index, @NotNull Collection<String> lines) {
@@ -204,6 +208,7 @@ public class ItemBuilder {
      * @param indexes Indexes at which the specified lore line will be set
      * @param line    New line of lore
      * @return This instance, useful for chaining
+     * @throws IllegalArgumentException If the integer array of indexes is null
      */
     @NotNull
     public ItemBuilder loreAt(@Nullable String line, @NotNull int... indexes) {
@@ -224,6 +229,7 @@ public class ItemBuilder {
      *
      * @param itemConsumer Consumer or anonymous function that'll take this instance's item as an argument
      * @return This instance, useful for chaining
+     * @throws IllegalArgumentException If the {@link Consumer}&lt;{@link ItemStack}&gt; argument is null
      */
     @NotNull
     public ItemBuilder changeItem(@NotNull Consumer<ItemStack> itemConsumer) {
@@ -238,6 +244,7 @@ public class ItemBuilder {
      * @param metaConsumer Consumer or anonymous function that'll take this instance's item's {@link ItemMeta} as an
      *                     argument
      * @return This instance, useful for chaining
+     * @throws IllegalArgumentException If the {@link Consumer}&lt;{@link ItemMeta}&gt; argument is null
      */
     @NotNull
     public ItemBuilder changeMeta(@NotNull Consumer<ItemMeta> metaConsumer) {
@@ -255,6 +262,7 @@ public class ItemBuilder {
      * @param index Index at which the specified new lines of lore will be added
      * @param lines Array of lore lines that'll be added
      * @return This instance, useful for chaining
+     * @throws IllegalArgumentException If the {@link String} array of lore lines is null
      */
     @NotNull
     public ItemBuilder addLoreAt(int index, @NotNull String... lines) {
@@ -267,6 +275,7 @@ public class ItemBuilder {
      *
      * @param lines List of lore lines that'll be added
      * @return This instance, useful for chaining
+     * @throws IllegalArgumentException If the {@link Collection}&lt;{@link String}&gt; argument is null
      */
     @NotNull
     public ItemBuilder addLore(@NotNull Collection<String> lines) {
@@ -283,6 +292,7 @@ public class ItemBuilder {
      *
      * @param flags ItemFlags that'll be removed from the {@link ItemStack}
      * @return This instance, useful for chaining
+     * @throws IllegalArgumentException If the {@link ItemFlag} array is null
      */
     @NotNull
     public ItemBuilder removeFlags(@NotNull ItemFlag... flags) {
@@ -299,6 +309,7 @@ public class ItemBuilder {
      *
      * @param indexes Array of indexes at which each lore line should be removed
      * @return This instance, useful for chaining
+     * @throws IllegalArgumentException If the integer array of indexes is null
      */
     public ItemBuilder removeLoreAt(@NotNull int... indexes) {
         Preconditions.checkArgument(indexes != null, "Array of lore line indexes argument can't be null");
@@ -317,6 +328,7 @@ public class ItemBuilder {
      *
      * @param material New type of material that the {@link ItemStack} will be
      * @return This instance, useful for chaining
+     * @throws IllegalArgumentException If the {@link Material} argument is null
      */
     @NotNull
     public ItemBuilder material(@NotNull Material material) {
@@ -340,6 +352,7 @@ public class ItemBuilder {
      *
      * @param flags Array of ItemFlag enums
      * @return This instance, useful for chaining
+     * @throws IllegalArgumentException If the {@link ItemFlag} array is null
      */
     @NotNull
     public ItemBuilder addFlags(@NotNull ItemFlag... flags) {
@@ -363,6 +376,7 @@ public class ItemBuilder {
      *
      * @param lines Array of lore lines that'll be added
      * @return This instance, useful for chaining
+     * @throws IllegalArgumentException If the {@link String} array of lore lines is null
      */
     @NotNull
     public ItemBuilder addLore(@NotNull String... lines) {
@@ -456,10 +470,11 @@ public class ItemBuilder {
     }
 
     /**
-     * Returns whether the {@link ItemStack} has a given item flag.
+     * Returns whether the {@link ItemStack} has a given {@link ItemFlag}.
      *
-     * @param flag Item flag enum
+     * @param flag {@link ItemFlag}
      * @return Whether the {@link ItemStack} contains the given item flag
+     * @throws IllegalArgumentException If the {@link ItemFlag} argument is null
      */
     public boolean hasFlag(@NotNull ItemFlag flag) {
         Preconditions.checkArgument(flag != null, "ItemFlag argument can't be null");

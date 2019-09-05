@@ -26,9 +26,10 @@ public class UtilitiesPlugin extends JavaPlugin {
      *
      * @param provider {@link Plugin} argument that's being checked for
      * @return The given {@link Plugin} provider argument
-     * @throws IllegalArgumentException If the provider argument is null
-     * @throws IllegalStateException    If the provider argument is not enabled
+     * @throws IllegalArgumentException If the {@link Plugin} argument is null
+     * @throws IllegalStateException    If the {@link Plugin} argument is not enabled
      */
+    @NotNull
     public static Plugin checkProvider(@NotNull Plugin provider) {
         Preconditions.checkArgument(provider != null, "Plugin provider argument can't be null");
         Preconditions.checkState(provider.isEnabled(), "Plugin provider argument can't be disabled");
@@ -43,8 +44,8 @@ public class UtilitiesPlugin extends JavaPlugin {
      * @param failure {@link Plugin} that will be used for the creation or providing for this {@link UtilitiesPlugin}'s
      *                {@link MenuManager}
      * @return Not null registered {@link MenuManager}
-     * @throws IllegalArgumentException If the provider argument is null
-     * @throws IllegalStateException    If the provider argument is not enabled
+     * @throws IllegalArgumentException If the {@link Plugin} argument is null
+     * @throws IllegalStateException    If the {@link Plugin} argument is not enabled
      */
     @NotNull
     public static MenuManager getMenuManager(@NotNull Plugin failure) {

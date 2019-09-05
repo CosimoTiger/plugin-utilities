@@ -44,8 +44,10 @@ public class PropertyMenu<E extends AbstractSlotProperty> extends InventoryMenu 
     }
 
     /**
-     * {@inheritDoc} By default, runs an {@link AbstractSlotProperty} at the event's slot or cancels the event if it
-     * doesn't exist.
+     * {@inheritDoc}   By default, runs an existing {@link AbstractSlotProperty} or cancels the {@link
+     * InventoryClickEvent}. Every existing {@link AbstractSlotProperty} should decide whether to cancel the {@link
+     * org.bukkit.event.inventory.InventoryClickEvent} through {@link org.bukkit.event.Cancellable#setCancelled(boolean)}
+     * though.
      */
     @Override
     public void onClick(@NotNull InventoryClickEvent event, boolean external) {
@@ -60,10 +62,6 @@ public class PropertyMenu<E extends AbstractSlotProperty> extends InventoryMenu 
             return;
         }
 
-        /*
-         * By default, a slot that lacks a slot property will cancel any interactions with it. This is why every existing
-         * slot property in a slot needs to control the event result via Event.setCancelled(boolean cancelled).
-         */
         Optional<E> property = getSlotProperty(event.getSlot());
 
         if (property.isPresent()) {
@@ -84,7 +82,7 @@ public class PropertyMenu<E extends AbstractSlotProperty> extends InventoryMenu 
      * @param toSlot       End index location of a slot in an inventory
      * @param skipForSlots Amount of slots to be skipped till next property placement
      * @return This instance, useful for chaining
-     * @throws IndexOutOfBoundsException If the from-slot or to-slot argument aren't within the inventory's boundaries,
+     * @throws IndexOutOfBoundsException If the from-slot or to-slot argument isn't within the inventory's boundaries
      * @throws IllegalArgumentException  If the from-slot is greater than the to-slot argument or the skipForSlots
      *                                   argument is lower than 1
      */
@@ -106,7 +104,7 @@ public class PropertyMenu<E extends AbstractSlotProperty> extends InventoryMenu 
      * @param property Nullable {@link AbstractSlotProperty} that will be set in all given slots
      * @param slots    Slots in which the given item and property will be set
      * @return This instance, useful for chaining
-     * @throws IndexOutOfBoundsException If a slot in the slot array argument is out of this inventory's array bounds
+     * @throws IndexOutOfBoundsException If a slot in the slot array argument is out of this inventory's boundaries
      * @throws IllegalArgumentException  If the slot array argument is null
      */
     public PropertyMenu<E> set(@Nullable E property, @Nullable ItemStack item, int... slots) {
@@ -129,7 +127,7 @@ public class PropertyMenu<E extends AbstractSlotProperty> extends InventoryMenu 
      * @param slot          Slot at which an {@link AbstractSlotProperty} that is being modified is located at
      * @return This instance, useful for chaining
      * @throws IndexOutOfBoundsException If the slot argument is out of this inventory's array boundaries
-     * @throws IllegalArgumentException  If the Consumer&lt;AbstractSlotProperty&gt; argument is null
+     * @throws IllegalArgumentException  If the {@link Consumer}&lt;{@link AbstractSlotProperty}&gt; argument is null
      */
     public PropertyMenu<E> changeProperty(@NotNull Consumer<E> applyProperty, int slot) {
         Preconditions.checkArgument(applyProperty != null, "Consumer<AbstractSlotProperty> argument can't be null");
@@ -148,7 +146,7 @@ public class PropertyMenu<E extends AbstractSlotProperty> extends InventoryMenu 
      * @param fromSlot Beginning index of a slot in an inventory
      * @param toSlot   Ending index of a slot in an inventory
      * @return This instance, useful for chaining
-     * @throws IndexOutOfBoundsException If the from-slot or to-slot argument aren't within the inventory's boundaries
+     * @throws IndexOutOfBoundsException If the from-slot or to-slot argument isn't within the inventory's boundaries
      * @throws IllegalArgumentException  If the from-slot is greater than the to-slot argument
      */
     public PropertyMenu<E> fillInterval(@Nullable E property, int fromSlot, int toSlot) {
@@ -225,7 +223,7 @@ public class PropertyMenu<E extends AbstractSlotProperty> extends InventoryMenu 
      *
      * @param slot Slot index location of the {@link AbstractSlotProperty} in the inventory
      * @return {@link Optional} of nullable {@link AbstractSlotProperty}
-     * @throws IndexOutOfBoundsException If the given slot argument is out of this inventory's array bounds
+     * @throws IndexOutOfBoundsException If the given slot argument is out of this inventory's boundaries
      */
     @NotNull
     public Optional<E> getSlotProperty(int slot) {

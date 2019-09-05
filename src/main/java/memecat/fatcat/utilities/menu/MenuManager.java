@@ -50,8 +50,8 @@ public class MenuManager implements Listener {
      * Creates a new instance that registers itself with the enabled {@link Listener} provider {@link Plugin}.
      *
      * @param provider Not null enabled {@link Plugin} for registering this {@link Listener} instance's event handlers
-     * @throws IllegalArgumentException If the provider argument is null
-     * @throws IllegalStateException    If the provider argument is not enabled
+     * @throws IllegalArgumentException If the {@link Plugin} argument is null
+     * @throws IllegalStateException    If the {@link Plugin} argument is not enabled
      */
     public MenuManager(@NotNull Plugin provider) {
         Bukkit.getPluginManager().registerEvents(this, this.provider = UtilitiesPlugin.checkProvider(provider));
@@ -101,8 +101,8 @@ public class MenuManager implements Listener {
      *
      * @param provider Not null enabled {@link Plugin} for registering this {@link Listener} instance's event handlers
      * @return Whether this {@link Listener} was successfully registered
-     * @throws IllegalArgumentException If the provider argument is null
-     * @throws IllegalStateException    If the provider argument is not enabled
+     * @throws IllegalArgumentException If the {@link Plugin} argument is null
+     * @throws IllegalStateException    If the {@link Plugin} argument is not enabled
      */
     public boolean provide(@NotNull Plugin provider) {
         if (isRegistered()) {
@@ -214,9 +214,7 @@ public class MenuManager implements Listener {
 
         if (menu == null) {
             return;
-        }
-
-        if (menu.getInventory().getViewers().size() < 2) {
+        } else if (menu.getInventory().getViewers().size() < 2) {
             menus.remove(menu.getInventory());
         }
 
@@ -304,6 +302,7 @@ public class MenuManager implements Listener {
      * menus.
      *
      * @param event PluginDisableEvent event
+     * @see AbstractMenu#onDisable(PluginDisableEvent)
      */
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPluginDisable(@NotNull PluginDisableEvent event) {

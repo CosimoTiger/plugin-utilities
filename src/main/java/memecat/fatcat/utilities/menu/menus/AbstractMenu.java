@@ -11,7 +11,6 @@ import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -34,7 +33,7 @@ import java.util.Optional;
  * @see InventoryMenu
  * @see PropertyMenu
  */
-public abstract class AbstractMenu implements InventoryHolder {
+public abstract class AbstractMenu {
 
     /**
      * Main, constant part of an {@link AbstractMenu} that identifies it.
@@ -52,6 +51,7 @@ public abstract class AbstractMenu implements InventoryHolder {
      * @param inventory   Not null {@link Inventory} that will be wrapped and controlled by an {@link AbstractMenu}
      * @param menuManager Not null {@link MenuManager} that will be used for (un)registering this {@link AbstractMenu}
      *                    and passing events to it
+     * @throws IllegalArgumentException If the {@link Inventory} or {@link MenuManager} argument is null
      */
     public AbstractMenu(@NotNull Inventory inventory, @NotNull MenuManager menuManager) {
         Preconditions.checkArgument(inventory != null, "Inventory argument can't be null");
@@ -154,7 +154,7 @@ public abstract class AbstractMenu implements InventoryHolder {
      * @param item  {@link ItemStack} to set at given slots
      * @param slots Slots that the {@link ItemStack} will be placed at
      * @return This instance, useful for chaining
-     * @throws IndexOutOfBoundsException If a slot in the slot array argument is out of this inventory's array bounds
+     * @throws IndexOutOfBoundsException If a slot in the slot array argument is out of this inventory's boundaries
      * @throws IllegalArgumentException  If the slot array argument is null
      */
     @NotNull
@@ -270,8 +270,12 @@ public abstract class AbstractMenu implements InventoryHolder {
         return Optional.ofNullable(getInventory().getItem(slot));
     }
 
+    /**
+     * Returns the {@link Inventory} that's wrapped and controlled by this {@link AbstractMenu}.
+     *
+     * @return Not null, always the same {@link Inventory}
+     */
     @NotNull
-    @Override
     public final Inventory getInventory() {
         return inventory;
     }
@@ -292,7 +296,7 @@ public abstract class AbstractMenu implements InventoryHolder {
      *
      * @return Amount of slots of this inventory {@link AbstractMenu}
      */
-    public int getSize() {
+    public final int getSize() {
         return getInventory().getSize();
     }
 }

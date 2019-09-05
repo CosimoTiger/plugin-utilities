@@ -21,18 +21,14 @@ import java.util.function.Consumer;
 public class InventoryMenu extends AbstractMenu {
 
     /**
-     * The identifier of a BukkitTask task that's relevant to this inventory. The task is by default automatically
-     * cancelled when the menu is closed with no viewers left, but this can be modified by overriding the {@link
-     * #onClose(InventoryCloseEvent)} method.
+     * The identifier number of a BukkitTask task that's relevant to this inventory. The task is by default
+     * automatically cancelled when the menu is closed with no viewers left, but this can be modified by overriding the
+     * {@link #onClose(InventoryCloseEvent)} method.
      */
-    private int taskId = -1;
+    protected int taskId = -1;
 
     /**
-     * Creates a new {@link InventoryMenu} using the default constructor for {@link AbstractMenu}.
-     *
-     * @param inventory   Not null {@link Inventory} that will be wrapped and controlled by an {@link AbstractMenu}
-     * @param menuManager Not null {@link MenuManager} that will be used for (un)registering this {@link AbstractMenu}
-     *                    and passing events to it
+     * {@inheritDoc} Creates a new {@link InventoryMenu} using the default constructor for {@link AbstractMenu}.
      */
     public InventoryMenu(@NotNull Inventory inventory, @NotNull MenuManager menuManager) {
         super(inventory, menuManager);
@@ -56,6 +52,9 @@ public class InventoryMenu extends AbstractMenu {
      * @param toSlot       Ending index of a slot in an inventory
      * @param skipForSlots Amount of slots to be skipped until next {@link ItemStack} placement
      * @return This instance, useful for chaining
+     * @throws IndexOutOfBoundsException If the from-slot or to-slot argument isn't within the inventory's boundaries
+     * @throws IllegalArgumentException  If the from-slot is greater than the to-slot argument or the skipForSlots
+     *                                   argument is lower than 1
      */
     @NotNull
     public InventoryMenu fillSkip(@Nullable ItemStack item, int fromSlot, int toSlot, int skipForSlots) {
@@ -80,6 +79,8 @@ public class InventoryMenu extends AbstractMenu {
      * @param fromSlot Start index location of a slot in an inventory
      * @param toSlot   End index location of a slot in an inventory
      * @return This instance, useful for chaining
+     * @throws IndexOutOfBoundsException If the from-slot or to-slot argument isn't within the inventory's boundaries
+     * @throws IllegalArgumentException  If the from-slot is greater than the to-slot argument
      */
     @NotNull
     public InventoryMenu fillInterval(@Nullable ItemStack item, int fromSlot, int toSlot) {
@@ -92,7 +93,7 @@ public class InventoryMenu extends AbstractMenu {
      * @param applyItem Lambda method that'll take an ItemStack as an argument and perform operations on it
      * @param slot      Slot at which an {@link ItemStack} that is being modified is located
      * @return This instance, useful for chaining
-     * @throws IndexOutOfBoundsException If the slot argument is out of this inventory's array boundaries
+     * @throws IndexOutOfBoundsException If the slot argument is out of this inventory's boundaries
      * @throws IllegalArgumentException  If the {@link Consumer}&lt;{@link ItemStack}&gt; argument is null
      */
     @NotNull
@@ -152,7 +153,7 @@ public class InventoryMenu extends AbstractMenu {
         return this;
     }
 
-    protected static void checkRange(int from, int to, int size) {
+    public static void checkRange(int from, int to, int size) {
         if (from > to) {
             throw new IllegalArgumentException("From-slot argument (" + from + ") can't be greater than to-slot argument (" + to + ")");
         } else if (from < 0) {
@@ -164,11 +165,11 @@ public class InventoryMenu extends AbstractMenu {
         }
     }
 
-    protected static void checkElement(int index, int size) {
+    public static void checkElement(int index, int size) {
         if (index < 0) {
-            throw new IllegalArgumentException("Slot index argument (" + index + ") can't be smaller 0");
+            throw new IndexOutOfBoundsException("Slot index argument (" + index + ") can't be smaller than 0");
         } else if (index >= size) {
-            throw new IllegalArgumentException("Slot index argument (" + index + ") can't be greater or equal to the size");
+            throw new IndexOutOfBoundsException("Slot index argument (" + index + ") can't be greater or equal to the size");
         }
     }
 
