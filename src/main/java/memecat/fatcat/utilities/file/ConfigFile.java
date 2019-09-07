@@ -17,7 +17,7 @@ import java.net.URI;
  * Represents a YAML file that is stored inside of a plugin's data folder, holding the FileConfiguration object
  * variable. When creating a new instance or using the superclass constructor as a subclass, reloadFile() should be
  * called to initialise the {@link FileConfiguration} variable. This isn't done by default because calling superclass
- * constructors and waiting on them can be a problem when defining class variables.
+ * constructors and waiting on them can be a problem when defining default class variables.
  */
 public class ConfigFile extends PluginFile {
 

@@ -153,7 +153,7 @@ public class InventoryMenu extends AbstractMenu {
         return this;
     }
 
-    public static void checkRange(int from, int to, int size) {
+    protected static void checkRange(int from, int to, int size) {
         if (from > to) {
             throw new IllegalArgumentException("From-slot argument (" + from + ") can't be greater than to-slot argument (" + to + ")");
         } else if (from < 0) {
@@ -165,7 +165,7 @@ public class InventoryMenu extends AbstractMenu {
         }
     }
 
-    public static void checkElement(int index, int size) {
+    protected static void checkElement(int index, int size) {
         if (index < 0) {
             throw new IndexOutOfBoundsException("Slot index argument (" + index + ") can't be smaller than 0");
         } else if (index >= size) {

@@ -160,9 +160,10 @@ public abstract class AbstractMenu {
     @NotNull
     public AbstractMenu set(@Nullable ItemStack item, @NotNull int... slots) {
         Preconditions.checkArgument(slots != null, "Array of slots can't be null");
+        int size = getInventory().getSize();
 
         for (int slot : slots) {
-            InventoryMenu.checkElement(slot, getInventory().getSize());
+            InventoryMenu.checkElement(slot, size);
             getInventory().setItem(slot, item);
         }
 

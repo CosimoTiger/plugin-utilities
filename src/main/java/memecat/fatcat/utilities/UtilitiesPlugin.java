@@ -18,7 +18,7 @@ public class UtilitiesPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        menuManager = new MenuManager(instance = this);
+        instance = this;
     }
 
     /**
@@ -40,12 +40,16 @@ public class UtilitiesPlugin extends JavaPlugin {
     /**
      * Returns the {@link MenuManager} of this {@link UtilitiesPlugin} if it's enabled, or else the {@link Plugin}
      * argument is provided or a new {@link MenuManager} is instantiated with the given {@link Plugin} argument.
+     * <p>
+     * Exceptions will arise if the {@link MenuManager} is uninitialised or currently not registered.
      *
      * @param failure {@link Plugin} that will be used for the creation or providing for this {@link UtilitiesPlugin}'s
      *                {@link MenuManager}
      * @return Not null registered {@link MenuManager}
      * @throws IllegalArgumentException If the {@link Plugin} argument is null
      * @throws IllegalStateException    If the {@link Plugin} argument is not enabled
+     * @see MenuManager#MenuManager(Plugin)
+     * @see MenuManager#provide(Plugin)
      */
     @NotNull
     public static MenuManager getMenuManager(@NotNull Plugin failure) {
@@ -66,15 +70,5 @@ public class UtilitiesPlugin extends JavaPlugin {
     @NotNull
     public static Optional<UtilitiesPlugin> getInstance() {
         return Optional.ofNullable(instance);
-    }
-
-    /**
-     * Returns the nullable {@link MenuManager} instance of this {@link UtilitiesPlugin} singleton.
-     *
-     * @return {@link Optional} of nullable {@link MenuManager}, not null when enabled or provided
-     */
-    @NotNull
-    public static Optional<MenuManager> getMenuManager() {
-        return Optional.ofNullable(menuManager);
     }
 }

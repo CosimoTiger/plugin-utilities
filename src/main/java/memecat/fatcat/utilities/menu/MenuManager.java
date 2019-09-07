@@ -26,8 +26,7 @@ import java.util.Optional;
 /**
  * A class that controls inventory menus, distinguishes inventory menu events and passes them to their menus.
  * <p> <strong>Warning: {@link AbstractMenu}s in multiple instances of {@link MenuManager}s might cause multiple event
- * handler calls. It is advised that you use {@link UtilitiesPlugin#getMenuManager()} or {@link
- * UtilitiesPlugin#getMenuManager(Plugin)} to register your own {@link MenuManager} instance there, accessible and
+ * handler calls. It is advised that you use {@link UtilitiesPlugin#getMenuManager(Plugin)} which is accessible and
  * common to all {@link Plugin}s that are using this library.</strong>
  *
  * @author Alan B.
@@ -35,9 +34,9 @@ import java.util.Optional;
 public class MenuManager implements Listener {
 
     /**
-     * All menus are stored here at a 1:1 ratio (not tested) while being viewed, compared to a {@link HumanEntity} key
-     * to {@link AbstractMenu} value which can grower much larger (example: 50 players viewing the same menu would cause
-     * 50 keys), while in this case it's one {@link Inventory} key for one {@link AbstractMenu} value.
+     * All menus are stored here at a 1:1 ratio while being viewed, compared to a {@link HumanEntity} key to {@link
+     * AbstractMenu} value which can grower much larger (example: 50 players viewing the same menu would cause 50 keys),
+     * while in this case it's one {@link Inventory} key for one {@link AbstractMenu} value.
      */
     protected Map<Inventory, AbstractMenu> menus = new HashMap<>(8);
 
@@ -114,12 +113,15 @@ public class MenuManager implements Listener {
     }
 
     /**
-     * Closes all inventory menus that are currently open.
+     * Closes all inventory menus that are currently registered.
      * <p> Closing an {@link AbstractMenu} for a {@link HumanEntity} might not always work because their {@link
      * AbstractMenu#onClose(InventoryCloseEvent)} can choose to open a new {@link AbstractMenu}, possibly the same one.
+     *
+     * @return This instance, useful for chaining
      */
-    public void closeMenus() {
-        menus.forEach((inventory, menu) -> menu.close());
+    public MenuManager closeMenus() {
+        new HashMap<>(menus).forEach((inventory, menu) -> menu.close());
+        return this;
     }
 
     /**
@@ -312,7 +314,7 @@ public class MenuManager implements Listener {
 
         provider = null;
 
-        menus.forEach((inventory, menu) -> {
+        new HashMap<>(menus).forEach((inventory, menu) -> {
             try {
                 menu.onDisable(event);
             } catch (Exception e) {
