@@ -21,7 +21,7 @@ public class Cooldowns<K> {
      * Contains cooldown entries consisting of unique name keys and a {@link System#currentTimeMillis()} end time
      * value.
      */
-    protected Map<K, Long> cooldowns = new HashMap<>(8);
+    private Map<K, Long> cooldowns = new HashMap<>(8);
 
     /**
      * Puts a cooldown entry converted into milliseconds from a given time duration expressed in the given {@link

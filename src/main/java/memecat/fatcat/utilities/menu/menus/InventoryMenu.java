@@ -129,15 +129,13 @@ public class InventoryMenu extends AbstractMenu {
 
     /**
      * Sets a {@link BukkitTask} that will run until the inventory is closed or a new {@link BukkitTask} is set.
-     * <p>
-     * The task should be scheduled first and then set, as an example:
-     * <pre>
-     *     {@code
+     *
+     * <p>The task should be scheduled first and then set, for an example:
+     * <pre>{@code
      * BukkitTask task = Bukkit.getScheduler().runTaskTimer(plugin, () -> player.sendMessage("This menu is currently open!"), 0, 40);
      *
      * menu.setBukkitTask(task);
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param task The created {@link BukkitTask} that is returned by scheduling it
      * @return This instance, useful for chaining
@@ -153,7 +151,7 @@ public class InventoryMenu extends AbstractMenu {
         return this;
     }
 
-    protected static void checkRange(int from, int to, int size) {
+    static void checkRange(int from, int to, int size) {
         if (from > to) {
             throw new IllegalArgumentException("From-slot argument (" + from + ") can't be greater than to-slot argument (" + to + ")");
         } else if (from < 0) {
@@ -165,7 +163,7 @@ public class InventoryMenu extends AbstractMenu {
         }
     }
 
-    protected static void checkElement(int index, int size) {
+    static void checkElement(int index, int size) {
         if (index < 0) {
             throw new IndexOutOfBoundsException("Slot index argument (" + index + ") can't be smaller than 0");
         } else if (index >= size) {

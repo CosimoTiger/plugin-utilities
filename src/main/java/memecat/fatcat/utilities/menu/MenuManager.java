@@ -24,10 +24,18 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * A class that controls inventory menus, distinguishes inventory menu events and passes them to their menus.
- * <p> <strong>Warning: {@link AbstractMenu}s in multiple instances of {@link MenuManager}s might cause multiple event
- * handler calls. It is advised that you use {@link UtilitiesPlugin#getMenuManager(Plugin)} which is accessible and
- * common to all {@link Plugin}s that are using this library.</strong>
+ * A class that filters {@link org.bukkit.event.inventory.InventoryEvent}s to registered {@link Inventory} {@link
+ * AbstractMenu}s.
+ *
+ * <p><strong>Note:</strong> {@link AbstractMenu}s should be unregistered from their {@link MenuManager} when they're
+ * not in use anymore, such as when the last viewer closes an {@link AbstractMenu}. The unfollowing of this rule will
+ * cause the increase in memory usage because the {@link AbstractMenu} reference(s) won't be removed from a {@link
+ * MenuManager}'s {@link java.util.Map}. It is okay if the menus will be frequently used, opened and closed and visible
+ * to everyone.
+ *
+ * <p><strong>Warning:</strong> {@link AbstractMenu}s in multiple instances of {@link MenuManager}s might cause
+ * multiple event handler calls. It is advised that you use {@link UtilitiesPlugin#getMenuManager(Plugin)} which is
+ * accessible and common to all {@link Plugin}s that are using this library.
  *
  * @author Alan B.
  */
@@ -36,14 +44,16 @@ public class MenuManager implements Listener {
     /**
      * All menus are stored here at a 1:1 ratio while being viewed, compared to a {@link HumanEntity} key to {@link
      * AbstractMenu} value which can grower much larger (example: 50 players viewing the same menu would cause 50 keys),
-     * while in this case it's one {@link Inventory} key for one {@link AbstractMenu} value.
+     * while in this case it's one {@link Inventory} key for one {@link AbstractMenu} value. <strong>Multiple {@link
+     * AbstractMenu}s of a single {@link Inventory} won't work in one {@link MenuManager} because of unique key
+     * mappings.</strong>
      */
-    protected Map<Inventory, AbstractMenu> menus = new HashMap<>(8);
+    private Map<Inventory, AbstractMenu> menus = new HashMap<>(8);
 
     /**
      * Currently registered plugin that has this listener registered under it's instance.
      */
-    protected Plugin provider;
+    private Plugin provider;
 
     /**
      * Creates a new instance that registers itself with the enabled {@link Listener} provider {@link Plugin}.
@@ -114,7 +124,8 @@ public class MenuManager implements Listener {
 
     /**
      * Closes all inventory menus that are currently registered.
-     * <p> Closing an {@link AbstractMenu} for a {@link HumanEntity} might not always work because their {@link
+     *
+     * <p>Closing an {@link AbstractMenu} for a {@link HumanEntity} might not always work because their {@link
      * AbstractMenu#onClose(InventoryCloseEvent)} can choose to open a new {@link AbstractMenu}, possibly the same one.
      *
      * @return This instance, useful for chaining
@@ -203,9 +214,6 @@ public class MenuManager implements Listener {
 
     /**
      * Handles any inventory closing event that is related to an inventory menu, and opens next inventory menus.
-     * <p> An {@link AbstractMenu} is removed in this event handler when it's viewer count is less than 2. This is to
-     * make sure that {@link AbstractMenu}s are removed and not piled up into the {@link HashMap}&lt;{@link Inventory},
-     * {@link AbstractMenu}&gt; which could result in too much memory usage.
      *
      * @param event InventoryCloseEvent event
      * @see AbstractMenu#onClose(InventoryCloseEvent)
@@ -216,8 +224,6 @@ public class MenuManager implements Listener {
 
         if (menu == null) {
             return;
-        } else if (menu.getInventory().getViewers().size() < 2) {
-            menus.remove(menu.getInventory());
         }
 
         try {

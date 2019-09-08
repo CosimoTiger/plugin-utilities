@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -28,7 +27,7 @@ public class ItemBuilder {
     /**
      * Mutable {@link ItemStack}.
      */
-    protected ItemStack itemStack;
+    private ItemStack itemStack;
 
     /**
      * Creates a new {@link ItemBuilder} from an item stored in a given configuration file's path or a certain item in
@@ -450,58 +449,6 @@ public class ItemBuilder {
     }
 
     /**
-     * Returns the enchantment level of a given enchantment of the {@link ItemStack}.
-     *
-     * @param enchantment Enchantment that the {@link ItemStack} possibly has
-     * @return Enchantment level of a given enchantment of the {@link ItemStack}
-     */
-    public int getEnchantmentLevel(@NotNull Enchantment enchantment) {
-        return itemStack.getEnchantmentLevel(enchantment);
-    }
-
-    /**
-     * Returns a map of enchantments (keys) to their power levels (values) of the {@link ItemStack}.
-     *
-     * @return Map of enchantments to their power levels of the {@link ItemStack}
-     */
-    @NotNull
-    public Map<Enchantment, Integer> getEnchantments() {
-        return itemStack.getEnchantments();
-    }
-
-    /**
-     * Returns whether the {@link ItemStack} has a given {@link ItemFlag}.
-     *
-     * @param flag {@link ItemFlag}
-     * @return Whether the {@link ItemStack} contains the given item flag
-     * @throws IllegalArgumentException If the {@link ItemFlag} argument is null
-     */
-    public boolean hasFlag(@NotNull ItemFlag flag) {
-        Preconditions.checkArgument(flag != null, "ItemFlag argument can't be null");
-        return getItemMeta().hasItemFlag(flag);
-    }
-
-    /**
-     * Returns the localized name (this is most likely part of a language locale) of the {@link ItemStack}.
-     *
-     * @return Localized name of the {@link ItemStack}
-     */
-    @NotNull
-    public String getLocalizedName() {
-        return getItemMeta().getLocalizedName();
-    }
-
-    /**
-     * Returns the type (material) of the {@link ItemStack}.
-     *
-     * @return Type (material) of the {@link ItemStack}
-     */
-    @NotNull
-    public Material getMaterial() {
-        return itemStack.getType();
-    }
-
-    /**
      * Returns the {@link ItemMeta} of the {@link ItemStack}.
      *
      * @return {@link ItemMeta} of the {@link ItemStack}
@@ -522,15 +469,6 @@ public class ItemBuilder {
     }
 
     /**
-     * Returns whether the {@link ItemStack} has an existing {@link ItemMeta}.
-     *
-     * @return Whether the {@link ItemStack} has an existing {@link ItemMeta}
-     */
-    public boolean hasItemMeta() {
-        return itemStack.hasItemMeta();
-    }
-
-    /**
      * Returns whether the {@link ItemStack} can lose it's durability through use.
      *
      * @return Whether the {@link ItemStack} can lose it's durability through use
@@ -540,31 +478,12 @@ public class ItemBuilder {
     }
 
     /**
-     * Returns the display name (title) of the {@link ItemStack}.
-     *
-     * @return Display name (title) of the {@link ItemStack}
-     */
-    @NotNull
-    public String getTitle() {
-        return getItemMeta().getDisplayName();
-    }
-
-    /**
      * Simply returns the {@link ItemStack} that's being modified by this {@link ItemBuilder}.
      *
      * @return {@link ItemStack} that's being modified
      */
     @NotNull
-    public ItemStack build() {
+    public ItemStack get() {
         return itemStack;
-    }
-
-    /**
-     * Returns the amount of items in the {@link ItemStack}.
-     *
-     * @return Amount of items in the {@link ItemStack}
-     */
-    public int getAmount() {
-        return itemStack.getAmount();
     }
 }

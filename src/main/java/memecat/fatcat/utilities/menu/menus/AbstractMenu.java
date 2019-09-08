@@ -26,7 +26,7 @@ import java.util.Optional;
  * Represents a collection of functional actions and features of an inventory that multiple viewers can see and interact
  * with, containing many different features that can be customised and extended by a developer.
  *
- * <p> A developer can subclass this class, override the methods or add them to customise the ways of processing inputs
+ * <p>A developer can subclass this class, override the methods or add them to customise the ways of processing inputs
  * for inventory menu events or modifying the inventories.
  *
  * @author Alan B.
@@ -43,7 +43,7 @@ public abstract class AbstractMenu {
     /**
      * A {@link MenuManager} instance that is available for the control of this {@link AbstractMenu}.
      */
-    protected MenuManager menuManager;
+    private MenuManager menuManager;
 
     /**
      * The default constructor for all subclasses.
@@ -64,7 +64,7 @@ public abstract class AbstractMenu {
     /**
      * Acts as an event handler for an ItemStack movement from source to destination inventory.
      *
-     * <p> This event handler is most likely called in rare cases; when this {@link AbstractMenu} inventory belongs to
+     * <p>This event handler is most likely called in rare cases; when this {@link AbstractMenu} inventory belongs to
      * a container object and another object or inventory tries to move items to it. An example of this happening can be
      * a chest block container inventory with a hopper connecting to it that is trying to move items into it.
      *
@@ -79,7 +79,7 @@ public abstract class AbstractMenu {
     /**
      * Handles any {@link InventoryClickEvent} related to this inventory menu.
      *
-     * <p> By default, the {@link InventoryAction} {@code COLLECT_TO_CURSOR} and {@code MOVE_TO_OTHER_INVENTORY} are
+     * <p>By default, the {@link InventoryAction} {@code COLLECT_TO_CURSOR} and {@code MOVE_TO_OTHER_INVENTORY} are
      * cancelled and any menu action is cancelled from interaction.
      *
      * @param event    {@link InventoryClickEvent} event
@@ -103,7 +103,7 @@ public abstract class AbstractMenu {
     }
 
     /**
-     * Handles the {@link PluginDisableEvent} of {@link MenuManager}'s {@link MenuManager#getPlugin}.
+     * Handles the {@link PluginDisableEvent} of the {@link MenuManager} this {@link AbstractMenu} is registered in.
      *
      * @param event {@link PluginDisableEvent} event
      */
@@ -112,14 +112,17 @@ public abstract class AbstractMenu {
 
     /**
      * Handles the inventory close events of this menu and opens a next menu after this one.
-     * <p>
-     * To open a new {@link AbstractMenu} for the given {@link InventoryCloseEvent} of a {@link HumanEntity}, perform
-     * that task on the next tick. For an example: {@code Bukkit.getScheduler().runTask(plugin, () ->
-     * open(event.getPlayer()))}
+     *
+     * <p>To open a new {@link AbstractMenu} for the given {@link InventoryCloseEvent} of a {@link HumanEntity},
+     * perform that task on the next tick. For an example, to reopen this menu: {@code
+     * Bukkit.getScheduler().runTask(plugin, () -> open(event.getPlayer()))}.
      *
      * @param event {@link InventoryCloseEvent} event
      */
     public void onClose(@NotNull InventoryCloseEvent event) {
+        if (getInventory().getViewers().size() < 2) {
+            getMenuManager().unregisterMenu(this);
+        }
     }
 
     /**
@@ -133,7 +136,7 @@ public abstract class AbstractMenu {
     /**
      * Acts as an event handler for the inventory item dragging event.
      *
-     * <p> By default, any item dragging in the menu will be cancelled, while outside of it (bottom inventory) won't.
+     * <p>By default, any item dragging in the menu will be cancelled.
      *
      * @param event {@link InventoryDragEvent} event
      */
@@ -173,7 +176,7 @@ public abstract class AbstractMenu {
     /**
      * Opens this {@link AbstractMenu} for the given viewers, fail-fast.
      *
-     * <p> If any {@link HumanEntity} in the viewers argument is null, a {@link NullPointerException} is thrown - this
+     * <p>If any {@link HumanEntity} in the viewers argument is null, a {@link NullPointerException} is thrown - this
      * is to prevent this {@link AbstractMenu} from being registered unnecessarily to it's {@link MenuManager}.
      *
      * @param viewers {@link Collection}&lt;{@link HumanEntity}&gt; of which each will see this {@link AbstractMenu}
@@ -219,7 +222,7 @@ public abstract class AbstractMenu {
     /**
      * Opens this {@link AbstractMenu} for the given viewers, fail-fast.
      *
-     * <p> If any {@link HumanEntity} in the viewers argument is null, a {@link NullPointerException} is thrown - this
+     * <p>If any {@link HumanEntity} in the viewers argument is null, a {@link NullPointerException} is thrown - this
      * is to prevent this {@link AbstractMenu} from being registered unnecessarily to it's {@link MenuManager}.
      *
      * @param viewers Array of {@link HumanEntity} of which each will see this {@link AbstractMenu} {@link Inventory}
@@ -236,7 +239,7 @@ public abstract class AbstractMenu {
     /**
      * Closes all {@link AbstractMenu}s of this instance for all viewers who are viewing it.
      *
-     * <p> Closing an {@link AbstractMenu} for a {@link HumanEntity} might not always work because their {@link
+     * <p>Closing an {@link AbstractMenu} for a {@link HumanEntity} might not always work because their {@link
      * #onClose(InventoryCloseEvent)} can choose to open a new {@link AbstractMenu}, possibly the same one.
      *
      * @return This instance, useful for chaining

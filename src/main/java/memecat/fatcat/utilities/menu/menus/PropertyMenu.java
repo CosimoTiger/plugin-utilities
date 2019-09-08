@@ -27,7 +27,7 @@ public class PropertyMenu<E extends AbstractSlotProperty> extends InventoryMenu 
     /**
      * Properties of each slot in this inventory are stored in an array, linear like inventories.
      */
-    protected E[] properties;
+    private E[] properties;
 
     /**
      * Creates a new {@link PropertyMenu} using the default constructor for {@link InventoryMenu}, with an array of this
@@ -44,7 +44,7 @@ public class PropertyMenu<E extends AbstractSlotProperty> extends InventoryMenu 
     }
 
     /**
-     * {@inheritDoc}   By default, runs an existing {@link AbstractSlotProperty} or cancels the {@link
+     * {@inheritDoc} By default, runs an existing {@link AbstractSlotProperty} or cancels the {@link
      * InventoryClickEvent}. Every existing {@link AbstractSlotProperty} should decide whether to cancel the {@link
      * org.bukkit.event.inventory.InventoryClickEvent} through {@link org.bukkit.event.Cancellable#setCancelled(boolean)}
      * though.
@@ -73,8 +73,8 @@ public class PropertyMenu<E extends AbstractSlotProperty> extends InventoryMenu 
 
     /**
      * Fills inventory slots with slot properties by skipping an amount of given slots from a start to the end.
-     * <p>
-     * This method places a property in the first slot and keeps on adding the skipForSlots amount until the current
+     *
+     * <p>This method places a property in the first slot and keeps on adding the skipForSlots amount until the current
      * slot is bigger than toSlot.
      *
      * @param property     Slot property object or null
@@ -137,8 +137,8 @@ public class PropertyMenu<E extends AbstractSlotProperty> extends InventoryMenu 
 
     /**
      * Fills inventory slots with a slot property from a beginning slot to an ending slot.
-     * <p>
-     * An "interval" in the case of this method can be defined as a set of whole numbers ranging from the given
+     *
+     * <p>An "interval" in the case of this method can be defined as a set of whole numbers ranging from the given
      * beginning slot index (inclusive) to the given slot index (exclusive). This is referenced to mathematical
      * intervals, or simply shown with symbols: [fromSlot, toSlot&gt; or firstSlot = fromSlot, endSlot = (toSlot - 1).
      *
