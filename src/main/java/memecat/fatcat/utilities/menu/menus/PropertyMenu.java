@@ -44,8 +44,8 @@ public class PropertyMenu<E extends AbstractSlotProperty> extends InventoryMenu 
     }
 
     /**
-     * {@inheritDoc} By default, runs an existing {@link AbstractSlotProperty} or cancels the {@link
-     * InventoryClickEvent}. Every existing {@link AbstractSlotProperty} should decide whether to cancel the {@link
+     * {@inheritDoc} Also runs an existing {@link AbstractSlotProperty} or cancels the {@link InventoryClickEvent}.
+     * Every existing {@link AbstractSlotProperty} should decide whether to cancel the {@link
      * org.bukkit.event.inventory.InventoryClickEvent} through {@link org.bukkit.event.Cancellable#setCancelled(boolean)}
      * though.
      */
@@ -62,6 +62,8 @@ public class PropertyMenu<E extends AbstractSlotProperty> extends InventoryMenu 
             return;
         }
 
+        // getSlotProperty(event.getSlot).ifPresentOrElse(property -> property.run(event, this), () ->
+        // event.setCancelled(true)); for Java 9+
         Optional<E> property = getSlotProperty(event.getSlot());
 
         if (property.isPresent()) {

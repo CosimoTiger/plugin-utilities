@@ -9,8 +9,8 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
- * A class that keeps track of timed cooldowns stored inside a {@link HashMap}, updated lazily, on access. It is
- * enough to store one instance per project.
+ * A class that keeps track of timed cooldowns stored inside a {@link HashMap}, updated lazily, on access. It is enough
+ * to store one instance per project.
  *
  * @param <K> Key type of this class's {@link HashMap}, {@link String} is suggested as it provides many variations for
  *            unique keys
@@ -154,9 +154,10 @@ public class Cooldowns<K> {
     }
 
     /**
-     * Returns the unmodifiable {@link Map}&lt;{@link K}, {@link Long}&gt; view of this class.
+     * Returns the unmodifiable ({@link Collections#unmodifiableMap(Map)}) {@link Map}&lt;{@link K}, {@link Long}&gt;
+     * view of this instance.
      *
-     * @return Unmodifiable {@link Map}&lt;{@link K}, {@link Long}&gt; view of this class.
+     * @return Unmodifiable {@link Map}&lt;{@link K}, {@link Long}&gt; view of this instance
      */
     @NotNull
     public Map<K, Long> getMap() {

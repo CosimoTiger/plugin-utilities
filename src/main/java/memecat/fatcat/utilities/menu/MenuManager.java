@@ -162,8 +162,8 @@ public class MenuManager implements Listener {
     }
 
     /**
-     * Returns the unmodifiable map ({@link Collections#unmodifiableMap(Map)}) of this {@link MenuManager}'s menu {@link
-     * HashMap} of {@link Inventory} keys to {@link AbstractMenu} values.
+     * Returns the unmodifiable map ({@link Collections#unmodifiableMap(Map)}) view of this {@link MenuManager}'s menu
+     * {@link HashMap} of {@link Inventory} keys to {@link AbstractMenu} values.
      *
      * @return Unmodifiable view of this {@link MenuManager}'s {@link HashMap}
      */
@@ -204,12 +204,7 @@ public class MenuManager implements Listener {
             return;
         }
 
-        try {
-            menu.onClick(event, event.getClickedInventory() == null || !event.getClickedInventory().equals(menu.getInventory()));
-        } catch (Exception e) {
-            getPlugin().ifPresent(p -> p.getLogger().warning("An error occurred while handling a menu click event."));
-            e.printStackTrace();
-        }
+        menu.onClick(event, event.getClickedInventory() == null || !event.getClickedInventory().equals(menu.getInventory()));
     }
 
     /**
@@ -226,12 +221,7 @@ public class MenuManager implements Listener {
             return;
         }
 
-        try {
-            menu.onClose(event);
-        } catch (Exception e) {
-            getPlugin().ifPresent(p -> p.getLogger().warning("An error occurred while handling a menu closing event."));
-            e.printStackTrace();
-        }
+        menu.onClose(event);
     }
 
 
@@ -249,13 +239,7 @@ public class MenuManager implements Listener {
             return;
         }
 
-        try {
-            menu.onOpen(event);
-        } catch (Exception e) {
-            getPlugin().ifPresent(p -> p.getLogger().warning("An error occurred while handling a menu opening event."));
-            e.printStackTrace();
-        }
-
+        menu.onOpen(event);
     }
 
     /**
@@ -272,12 +256,7 @@ public class MenuManager implements Listener {
             return;
         }
 
-        try {
-            menu.onDrag(event);
-        } catch (Exception e) {
-            getPlugin().ifPresent(p -> p.getLogger().warning("An error occurred while handling a menu open event."));
-            e.printStackTrace();
-        }
+        menu.onDrag(event);
     }
 
     /**
@@ -297,12 +276,7 @@ public class MenuManager implements Listener {
             isDestination = true;
         }
 
-        try {
-            menu.onItemMove(event, isDestination);
-        } catch (Exception e) {
-            getPlugin().ifPresent(p -> p.getLogger().warning("An error occurred while handling a menu item movement event."));
-            e.printStackTrace();
-        }
+        menu.onItemMove(event, isDestination);
     }
 
     /**

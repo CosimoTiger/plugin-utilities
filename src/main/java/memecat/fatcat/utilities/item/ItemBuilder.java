@@ -81,11 +81,10 @@ public class ItemBuilder {
      *
      * @param itemStack {@link ItemStack} that's being wrapped by this class for further modification
      * @param title     Display name or visible title of an item
-     * @throws IllegalArgumentException If the ItemStack argument is null or of Material.AIR type
+     * @throws IllegalArgumentException If the ItemStack argument is null
      */
     public ItemBuilder(@NotNull ItemStack itemStack, @Nullable String title) {
         Preconditions.checkArgument(itemStack != null, "ItemStack argument can't be null");
-        Preconditions.checkArgument(!itemStack.getType().equals(Material.AIR), "ItemStack type can't be of Material.AIR type");
 
         this.itemStack = itemStack;
         title(title);
@@ -137,12 +136,12 @@ public class ItemBuilder {
         Preconditions.checkArgument(metaClass != null, "Class<T extends ItemMeta> argument can't be null");
         Preconditions.checkArgument(metaConsumer != null, "Consumer<T extends ItemMeta> argument can't be null");
 
-        ItemMeta meta = getItemMeta();
-
-        if (metaClass.isInstance(meta)) {
-            metaConsumer.accept(metaClass.cast(meta));
-            itemMeta(meta);
-        }
+        getItemMeta().ifPresent(meta -> {
+            if (metaClass.isInstance(meta)) {
+                metaConsumer.accept(metaClass.cast(meta));
+                itemStack.setItemMeta(meta);
+            }
+        });
 
         return this;
     }
@@ -213,7 +212,7 @@ public class ItemBuilder {
     public ItemBuilder loreAt(@Nullable String line, @NotNull int... indexes) {
         Preconditions.checkArgument(indexes != null, "Array of lore line indexes argument can't be null");
 
-        List<String> lore = getItemMeta().getLore();
+        List<String> lore = getItemMeta().map(ItemMeta::getLore).orElse(null);
         lore = lore == null || lore.isEmpty() ? new ArrayList<>(Utility.max(indexes) + 1) : lore;
 
         for (int index : indexes) {
@@ -249,10 +248,12 @@ public class ItemBuilder {
     public ItemBuilder changeMeta(@NotNull Consumer<ItemMeta> metaConsumer) {
         Preconditions.checkArgument(metaConsumer != null, "Consumer<T extends ItemMeta> argument can't be null");
 
-        ItemMeta meta = getItemMeta();
-        metaConsumer.accept(meta);
+        getItemMeta().ifPresent(meta -> {
+            metaConsumer.accept(meta);
+            itemStack.setItemMeta(meta);
+        });
 
-        return itemMeta(meta);
+        return this;
     }
 
     /**
@@ -454,8 +455,8 @@ public class ItemBuilder {
      * @return {@link ItemMeta} of the {@link ItemStack}
      */
     @NotNull
-    public ItemMeta getItemMeta() {
-        return itemStack.getItemMeta();
+    public Optional<ItemMeta> getItemMeta() {
+        return Optional.ofNullable(itemStack.getItemMeta());
     }
 
     /**
@@ -465,7 +466,7 @@ public class ItemBuilder {
      */
     @NotNull
     public List<String> getLore() {
-        return Optional.ofNullable(getItemMeta().getLore()).orElse(new ArrayList<>());
+        return getItemMeta().map(ItemMeta::getLore).orElse(new ArrayList<>());
     }
 
     /**
@@ -474,7 +475,7 @@ public class ItemBuilder {
      * @return Whether the {@link ItemStack} can lose it's durability through use
      */
     public boolean isBreakable() {
-        return !getItemMeta().isUnbreakable();
+        return getItemMeta().map(meta -> !meta.isUnbreakable()).orElse(true);
     }
 
     /**

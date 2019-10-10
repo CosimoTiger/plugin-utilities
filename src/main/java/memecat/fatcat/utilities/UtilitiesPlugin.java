@@ -44,9 +44,8 @@ public class UtilitiesPlugin extends JavaPlugin {
      * <p>Exceptions will arise from a bad argument if the {@link MenuManager} is uninitialised or currently not
      * registered.
      *
-     * <p>May also be instantiated as the following:
-     * {@code UtilitiesPlugin.getMenuManager(UtilitiesPlugin.getInstance().orElse(otherPlugin))} In the {@link
-     * Plugin#onEnable()} of a {@link JavaPlugin} the {@code this} keyword may be used instead of {@code otherPlugin}.
+     * <p>May also be acquired as the following:
+     * {@code MenuManager menuManager = UtilitiesPlugin.getMenuManager(UtilitiesPlugin.getInstance().orElse(otherPlugin))}
      *
      * @param failure {@link Plugin} that will be used for the creation or providing for this {@link UtilitiesPlugin}'s
      *                {@link MenuManager}
