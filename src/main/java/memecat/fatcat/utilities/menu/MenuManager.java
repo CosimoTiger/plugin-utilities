@@ -14,6 +14,7 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.server.PluginDisableEvent;
+import org.bukkit.event.server.ServerLoadEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
@@ -37,7 +38,7 @@ import java.util.Optional;
  * multiple event handler calls. It is advised that you use {@link UtilitiesPlugin#getMenuManager(Plugin)} which is
  * accessible and common to all {@link Plugin}s that are using this library.
  *
- * @author Alan B.
+ * @author Alan B. | FatCat
  */
 public class MenuManager implements Listener {
 
@@ -58,12 +59,12 @@ public class MenuManager implements Listener {
     /**
      * Creates a new instance that registers itself with the enabled {@link Listener} provider {@link Plugin}.
      *
-     * @param provider Not null enabled {@link Plugin} for registering this {@link Listener} instance's event handlers
+     * @param newProvider Not null enabled {@link Plugin} for registering this {@link Listener} instance's event handlers
      * @throws IllegalArgumentException If the {@link Plugin} argument is null
      * @throws IllegalStateException    If the {@link Plugin} argument is not enabled
      */
-    public MenuManager(@NotNull Plugin provider) {
-        Bukkit.getPluginManager().registerEvents(this, this.provider = UtilitiesPlugin.checkProvider(provider));
+    public MenuManager(@NotNull Plugin newProvider) {
+        Bukkit.getPluginManager().registerEvents(this, provider = UtilitiesPlugin.checkProvider(newProvider));
     }
 
     /**
@@ -108,17 +109,17 @@ public class MenuManager implements Listener {
      * Provides a new {@link Plugin} to register this {@link Listener}'s events if it's current provider is null or
      * disabled.
      *
-     * @param provider Not null enabled {@link Plugin} for registering this {@link Listener} instance's event handlers
+     * @param newProvider Not null enabled {@link Plugin} for registering this {@link Listener} instance's event handlers
      * @return Whether this {@link Listener} was successfully registered
      * @throws IllegalArgumentException If the {@link Plugin} argument is null
      * @throws IllegalStateException    If the {@link Plugin} argument is not enabled
      */
-    public boolean provide(@NotNull Plugin provider) {
+    public boolean provide(@NotNull Plugin newProvider) {
         if (isRegistered()) {
             return false;
         }
 
-        Bukkit.getPluginManager().registerEvents(this, this.provider = UtilitiesPlugin.checkProvider(provider));
+        Bukkit.getPluginManager().registerEvents(this, provider = UtilitiesPlugin.checkProvider(newProvider));
         return true;
     }
 
@@ -157,7 +158,7 @@ public class MenuManager implements Listener {
      */
     @NotNull
     public Optional<AbstractMenu> getMenu(@NotNull HumanEntity viewer) {
-        Preconditions.checkArgument(viewer != null, "Viewer argument can't be null");
+        Preconditions.checkArgument(viewer != null, "HumanEntity viewer argument can't be null");
         return getMenu(viewer.getOpenInventory().getTopInventory());
     }
 
@@ -200,11 +201,10 @@ public class MenuManager implements Listener {
     public void onInventoryClick(@NotNull InventoryClickEvent event) {
         AbstractMenu menu = menus.get(event.getInventory());
 
-        if (menu == null) {
-            return;
+        if (menu != null) {
+            menu.onClick(event, event.getClickedInventory() == null ||
+                    !event.getClickedInventory().equals(menu.getInventory()));
         }
-
-        menu.onClick(event, event.getClickedInventory() == null || !event.getClickedInventory().equals(menu.getInventory()));
     }
 
     /**
@@ -217,11 +217,9 @@ public class MenuManager implements Listener {
     public void onInventoryClose(@NotNull InventoryCloseEvent event) {
         AbstractMenu menu = menus.get(event.getInventory());
 
-        if (menu == null) {
-            return;
+        if (menu != null) {
+            menu.onClose(event);
         }
-
-        menu.onClose(event);
     }
 
 
@@ -235,11 +233,9 @@ public class MenuManager implements Listener {
     public void onInventoryOpen(@NotNull InventoryOpenEvent event) {
         AbstractMenu menu = menus.get(event.getInventory());
 
-        if (menu == null) {
-            return;
+        if (menu != null) {
+            menu.onOpen(event);
         }
-
-        menu.onOpen(event);
     }
 
     /**
@@ -252,11 +248,9 @@ public class MenuManager implements Listener {
     public void onInventoryDrag(@NotNull InventoryDragEvent event) {
         AbstractMenu menu = menus.get(event.getInventory());
 
-        if (menu == null) {
-            return;
+        if (menu != null) {
+            menu.onDrag(event);
         }
-
-        menu.onDrag(event);
     }
 
     /**
@@ -268,15 +262,16 @@ public class MenuManager implements Listener {
     @EventHandler
     public void onItemMove(@NotNull InventoryMoveItemEvent event) {
         AbstractMenu menu = menus.get(event.getDestination());
-        boolean isDestination = false;
 
         if (menu == null) {
             menu = menus.get(event.getSource());
-        } else {
-            isDestination = true;
-        }
 
-        menu.onItemMove(event, isDestination);
+            if (menu != null) {
+                menu.onItemMove(event, false);
+            }
+        } else {
+            menu.onItemMove(event, true);
+        }
     }
 
     /**
@@ -288,19 +283,17 @@ public class MenuManager implements Listener {
      */
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPluginDisable(@NotNull PluginDisableEvent event) {
-        if (!event.getPlugin().equals(provider)) {
-            return;
+        if (event.getPlugin().equals(provider)) {
+            provider = null;
+
+            new HashMap<>(menus).forEach((inventory, menu) -> {
+                try {
+                    menu.onDisable(event);
+                } catch (Exception e) {
+                    Bukkit.getLogger().warning("An error occurred while handling a menu plugin disable event.");
+                    e.printStackTrace();
+                }
+            });
         }
-
-        provider = null;
-
-        new HashMap<>(menus).forEach((inventory, menu) -> {
-            try {
-                menu.onDisable(event);
-            } catch (Exception e) {
-                Bukkit.getLogger().warning("An error occurred while handling a menu plugin disable event.");
-                e.printStackTrace();
-            }
-        });
     }
 }

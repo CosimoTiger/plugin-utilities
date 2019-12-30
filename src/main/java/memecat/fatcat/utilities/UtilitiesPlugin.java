@@ -21,6 +21,12 @@ public class UtilitiesPlugin extends JavaPlugin {
         instance = this;
     }
 
+    @Override
+    public void onDisable() {
+        instance = null;
+        menuManager = null;
+    }
+
     /**
      * Checks whether a given {@link Plugin} argument is not null and enabled or else an exception is thrown.
      *
@@ -44,9 +50,6 @@ public class UtilitiesPlugin extends JavaPlugin {
      * <p>Exceptions will arise from a bad argument if the {@link MenuManager} is uninitialised or currently not
      * registered.
      *
-     * <p>May also be acquired as the following:
-     * {@code MenuManager menuManager = UtilitiesPlugin.getMenuManager(UtilitiesPlugin.getInstance().orElse(otherPlugin))}
-     *
      * @param failure {@link Plugin} that will be used for the creation or providing for this {@link UtilitiesPlugin}'s
      *                {@link MenuManager}
      * @return Not null registered {@link MenuManager}
@@ -57,6 +60,8 @@ public class UtilitiesPlugin extends JavaPlugin {
      */
     @NotNull
     public static MenuManager getMenuManager(@NotNull Plugin failure) {
+        failure = instance == null ? failure : instance;
+
         if (menuManager == null) {
             return menuManager = new MenuManager(failure);
         }

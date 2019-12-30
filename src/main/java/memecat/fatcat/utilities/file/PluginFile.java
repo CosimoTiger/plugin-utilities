@@ -82,7 +82,7 @@ public abstract class PluginFile extends File {
      * Creates a new {@link PluginFile} if it doesn't exist in it's location in the file system by copying it from the
      * plugin's embedded resources folder.
      *
-     * @return Whether this file already exists
+     * @return Whether this file already existed
      */
     public boolean createFile() {
         if (!exists()) {

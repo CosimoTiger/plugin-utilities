@@ -66,17 +66,6 @@ public class ItemBuilder {
     }
 
     /**
-     * Creates a new {@link ItemBuilder} from the given material and title of a new item being created, with an amount
-     * of 1.
-     *
-     * @param material Type of an item
-     * @param title    Display name or visible title of an item
-     */
-    public ItemBuilder(@NotNull Material material, @Nullable String title) {
-        this(material, 1, title);
-    }
-
-    /**
      * Creates a new {@link ItemBuilder} from the given item, renaming it to a given title.
      *
      * @param itemStack {@link ItemStack} that's being wrapped by this class for further modification
@@ -88,6 +77,17 @@ public class ItemBuilder {
 
         this.itemStack = itemStack;
         title(title);
+    }
+
+    /**
+     * Creates a new {@link ItemBuilder} from the given material and title of a new item being created, with an amount
+     * of 1.
+     *
+     * @param material Type of an item
+     * @param title    Display name or visible title of an item
+     */
+    public ItemBuilder(@NotNull Material material, @Nullable String title) {
+        this(material, 1, title);
     }
 
     /**

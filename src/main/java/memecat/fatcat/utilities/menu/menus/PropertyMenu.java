@@ -13,16 +13,16 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
- * Instantiable implementation of {@link InventoryMenu} with an {@link AbstractSlotProperty} array of the same size as
- * the inventory, with many methods for working with these properties. This class is generified to allow different
+ * The default implementation of {@link Menu} with an {@link AbstractSlotProperty} array of the same size as the
+ * inventory, with many methods for working with these properties. This class is generified to allow different
  * subclasses of {@link AbstractSlotProperty} to be used.
  *
  * @param <E> Type that is a subclass of {@link AbstractSlotProperty}, can be left empty ({@code <>}, but never nothing)
  *            to allow any subclass
- * @author Alan B.
+ * @author Alan B. | FatCat
  * @see AbstractSlotProperty
  */
-public class PropertyMenu<E extends AbstractSlotProperty> extends InventoryMenu {
+public class PropertyMenu<E extends AbstractSlotProperty> extends Menu {
 
     /**
      * Properties of each slot in this inventory are stored in an array, linear like inventories.
@@ -30,7 +30,7 @@ public class PropertyMenu<E extends AbstractSlotProperty> extends InventoryMenu 
     private E[] properties;
 
     /**
-     * Creates a new {@link PropertyMenu} using the default constructor for {@link InventoryMenu}, with an array of this
+     * Creates a new {@link PropertyMenu} using the default constructor for {@link Menu}, with an array of this
      * instance's generic type.
      *
      * @param inventory   Not null {@link Inventory} that will be wrapped and controlled by an {@link AbstractMenu}
@@ -62,15 +62,8 @@ public class PropertyMenu<E extends AbstractSlotProperty> extends InventoryMenu 
             return;
         }
 
-        // getSlotProperty(event.getSlot).ifPresentOrElse(property -> property.run(event, this), () ->
-        // event.setCancelled(true)); for Java 9+
-        Optional<E> property = getSlotProperty(event.getSlot());
-
-        if (property.isPresent()) {
-            property.get().run(event, this);
-        } else {
-            event.setCancelled(true);
-        }
+        getSlotProperty(event.getSlot()).ifPresentOrElse(property -> property.run(event, this),
+                () -> event.setCancelled(true));
     }
 
     /**
@@ -84,13 +77,13 @@ public class PropertyMenu<E extends AbstractSlotProperty> extends InventoryMenu 
      * @param toSlot       End index location of a slot in an inventory
      * @param skipForSlots Amount of slots to be skipped till next property placement
      * @return This instance, useful for chaining
-     * @throws IndexOutOfBoundsException If the from-slot or to-slot argument isn't within the inventory's boundaries
-     * @throws IllegalArgumentException  If the from-slot is greater than the to-slot argument or the skipForSlots
+     * @throws IndexOutOfBoundsException If the fromSlot or toSlot argument isn't within the inventory's boundaries
+     * @throws IllegalArgumentException  If the fromSlot is greater than the toSlot argument or the skipForSlots
      *                                   argument is lower than 1
      */
     public PropertyMenu<E> fillSkip(@Nullable E property, int fromSlot, int toSlot, int skipForSlots) {
         checkRange(fromSlot, toSlot, getInventory().getSize());
-        Preconditions.checkArgument(skipForSlots > 0, "Skip-for-slots argument (" + skipForSlots + ") can't be smaller than 1");
+        Preconditions.checkArgument(skipForSlots > 0, "skipForSlots argument (" + skipForSlots + ") can't be smaller than 1");
 
         for (int slot = fromSlot; slot < toSlot; slot += skipForSlots) {
             properties[slot] = property;
@@ -148,8 +141,8 @@ public class PropertyMenu<E extends AbstractSlotProperty> extends InventoryMenu 
      * @param fromSlot Beginning index of a slot in an inventory
      * @param toSlot   Ending index of a slot in an inventory
      * @return This instance, useful for chaining
-     * @throws IndexOutOfBoundsException If the from-slot or to-slot argument isn't within the inventory's boundaries
-     * @throws IllegalArgumentException  If the from-slot is greater than the to-slot argument
+     * @throws IndexOutOfBoundsException If the fromSlot or to-slot argument isn't within the inventory's boundaries
+     * @throws IllegalArgumentException  If the fromSlot is greater than the to-slot argument
      */
     public PropertyMenu<E> fillInterval(@Nullable E property, int fromSlot, int toSlot) {
         return fillSkip(property, fromSlot, toSlot, 1);
