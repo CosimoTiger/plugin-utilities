@@ -151,6 +151,9 @@ public class Menu extends AbstractMenu {
         return this;
     }
 
+    /**
+     * Package-protected methods for reuse.
+     */
     static void checkRange(int from, int to, int size) {
         if (from > to) {
             throw new IllegalArgumentException("fromSlot argument (" + from + ") can't be greater than toSlot argument (" + to + ")");
@@ -163,6 +166,9 @@ public class Menu extends AbstractMenu {
         }
     }
 
+    /**
+     * Package-protected methods for reuse.
+     */
     static void checkElement(int index, int size) {
         if (index < 0) {
             throw new IndexOutOfBoundsException("Slot index argument (" + index + ") can't be smaller than 0");
@@ -182,6 +188,11 @@ public class Menu extends AbstractMenu {
         return this;
     }
 
+    /**
+     * Generally clears the inventory menu of its contents and attributes.
+     *
+     * @return This instance, useful for chaining
+     */
     @NotNull
     @Override
     public Menu clear() {

@@ -14,10 +14,10 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.server.PluginDisableEvent;
-import org.bukkit.event.server.ServerLoadEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,25 +31,24 @@ import java.util.Optional;
  * <p><strong>Note:</strong> {@link AbstractMenu}s should be unregistered from their {@link MenuManager} when they're
  * not in use anymore, such as when the last viewer closes an {@link AbstractMenu}. The unfollowing of this rule will
  * cause the increase in memory usage because the {@link AbstractMenu} reference(s) won't be removed from a {@link
- * MenuManager}'s {@link java.util.Map}. It is okay if the menus will be frequently used, opened and closed and visible
- * to everyone.
+ * MenuManager}'s {@link java.util.Map}.
  *
  * <p><strong>Warning:</strong> {@link AbstractMenu}s in multiple instances of {@link MenuManager}s might cause
- * multiple event handler calls. It is advised that you use {@link UtilitiesPlugin#getMenuManager(Plugin)} which is
- * accessible and common to all {@link Plugin}s that are using this library.
+ * multiple event handler calls. It is advised to use {@link UtilitiesPlugin#getMenuManager(Plugin)} which is accessible
+ * and common to all {@link Plugin}s that are using this library.
  *
  * @author Alan B. | FatCat
  */
 public class MenuManager implements Listener {
 
     /**
-     * All menus are stored here at a 1:1 ratio while being viewed, compared to a {@link HumanEntity} key to {@link
-     * AbstractMenu} value which can grower much larger (example: 50 players viewing the same menu would cause 50 keys),
-     * while in this case it's one {@link Inventory} key for one {@link AbstractMenu} value. <strong>Multiple {@link
-     * AbstractMenu}s of a single {@link Inventory} won't work in one {@link MenuManager} because of unique key
-     * mappings.</strong>
+     * All menus are stored here at a 1:1 ratio ({@link Inventory} for {@link AbstractMenu}) while being viewed,
+     * compared to a {@link HumanEntity} key to {@link AbstractMenu} value which can grower much larger (e.g. 50
+     * players viewing the same menu would cause 50 keys). <strong>Multiple {@link AbstractMenu}s of a single
+     * {@link Inventory} won't work in one {@link MenuManager} because of unique key mappings.</strong>
+     * TODO: use a WeakHashMap?
      */
-    private Map<Inventory, AbstractMenu> menus = new HashMap<>(8);
+    private final Map<Inventory, AbstractMenu> menus = new HashMap<>(8);
 
     /**
      * Currently registered plugin that has this listener registered under it's instance.
@@ -114,7 +113,7 @@ public class MenuManager implements Listener {
      * @throws IllegalArgumentException If the {@link Plugin} argument is null
      * @throws IllegalStateException    If the {@link Plugin} argument is not enabled
      */
-    public boolean provide(@NotNull Plugin newProvider) {
+    public boolean provide(@Nullable Plugin newProvider) {
         if (isRegistered()) {
             return false;
         }
@@ -199,12 +198,8 @@ public class MenuManager implements Listener {
      */
     @EventHandler
     public void onInventoryClick(@NotNull InventoryClickEvent event) {
-        AbstractMenu menu = menus.get(event.getInventory());
-
-        if (menu != null) {
-            menu.onClick(event, event.getClickedInventory() == null ||
-                    !event.getClickedInventory().equals(menu.getInventory()));
-        }
+        Optional.ofNullable(menus.get(event.getInventory())).ifPresent(menu -> menu.onClick(event,
+                event.getClickedInventory() == null || !event.getClickedInventory().equals(menu.getInventory())));
     }
 
     /**
@@ -215,13 +210,8 @@ public class MenuManager implements Listener {
      */
     @EventHandler(priority = EventPriority.MONITOR)
     public void onInventoryClose(@NotNull InventoryCloseEvent event) {
-        AbstractMenu menu = menus.get(event.getInventory());
-
-        if (menu != null) {
-            menu.onClose(event);
-        }
+        Optional.ofNullable(menus.get(event.getInventory())).ifPresent(menu -> menu.onClose(event));
     }
-
 
     /**
      * Handles any inventory opening events that are related to inventory menus.
@@ -231,11 +221,7 @@ public class MenuManager implements Listener {
      */
     @EventHandler
     public void onInventoryOpen(@NotNull InventoryOpenEvent event) {
-        AbstractMenu menu = menus.get(event.getInventory());
-
-        if (menu != null) {
-            menu.onOpen(event);
-        }
+        Optional.ofNullable(menus.get(event.getInventory())).ifPresent(menu -> menu.onOpen(event));
     }
 
     /**
@@ -246,11 +232,7 @@ public class MenuManager implements Listener {
      */
     @EventHandler
     public void onInventoryDrag(@NotNull InventoryDragEvent event) {
-        AbstractMenu menu = menus.get(event.getInventory());
-
-        if (menu != null) {
-            menu.onDrag(event);
-        }
+        Optional.ofNullable(menus.get(event.getInventory())).ifPresent(menu -> menu.onDrag(event));
     }
 
     /**
@@ -261,16 +243,14 @@ public class MenuManager implements Listener {
      */
     @EventHandler
     public void onItemMove(@NotNull InventoryMoveItemEvent event) {
-        AbstractMenu menu = menus.get(event.getDestination());
+        // Optional.ofNullable(menus.get(event.getDestination())).ifPresentOrElse(menu -> menu.onItemMove(event, true),
+        // () -> Optional.ofNullable(menus.get(event.getSource())).ifPresent(menu -> menu.onItemMove(event, false)));
+        Optional<AbstractMenu> menu = Optional.ofNullable(menus.get(event.getDestination()));
 
-        if (menu == null) {
-            menu = menus.get(event.getSource());
-
-            if (menu != null) {
-                menu.onItemMove(event, false);
-            }
+        if (menu.isPresent()) {
+            menu.get().onItemMove(event, true);
         } else {
-            menu.onItemMove(event, true);
+            Optional.ofNullable(menus.get(event.getSource())).ifPresent(m -> m.onItemMove(event, false));
         }
     }
 
@@ -284,14 +264,14 @@ public class MenuManager implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPluginDisable(@NotNull PluginDisableEvent event) {
         if (event.getPlugin().equals(provider)) {
-            provider = null;
-
             new HashMap<>(menus).forEach((inventory, menu) -> {
                 try {
                     menu.onDisable(event);
                 } catch (Exception e) {
-                    Bukkit.getLogger().warning("An error occurred while handling a menu plugin disable event.");
+                    Bukkit.getLogger().warning("An error occurred while handling a menu plugin disable event");
                     e.printStackTrace();
+                } finally {
+                    provider = null;
                 }
             });
         }

@@ -9,10 +9,10 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.BiConsumer;
 
 /**
- * An implementation subclass of {@link AbstractSlotProperty} that functions with lambdas (anonymous methods) as a way
+ * An implementation subclass of {@link ISlotProperty} that functions with lambdas (anonymous methods) as a way
  * of storing and running an action.
  */
-public class SlotProperty implements AbstractSlotProperty {
+public class SlotProperty implements ISlotProperty {
 
     private BiConsumer<InventoryClickEvent, AbstractMenu> eventConsumer;
 
@@ -22,7 +22,7 @@ public class SlotProperty implements AbstractSlotProperty {
      * @param event Actions that should be executed with the given InventoryClickEvent argument
      */
     public SlotProperty(@Nullable BiConsumer<InventoryClickEvent, AbstractMenu> event) {
-        this.eventConsumer = event;
+        eventConsumer = event;
     }
 
     /**
@@ -33,7 +33,7 @@ public class SlotProperty implements AbstractSlotProperty {
      */
     @NotNull
     public SlotProperty setAction(@Nullable BiConsumer<InventoryClickEvent, AbstractMenu> event) {
-        this.eventConsumer = event;
+        eventConsumer = event;
         return this;
     }
 
@@ -57,13 +57,11 @@ public class SlotProperty implements AbstractSlotProperty {
      * @throws IllegalArgumentException If {@link InventoryClickEvent} or {@link AbstractMenu} argument is null
      */
     public void run(@NotNull InventoryClickEvent event, @NotNull AbstractMenu menu) {
-        if (getAction() == null) {
-            return;
+        if (getAction() != null) {
+            Preconditions.checkArgument(event != null, "InventoryClickEvent argument can't be null");
+            Preconditions.checkArgument(menu != null, "AbstractMenu argument can't be null");
+
+            getAction().accept(event, menu);
         }
-
-        Preconditions.checkArgument(event != null, "InventoryClickEvent argument can't be null");
-        Preconditions.checkArgument(menu != null, "AbstractMenu argument can't be null");
-
-        getAction().accept(event, menu);
     }
 }

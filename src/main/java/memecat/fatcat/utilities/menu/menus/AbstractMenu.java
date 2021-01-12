@@ -2,6 +2,7 @@ package memecat.fatcat.utilities.menu.menus;
 
 import com.google.common.base.Preconditions;
 import memecat.fatcat.utilities.menu.MenuManager;
+import memecat.fatcat.utilities.menu.slot.ISlotProperty;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -15,12 +16,10 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Objects;
+import java.util.Iterator;
 import java.util.Optional;
-
 
 /**
  * Represents a collection of functional actions and features of an inventory that multiple viewers can see and interact
@@ -62,11 +61,10 @@ public abstract class AbstractMenu {
     }
 
     /**
-     * Acts as an event handler for an ItemStack movement from source to destination inventory.
+     * Acts as an event handler for the movement of an {@link org.bukkit.inventory.ItemStack} from source to
+     * destination inventory.
      *
-     * <p>This event handler is most likely called in rare cases; when this {@link AbstractMenu} inventory belongs to
-     * a container object and another object or inventory tries to move items to it. An example of this happening can be
-     * a chest block container inventory with a hopper connecting to it that is trying to move items into it.
+     * <p>This typically happens when listening to a container inventory; example of a situation is .</p>
      *
      * @param event         {@link InventoryMoveItemEvent} event
      * @param isDestination Whether this {@link org.bukkit.inventory.Inventory} is equal to the {@link
@@ -77,14 +75,15 @@ public abstract class AbstractMenu {
     }
 
     /**
-     * Handles any {@link InventoryClickEvent} related to this inventory menu.
+     * Handles any {@link InventoryClickEvent} related to this inventory.
      *
      * <p>By default, the {@link InventoryAction} {@code COLLECT_TO_CURSOR} and {@code MOVE_TO_OTHER_INVENTORY} are
-     * cancelled and any menu action is cancelled from interaction.
+     * cancelled and any menu action is cancelled from interaction, but interaction with one's personal inventory is
+     * allowed.
      *
      * @param event    {@link InventoryClickEvent} event
-     * @param external Whether the clicked inventory is not this menu, possibly not any
-     * @see memecat.fatcat.utilities.menu.slot.AbstractSlotProperty
+     * @param external Whether the clicked inventory is not this one, possibly not any (outside)
+     * @see ISlotProperty
      * @see memecat.fatcat.utilities.menu.slot.SlotProperty
      */
     public void onClick(@NotNull InventoryClickEvent event, boolean external) {
@@ -93,17 +92,17 @@ public abstract class AbstractMenu {
             case MOVE_TO_OTHER_INVENTORY:
                 event.setCancelled(true);
                 break;
-        }
-
-        if (!external) {
-            event.setCancelled(true);
+            default:
+                if (!external) {
+                    event.setCancelled(true);
+                }
         }
     }
 
     /**
      * Handles the {@link PluginDisableEvent} of the {@link MenuManager} this {@link AbstractMenu} is registered in.
-     * <p>
-     * {@link AbstractMenu}s should always close themselves during this event because their reference is mostly lost -
+     *
+     * <p>{@link AbstractMenu}s should always close themselves during this event because their reference is mostly lost -
      * {@link org.bukkit.plugin.Plugin}s are disabled on restart, their reference is lost and a totally new object is
      * created on reload. The same happens with {@link MenuManager} as they are connected to their
      * {@link org.bukkit.plugin.Plugin}s.
@@ -115,10 +114,10 @@ public abstract class AbstractMenu {
     }
 
     /**
-     * Handles the inventory close events of this menu and opens a next menu after this one.
+     * Handles the inventory close events of an inventory.
      *
-     * <p>To open a new {@link AbstractMenu} for the given {@link InventoryCloseEvent} of a {@link HumanEntity},
-     * perform that task on the next tick. For an example, to reopen this menu: {@code
+     * <p>Can open new menus: for the given {@link InventoryCloseEvent} of a
+     * {@link HumanEntity}, perform that task on the next tick. For an example, to reopen this menu: {@code
      * Bukkit.getScheduler().runTask(plugin, () -> open(event.getPlayer()))}.
      *
      * @param event {@link InventoryCloseEvent} event
@@ -127,14 +126,6 @@ public abstract class AbstractMenu {
         if (getInventory().getViewers().size() < 2) {
             getManager().unregisterMenu(this);
         }
-    }
-
-    /**
-     * Acts as an event handler for the inventory opening event.
-     *
-     * @param event {@link InventoryOpenEvent} event
-     */
-    public void onOpen(@NotNull InventoryOpenEvent event) {
     }
 
     /**
@@ -147,12 +138,42 @@ public abstract class AbstractMenu {
     public void onDrag(@NotNull InventoryDragEvent event) {
         int size = event.getView().getTopInventory().getSize();
 
-        for (int slot : event.getRawSlots()) {
-            if (slot < size) {
-                event.setCancelled(true);
-                return;
-            }
+        if (event.getRawSlots().stream().anyMatch(slot -> slot < size)) {
+            event.setCancelled(true);
         }
+    }
+
+    /**
+     * Acts as an event handler for the inventory opening event.
+     *
+     * @param event {@link InventoryOpenEvent} event
+     */
+    public void onOpen(@NotNull InventoryOpenEvent event) {
+    }
+
+    /**
+     * Opens this {@link AbstractMenu} for the given viewers, fail-fast.
+     *
+     * @param viewers {@link Collection}&lt;{@link HumanEntity}&gt; of which each will see this {@link AbstractMenu}
+     *                {@link Inventory}
+     * @return This instance, useful for chaining
+     * @throws IllegalArgumentException If the {@link Collection}&lt;{@link HumanEntity}&gt; argument is null or empty
+     * @throws IllegalStateException    If this {@link AbstractMenu}'s {@link MenuManager} isn't registered for handling
+     *                                  events
+     * @throws NullPointerException     If a {@link HumanEntity} is null
+     */
+    @NotNull
+    public AbstractMenu open(@NotNull Collection<? extends HumanEntity> viewers) {
+        Preconditions.checkState(menuManager.isRegistered(),
+                "MenuManager has no enabled plugin registered to handle inventory menu events");
+        Preconditions.checkArgument(viewers != null && !viewers.isEmpty(),
+                "Collection<? extends HumanEntity> of viewers argument can't be null");
+        Preconditions.checkArgument(!viewers.contains(null), "Collection<? extends HumanEntity> of viewers argument can't contain null");
+
+        menuManager.registerMenu(this);
+        viewers.forEach(viewer -> viewer.openInventory(getInventory()));
+
+        return this;
     }
 
     /**
@@ -178,49 +199,8 @@ public abstract class AbstractMenu {
     }
 
     /**
-     * Opens this {@link AbstractMenu} for the given viewers, fail-fast.
-     *
-     * @param viewers {@link Collection}&lt;{@link HumanEntity}&gt; of which each will see this {@link AbstractMenu}
-     *                {@link Inventory}
-     * @return This instance, useful for chaining
-     * @throws IllegalArgumentException If the {@link Collection}&lt;{@link HumanEntity}&gt; argument is null or empty
-     * @throws IllegalStateException    If this {@link AbstractMenu}'s {@link MenuManager} isn't registered for handling
-     *                                  events
-     * @throws NullPointerException     If a {@link HumanEntity} is null
-     */
-    @NotNull
-    public AbstractMenu open(@NotNull Collection<? extends HumanEntity> viewers) {
-        // TODO: The following code is kind of "yuck!" Too many checks.. Although, we need to have at least one viewer
-        //  for which it is reasonable to register this menu. Figure out something simpler and faster.
-        Preconditions.checkState(menuManager.isRegistered(),
-                "MenuManager has no enabled plugin registered to handle inventory menu events");
-        Preconditions.checkArgument(viewers != null,
-                "Collection<? extends HumanEntity> of viewers argument can't be null");
-
-        boolean notNull = false;
-
-        for (HumanEntity viewer : viewers) {
-            if (viewer != null) {
-                notNull = true;
-                break;
-            }
-        }
-
-        if (notNull) {
-            menuManager.registerMenu(this);
-            viewers.forEach(viewer -> viewer.openInventory(getInventory()));
-        } else {
-            throw new IllegalArgumentException(viewers.isEmpty() ?
-                    "Collection<? extends HumanEntity> of viewers argument can't be empty" :
-                    "All elements of Collection<? extends HumanEntity> of viewers argument are null");
-        }
-
-        return this;
-    }
-
-    /**
-     * Unregisters this {@link AbstractMenu} from it's previous {@link MenuManager}, sets this one and registers itself
-     * to the new, given {@link MenuManager}.
+     * Unregisters this {@link AbstractMenu} from its previous {@link MenuManager}, sets and registers itself to the
+     * new, given {@link MenuManager}.
      *
      * @param menuManager Not null {@link MenuManager} that this {@link AbstractMenu} will switch over to
      * @return Previous {@link MenuManager} of this {@link AbstractMenu}
@@ -249,35 +229,7 @@ public abstract class AbstractMenu {
      */
     @NotNull
     public AbstractMenu open(@NotNull HumanEntity... viewers) {
-        // TODO: The following code is kind of "yuck!" Too many checks.. Although, we need to have at least one viewer
-        //  for which it is reasonable to register this menu. Figure out something simpler and faster.
-        Preconditions.checkState(menuManager.isRegistered(),
-                "MenuManager has no enabled plugin registered to handle inventory menu events");
-        Preconditions.checkArgument(viewers != null,
-                "HumanEntity array of viewers argument can't be null");
-        Preconditions.checkArgument(viewers.length > 0,
-                "HumanEntity array of viewers argument can't be empty");
-
-        boolean notNull = false;
-
-        for (HumanEntity viewer : viewers) {
-            if (viewer != null) {
-                notNull = true;
-                break;
-            }
-        }
-
-        if (notNull) {
-            menuManager.registerMenu(this);
-
-            for (HumanEntity viewer : viewers) {
-                viewer.openInventory(getInventory());
-            }
-        } else {
-            throw new IllegalArgumentException("All elements of HumanEntity array of viewers argument are null");
-        }
-
-        return this;
+        return open(Arrays.asList(viewers));
     }
 
     /**
@@ -289,8 +241,12 @@ public abstract class AbstractMenu {
      * @return This instance, useful for chaining
      */
     @NotNull
-    public final AbstractMenu close() {
-        new ArrayList<>(getInventory().getViewers()).forEach(HumanEntity::closeInventory);
+    public AbstractMenu close() {
+        // Careful! An Iterator is required to prevent ConcurrentModificationException during indirect removal of
+        // viewers.
+        for (Iterator<HumanEntity> iterator = getInventory().getViewers().iterator(); iterator.hasNext(); ) {
+            iterator.next().closeInventory();
+        }
         return this;
     }
 
@@ -321,7 +277,7 @@ public abstract class AbstractMenu {
     /**
      * Returns the {@link Inventory} that's wrapped and controlled by this {@link AbstractMenu}.
      *
-     * @return Not null, always the same {@link Inventory}
+     * @return Always the same {@link Inventory}
      */
     @NotNull
     public final Inventory getInventory() {
@@ -332,7 +288,7 @@ public abstract class AbstractMenu {
      * Returns the {@link MenuManager} that is used by this {@link AbstractMenu} to (un)register itself, listen to
      * events and access other {@link AbstractMenu}s.
      *
-     * @return Not null {@link MenuManager}
+     * @return The {@link MenuManager} this inventory is or will be registered in
      */
     @NotNull
     public MenuManager getManager() {

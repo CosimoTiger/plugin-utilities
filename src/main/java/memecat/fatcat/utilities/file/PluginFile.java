@@ -20,7 +20,7 @@ public abstract class PluginFile extends File {
     /**
      * Plugin that this file belongs to.
      */
-    private Plugin plugin;
+    private final Plugin plugin;
 
     /**
      * Creates a new {@link PluginFile} from a given file name in it's given file path.

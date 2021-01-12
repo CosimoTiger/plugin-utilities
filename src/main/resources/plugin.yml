@@ -1,8 +1,7 @@
 name: PluginUtilities
 main: memecat.fatcat.utilities.UtilitiesPlugin
-version: 1.0.0
-api-version: 1.14
-# ^ Differences between 1.14 and 1.15 versions haven't been found and so backward compatibility is still alright.
+version: 1.1.0
+api-version: 1.16
 author: FatCatBuilds
-description: PluginUtilities is an utility library for Spigot developers.
+description: PluginUtilities is a code utility library for Spigot developers.
 website: https://github.com/memecatFatCat/plugin-utilities
