@@ -22,7 +22,7 @@ import java.util.function.Consumer;
  * A class that wraps around a given or created {@link ItemStack}, allowing easier and chained modifications of the
  * item.
  */
-public class ItemBuilder {
+public class ItemBuilder implements Cloneable {
 
     /**
      * Mutable {@link ItemStack}.
@@ -124,15 +124,15 @@ public class ItemBuilder {
      * Modifies the {@link ItemStack}'s subtype of {@link ItemMeta} with given operations, possibly specific for that
      * subclass.
      *
-     * @param metaClass    Class that belongs to the {@link ItemMeta} subtype
      * @param metaConsumer Consumer or anonymous function that'll take this instance's item's specific {@link ItemMeta}
      *                     as an argument
+     * @param metaClass    Class that belongs to the {@link ItemMeta} subtype
      * @param <T>          {@link ItemMeta} subclass type
      * @return This instance, useful for chaining
      * @throws IllegalArgumentException If the {@link Class}&lt;T&gt; or {@link Consumer}&lt;T&gt; argument is null
      */
     @NotNull
-    public <T extends ItemMeta> ItemBuilder changeMeta(@NotNull Class<T> metaClass, @NotNull Consumer<T> metaConsumer) {
+    public <T extends ItemMeta> ItemBuilder changeMeta(@NotNull Consumer<T> metaConsumer, @NotNull Class<T> metaClass) {
         Preconditions.checkArgument(metaClass != null, "Class<T extends ItemMeta> argument can't be null");
         Preconditions.checkArgument(metaConsumer != null, "Consumer<T extends ItemMeta> argument can't be null");
 
@@ -486,5 +486,10 @@ public class ItemBuilder {
     @NotNull
     public ItemStack get() {
         return itemStack;
+    }
+
+    @Override
+    public Object clone() {
+        return new ItemBuilder(itemStack.clone());
     }
 }
