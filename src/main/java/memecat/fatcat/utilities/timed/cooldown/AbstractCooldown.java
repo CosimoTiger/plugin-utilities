@@ -22,9 +22,9 @@ public abstract class AbstractCooldown implements ITimed {
     }
 
     /**
-     * Returns the {@link System#currentTimeMillis()} time at which this cooldown should expire.
+     * Returns the {@link #getCurrentTime()} time at which this cooldown should expire.
      *
-     * @return {@link System#currentTimeMillis()} time at which this cooldown should expire
+     * @return {@link #getCurrentTime()} time at which this cooldown should expire
      */
     public long getExpiration() {
         return end;

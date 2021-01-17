@@ -305,12 +305,13 @@ public class ItemBuilder implements Cloneable {
      * <p>
      * This method loops through the given list of indexes and removes a line at each given index. Removing an element
      * at an index will cause the {@link ArrayList} to shift in size and move it's elements towards the removed element
-     * each time. If you want to remove a line and next lines after it, you would have to repeat the same index then.
+     * each time. Repeat the same index to remove a line and lines after it.
      *
      * @param indexes Array of indexes at which each lore line should be removed
      * @return This instance, useful for chaining
      * @throws IllegalArgumentException If the integer array of indexes is null
      */
+    @NotNull
     public ItemBuilder removeLoreAt(@NotNull int... indexes) {
         Preconditions.checkArgument(indexes != null, "Array of lore line indexes argument can't be null");
 

@@ -3,7 +3,6 @@ package memecat.fatcat.utilities.menu.menus;
 import com.google.common.base.Preconditions;
 import memecat.fatcat.utilities.menu.MenuManager;
 import memecat.fatcat.utilities.menu.slot.ISlotProperty;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -22,12 +21,12 @@ import java.util.function.Consumer;
  * @author Alan B. | FatCat
  * @see ISlotProperty
  */
-public class PropertyMenu<E extends ISlotProperty> extends Menu {
+public class PropertyMenu<E> extends Menu {
 
     /**
      * Properties of each slot in this inventory are stored in an array, linear like inventories.
      */
-    private E[] properties = (E[]) new ISlotProperty[getInventory().getSize()];
+    private E[] properties = (E[]) new Object[getInventory().getSize()];
 
     /**
      * Creates a new {@link PropertyMenu} using the default constructor for {@link Menu}, with an array of this
@@ -39,36 +38,6 @@ public class PropertyMenu<E extends ISlotProperty> extends Menu {
      */
     public PropertyMenu(@NotNull Inventory inventory, @NotNull MenuManager menuManager) {
         super(inventory, menuManager);
-    }
-
-    /**
-     * {@inheritDoc} Runs an existing {@link ISlotProperty} and cancels the {@link InventoryClickEvent} if a
-     * property doesn't exist. Every existing {@link ISlotProperty} should decide whether to cancel the {@link
-     * org.bukkit.event.inventory.InventoryClickEvent} through
-     * {@link org.bukkit.event.Cancellable#setCancelled(boolean)}.
-     */
-    @Override
-    public void onClick(@NotNull InventoryClickEvent event, boolean external) {
-        switch (event.getAction()) {
-            case COLLECT_TO_CURSOR:
-            case MOVE_TO_OTHER_INVENTORY:
-                event.setCancelled(true);
-                break;
-        }
-
-        if (external) {
-            return;
-        }
-
-        // If only those stubborn servers migrated to Java 9 at least so we could simplify it to:
-        // getSlotProperty(event.getSlot()).ifPresentOrElse(property -> property.run(event, this), event.setCancelled(true));
-        Optional<E> property = getSlotProperty(event.getSlot());
-
-        if (property.isPresent()) {
-            property.get().run(event, this);
-        } else {
-            event.setCancelled(true);
-        }
     }
 
     /**
@@ -130,7 +99,7 @@ public class PropertyMenu<E extends ISlotProperty> extends Menu {
      * @throws IllegalArgumentException  If the {@link Consumer}&lt;{@link ISlotProperty}&gt; argument is null
      */
     public PropertyMenu<E> changeProperty(@NotNull Consumer<E> applyProperty, int slot) {
-        Preconditions.checkArgument(applyProperty != null, "Consumer<AbstractSlotProperty> argument can't be null");
+        Preconditions.checkArgument(applyProperty != null, "Consumer<ISlotProperty> argument can't be null");
         getSlotProperty(slot).ifPresent(applyProperty);
         return this;
     }
@@ -203,7 +172,7 @@ public class PropertyMenu<E extends ISlotProperty> extends Menu {
      * @return This instance, useful for chaining
      */
     public PropertyMenu<E> clearProperties() {
-        properties = (E[]) new ISlotProperty[getInventory().getSize()];
+        properties = (E[]) new Object[getInventory().getSize()];
         return this;
     }
 
@@ -220,10 +189,10 @@ public class PropertyMenu<E extends ISlotProperty> extends Menu {
     }
 
     /**
-     * Returns an {@link ISlotProperty} at the given slot of this inventory menu or null if it doesn't exist.
+     * Returns an property stored at the given slot of this inventory menu or null if it doesn't exist.
      *
-     * @param slot Slot index location of the {@link ISlotProperty} in the inventory
-     * @return {@link Optional} of nullable {@link ISlotProperty}
+     * @param slot Slot index location of the Object in the inventory
+     * @return {@link Optional} of nullable Object
      * @throws IndexOutOfBoundsException If the given slot argument is out of this inventory's boundaries
      */
     @NotNull

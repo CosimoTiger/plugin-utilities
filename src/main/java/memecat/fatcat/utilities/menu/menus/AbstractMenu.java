@@ -87,15 +87,10 @@ public abstract class AbstractMenu {
      * @see memecat.fatcat.utilities.menu.slot.SlotProperty
      */
     public void onClick(@NotNull InventoryClickEvent event, boolean external) {
-        switch (event.getAction()) {
-            case COLLECT_TO_CURSOR:
-            case MOVE_TO_OTHER_INVENTORY:
-                event.setCancelled(true);
-                break;
-            default:
-                if (!external) {
-                    event.setCancelled(true);
-                }
+        InventoryAction action = event.getAction();
+        if (action == InventoryAction.COLLECT_TO_CURSOR || action == InventoryAction.MOVE_TO_OTHER_INVENTORY
+                || !external) {
+            event.setCancelled(true);
         }
     }
 
@@ -138,8 +133,11 @@ public abstract class AbstractMenu {
     public void onDrag(@NotNull InventoryDragEvent event) {
         int size = event.getView().getTopInventory().getSize();
 
-        if (event.getRawSlots().stream().anyMatch(slot -> slot < size)) {
-            event.setCancelled(true);
+        for (int slot : event.getRawSlots()) {
+            if (slot < size) {
+                event.setCancelled(true);
+                break;
+            }
         }
     }
 

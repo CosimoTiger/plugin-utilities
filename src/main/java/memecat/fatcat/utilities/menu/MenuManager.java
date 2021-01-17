@@ -17,12 +17,8 @@ import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * A class that filters {@link org.bukkit.event.inventory.InventoryEvent}s to registered {@link Inventory} {@link
@@ -48,7 +44,8 @@ public class MenuManager implements Listener {
      * {@link Inventory} won't work in one {@link MenuManager} because of unique key mappings.</strong>
      * TODO: use a WeakHashMap?
      */
-    private final Map<Inventory, AbstractMenu> menus = new HashMap<>(8);
+    private final Map<Inventory, AbstractMenu> MENUS = new HashMap<>(8);
+    private final Set<Plugin> OTHER_PROVIDERS = new HashSet<>();
 
     /**
      * Currently registered plugin that has this listener registered under it's instance.
@@ -76,7 +73,7 @@ public class MenuManager implements Listener {
      */
     public Optional<AbstractMenu> unregisterMenu(@NotNull Inventory inventory) {
         Preconditions.checkArgument(inventory != null, "Inventory argument can't be null");
-        return Optional.ofNullable(menus.remove(inventory));
+        return Optional.ofNullable(MENUS.remove(inventory));
     }
 
     /**
@@ -88,7 +85,7 @@ public class MenuManager implements Listener {
      */
     public Optional<AbstractMenu> unregisterMenu(@NotNull AbstractMenu menu) {
         Preconditions.checkArgument(menu != null, "AbstractMenu argument can't be null");
-        return Optional.ofNullable(menus.remove(menu.getInventory()));
+        return Optional.ofNullable(MENUS.remove(menu.getInventory()));
     }
 
     /**
@@ -101,7 +98,7 @@ public class MenuManager implements Listener {
      */
     public Optional<AbstractMenu> registerMenu(@NotNull AbstractMenu menu) {
         Preconditions.checkArgument(menu != null, "AbstractMenu argument can't be null");
-        return Optional.ofNullable(menus.put(menu.getInventory(), menu));
+        return Optional.ofNullable(MENUS.put(menu.getInventory(), menu));
     }
 
     /**
@@ -109,17 +106,19 @@ public class MenuManager implements Listener {
      * disabled.
      *
      * @param newProvider Not null enabled {@link Plugin} for registering this {@link Listener} instance's event handlers
-     * @return Whether this {@link Listener} was successfully registered
+     *                    immediately or later
+     * @return This instance, useful for chaining
      * @throws IllegalArgumentException If the {@link Plugin} argument is null
      * @throws IllegalStateException    If the {@link Plugin} argument is not enabled
      */
-    public boolean provide(@Nullable Plugin newProvider) {
+    public MenuManager provide(@NotNull Plugin newProvider) {
         if (isRegistered()) {
-            return false;
+            OTHER_PROVIDERS.add(newProvider);
+        } else {
+            Bukkit.getPluginManager().registerEvents(this, provider = UtilitiesPlugin.checkProvider(newProvider));
         }
 
-        Bukkit.getPluginManager().registerEvents(this, provider = UtilitiesPlugin.checkProvider(newProvider));
-        return true;
+        return this;
     }
 
     /**
@@ -131,7 +130,10 @@ public class MenuManager implements Listener {
      * @return This instance, useful for chaining
      */
     public MenuManager closeMenus() {
-        new HashMap<>(menus).forEach((inventory, menu) -> menu.close());
+        for (Iterator<Map.Entry<Inventory, AbstractMenu>> iterator = MENUS.entrySet().iterator(); iterator.hasNext(); ) {
+            iterator.next().getValue().close();
+        }
+
         return this;
     }
 
@@ -145,7 +147,7 @@ public class MenuManager implements Listener {
     @NotNull
     public Optional<AbstractMenu> getMenu(@NotNull Inventory inventory) {
         Preconditions.checkArgument(inventory != null, "Inventory argument can't be null");
-        return Optional.ofNullable(menus.get(inventory));
+        return Optional.ofNullable(MENUS.get(inventory));
     }
 
     /**
@@ -168,7 +170,7 @@ public class MenuManager implements Listener {
      * @return Unmodifiable view of this {@link MenuManager}'s {@link HashMap}
      */
     public Map<Inventory, AbstractMenu> getMap() {
-        return Collections.unmodifiableMap(menus);
+        return Collections.unmodifiableMap(MENUS);
     }
 
     /**
@@ -182,12 +184,12 @@ public class MenuManager implements Listener {
     }
 
     /**
-     * Returns whether this listener has it's events registered under a plugin that's enabled.
+     * Returns whether this listener has it's events registered under a plugin.
      *
-     * @return Whether this listener has it's events registered under a plugin that's enabled
+     * @return Whether this listener has it's events registered under a plugin
      */
     public boolean isRegistered() {
-        return provider != null && provider.isEnabled();
+        return provider != null; // Assuming that the disabled provider is always removed...
     }
 
     /**
@@ -198,7 +200,7 @@ public class MenuManager implements Listener {
      */
     @EventHandler
     public void onInventoryClick(@NotNull InventoryClickEvent event) {
-        Optional.ofNullable(menus.get(event.getInventory())).ifPresent(menu -> menu.onClick(event,
+        Optional.ofNullable(MENUS.get(event.getInventory())).ifPresent(menu -> menu.onClick(event,
                 event.getClickedInventory() == null || !event.getClickedInventory().equals(menu.getInventory())));
     }
 
@@ -210,7 +212,7 @@ public class MenuManager implements Listener {
      */
     @EventHandler(priority = EventPriority.MONITOR)
     public void onInventoryClose(@NotNull InventoryCloseEvent event) {
-        Optional.ofNullable(menus.get(event.getInventory())).ifPresent(menu -> menu.onClose(event));
+        Optional.ofNullable(MENUS.get(event.getInventory())).ifPresent(menu -> menu.onClose(event));
     }
 
     /**
@@ -221,7 +223,7 @@ public class MenuManager implements Listener {
      */
     @EventHandler
     public void onInventoryOpen(@NotNull InventoryOpenEvent event) {
-        Optional.ofNullable(menus.get(event.getInventory())).ifPresent(menu -> menu.onOpen(event));
+        Optional.ofNullable(MENUS.get(event.getInventory())).ifPresent(menu -> menu.onOpen(event));
     }
 
     /**
@@ -232,7 +234,7 @@ public class MenuManager implements Listener {
      */
     @EventHandler
     public void onInventoryDrag(@NotNull InventoryDragEvent event) {
-        Optional.ofNullable(menus.get(event.getInventory())).ifPresent(menu -> menu.onDrag(event));
+        Optional.ofNullable(MENUS.get(event.getInventory())).ifPresent(menu -> menu.onDrag(event));
     }
 
     /**
@@ -243,14 +245,14 @@ public class MenuManager implements Listener {
      */
     @EventHandler
     public void onItemMove(@NotNull InventoryMoveItemEvent event) {
-        // Optional.ofNullable(menus.get(event.getDestination())).ifPresentOrElse(menu -> menu.onItemMove(event, true),
-        // () -> Optional.ofNullable(menus.get(event.getSource())).ifPresent(menu -> menu.onItemMove(event, false)));
-        Optional<AbstractMenu> menu = Optional.ofNullable(menus.get(event.getDestination()));
+        // Optional.ofNullable(MENUS.get(event.getDestination())).ifPresentOrElse(menu -> menu.onItemMove(event, true),
+        // () -> Optional.ofNullable(MENUS.get(event.getSource())).ifPresent(menu -> menu.onItemMove(event, false)));
+        Optional<AbstractMenu> menu = Optional.ofNullable(MENUS.get(event.getDestination()));
 
         if (menu.isPresent()) {
             menu.get().onItemMove(event, true);
         } else {
-            Optional.ofNullable(menus.get(event.getSource())).ifPresent(m -> m.onItemMove(event, false));
+            Optional.ofNullable(MENUS.get(event.getSource())).ifPresent(m -> m.onItemMove(event, false));
         }
     }
 
@@ -263,17 +265,35 @@ public class MenuManager implements Listener {
      */
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPluginDisable(@NotNull PluginDisableEvent event) {
-        if (event.getPlugin().equals(provider)) {
-            new HashMap<>(menus).forEach((inventory, menu) -> {
-                try {
-                    menu.onDisable(event);
-                } catch (Exception e) {
-                    Bukkit.getLogger().warning("An error occurred while handling a menu plugin disable event");
-                    e.printStackTrace();
-                } finally {
-                    provider = null;
-                }
-            });
+        // This method just keeps growing >:(((
+        if (!event.getPlugin().equals(provider)) {
+            OTHER_PROVIDERS.remove(event.getPlugin());
+            return;
+        }
+
+        for (Iterator<Map.Entry<Inventory, AbstractMenu>> iterator = MENUS.entrySet().iterator(); iterator.hasNext();) {
+            try {
+                iterator.next().getValue().onDisable(event);
+            } catch (Exception e) {
+                Bukkit.getLogger().warning("An error occurred while handling a menu plugin disable event");
+                e.printStackTrace();
+            }
+        }
+
+        provider = null;
+        if (OTHER_PROVIDERS.isEmpty()) {
+            return;
+        }
+
+        // Looks kinda ugly and sad
+        for (Iterator<Plugin> iterator = OTHER_PROVIDERS.iterator(); iterator.hasNext();) {
+            Plugin next = iterator.next();
+            iterator.remove();
+
+            if (next.isEnabled()) {
+                provider = next;
+                break;
+            }
         }
     }
 }

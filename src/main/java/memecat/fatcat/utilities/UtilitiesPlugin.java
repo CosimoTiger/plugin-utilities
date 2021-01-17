@@ -5,7 +5,6 @@ import memecat.fatcat.utilities.menu.MenuManager;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -25,14 +24,13 @@ public class UtilitiesPlugin extends JavaPlugin {
     @Override
     public void onDisable() {
         instance = null;
-        menuManager = null;
     }
 
     /**
      * Checks whether a given {@link Plugin} argument is not null and enabled or else an exception is thrown.
      *
      * @param provider {@link Plugin} argument that's being checked for
-     * @return The given {@link Plugin} provider argument
+     * @return The given {@link Plugin} argument
      * @throws IllegalArgumentException If the {@link Plugin} argument is null
      * @throws IllegalStateException    If the {@link Plugin} argument is not enabled
      */
@@ -51,7 +49,7 @@ public class UtilitiesPlugin extends JavaPlugin {
      * <p>It is required to provide the {@link Plugin} only upon plugin start to ensure the {@link MenuManager} has a
      * plugin to begin with.
      *
-     * @param backup Backup {@link Plugin} that will be used for the creation or providing for this {@link UtilitiesPlugin}'s
+     * @param provider Backup {@link Plugin} that will be used for the creation or providing for this {@link UtilitiesPlugin}'s
      *                {@link MenuManager} if the manager's without an enabled plugin
      * @return Not null registered {@link MenuManager}
      * @throws IllegalArgumentException If the {@link Plugin} argument is null when required
@@ -60,20 +58,17 @@ public class UtilitiesPlugin extends JavaPlugin {
      * @see MenuManager#provide(Plugin)
      */
     @NotNull
-    public static MenuManager getMenuManager(@Nullable Plugin backup) {
-        backup = instance == null ? backup : instance;
-
-        if (menuManager == null) {
-            return menuManager = new MenuManager(backup);
+    public static MenuManager getMenuManager(@NotNull Plugin provider) {
+        if (instance == null) {
+            return menuManager == null ? menuManager = new MenuManager(provider) : menuManager.provide(provider);
         }
 
-        menuManager.provide(backup);
-
-        return menuManager;
+        return menuManager == null ? menuManager = new MenuManager(instance).provide(provider) : menuManager.provide(provider);
     }
 
     /**
-     * Returns {@link Optional<MenuManager>} of the common {@link MenuManager} that might be null or not.
+     * Returns {@link Optional<MenuManager>} of the common {@link MenuManager} that might be null or not, depending on
+     * the state.
      *
      * @return {@link Optional<MenuManager>} of nullable {@link MenuManager}
      */
