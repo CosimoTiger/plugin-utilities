@@ -18,7 +18,7 @@ public class Resolver {
 
     public Optional<Field> resolveField(@NotNull String name) {
         try {
-            Field field = clazz.getDeclaredField(name);
+            Field field = this.clazz.getDeclaredField(name);
             field.setAccessible(true);
 
             return Optional.of(field);
@@ -30,6 +30,6 @@ public class Resolver {
     }
 
     public Class<?> getClazz() {
-        return clazz;
+        return this.clazz;
     }
 }

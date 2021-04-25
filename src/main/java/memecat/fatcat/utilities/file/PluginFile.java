@@ -85,13 +85,13 @@ public abstract class PluginFile extends File {
      * @return Whether this file already existed
      */
     public boolean createFile() {
-        if (!exists()) {
-            Optional.ofNullable(getParentFile()).ifPresent(File::mkdirs);
+        if (!this.exists()) {
+            Optional.ofNullable(this.getParentFile()).ifPresent(File::mkdirs);
 
-            try (InputStream inputStream = plugin.getResource(getName())) {
-                Objects.requireNonNull(inputStream, "Unable to find plugin " + getPlugin().getDescription().getFullName()
-                        + "'s file /resources/" + getName() + "!");
-                Files.copy(inputStream, toPath());
+            try (InputStream inputStream = this.plugin.getResource(this.getName())) {
+                Objects.requireNonNull(inputStream, "Unable to find plugin " + this.getPlugin().getDescription().getFullName()
+                        + "'s file /resources/" + this.getName() + "!");
+                Files.copy(inputStream, this.toPath());
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -119,6 +119,6 @@ public abstract class PluginFile extends File {
      */
     @NotNull
     public Plugin getPlugin() {
-        return plugin;
+        return this.plugin;
     }
 }

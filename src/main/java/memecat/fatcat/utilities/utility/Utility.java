@@ -43,7 +43,7 @@ public class Utility {
 
     @Nullable
     public static String possessive(@Nullable String input, @NotNull String sCase, @NotNull String noneCase) {
-        return input == null ? input : input.concat(input.endsWith("s") ? noneCase : sCase);
+        return input == null ? null : input.concat(input.endsWith("s") ? noneCase : sCase);
     }
 
     @Nullable

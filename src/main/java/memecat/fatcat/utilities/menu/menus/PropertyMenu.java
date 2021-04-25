@@ -26,7 +26,7 @@ public class PropertyMenu<E> extends Menu {
     /**
      * Properties of each slot in this inventory are stored in an array, linear like inventories.
      */
-    private E[] properties = (E[]) new Object[getInventory().getSize()];
+    private E[] properties = (E[]) new Object[this.getInventory().getSize()];
 
     /**
      * Creates a new {@link PropertyMenu} using the default constructor for {@link Menu}, with an array of this
@@ -56,11 +56,11 @@ public class PropertyMenu<E> extends Menu {
      *                                   argument is lower than 1
      */
     public PropertyMenu<E> fillSkip(@Nullable E property, int fromSlot, int toSlot, int skipForSlots) {
-        checkRange(fromSlot, toSlot, getInventory().getSize());
+        checkRange(fromSlot, toSlot, this.getInventory().getSize());
         Preconditions.checkArgument(skipForSlots > 0, "skipForSlots argument (" + skipForSlots + ") can't be smaller than 1");
 
         for (int slot = fromSlot; slot < toSlot; slot += skipForSlots) {
-            properties[slot] = property;
+            this.properties[slot] = property;
         }
 
         return this;
@@ -80,9 +80,9 @@ public class PropertyMenu<E> extends Menu {
         Preconditions.checkArgument(slots != null, "Array of slots can't be null");
 
         for (int slot : slots) {
-            checkElement(slot, getInventory().getSize());
-            properties[slot] = property;
-            getInventory().setItem(slot, item);
+            checkElement(slot, this.getInventory().getSize());
+            this.properties[slot] = property;
+            this.getInventory().setItem(slot, item);
         }
 
         return this;
@@ -100,7 +100,7 @@ public class PropertyMenu<E> extends Menu {
      */
     public PropertyMenu<E> changeProperty(@NotNull Consumer<E> applyProperty, int slot) {
         Preconditions.checkArgument(applyProperty != null, "Consumer<ISlotProperty> argument can't be null");
-        getSlotProperty(slot).ifPresent(applyProperty);
+        this.getSlotProperty(slot).ifPresent(applyProperty);
         return this;
     }
 
@@ -119,7 +119,7 @@ public class PropertyMenu<E> extends Menu {
      * @throws IllegalArgumentException  If the fromSlot is greater than the to-slot argument
      */
     public PropertyMenu<E> fillInterval(@Nullable E property, int fromSlot, int toSlot) {
-        return fillSkip(property, fromSlot, toSlot, 1);
+        return this.fillSkip(property, fromSlot, toSlot, 1);
     }
 
     /**
@@ -131,13 +131,13 @@ public class PropertyMenu<E> extends Menu {
      */
     public PropertyMenu<E> fill(@Nullable E property, boolean replace) {
         if (replace) {
-            for (int slot = 0; slot < getInventory().getSize(); slot++) {
-                properties[slot] = property;
+            for (int slot = 0; slot < this.getInventory().getSize(); slot++) {
+                this.properties[slot] = property;
             }
         } else {
-            for (int slot = 0; slot < getInventory().getSize(); slot++) {
-                if (!getItem(slot).isPresent()) { // Java 11: .isEmpty()
-                    properties[slot] = property;
+            for (int slot = 0; slot < this.getInventory().getSize(); slot++) {
+                if (!this.getItem(slot).isPresent()) { // Java 11: .isEmpty()
+                    this.properties[slot] = property;
                 }
             }
         }
@@ -156,11 +156,11 @@ public class PropertyMenu<E> extends Menu {
      */
     public PropertyMenu<E> set(@Nullable E property, @NotNull int... slots) {
         Preconditions.checkArgument(slots != null, "Array of slots can't be null");
-        int size = getInventory().getSize();
+        int size = this.getInventory().getSize();
 
         for (int slot : slots) {
             checkElement(slot, size);
-            properties[slot] = property;
+            this.properties[slot] = property;
         }
 
         return this;
@@ -172,7 +172,7 @@ public class PropertyMenu<E> extends Menu {
      * @return This instance, useful for chaining
      */
     public PropertyMenu<E> clearProperties() {
-        properties = (E[]) new Object[getInventory().getSize()];
+        this.properties = (E[]) new Object[this.getInventory().getSize()];
         return this;
     }
 
@@ -184,8 +184,8 @@ public class PropertyMenu<E> extends Menu {
     @NotNull
     @Override
     public PropertyMenu<E> clear() {
-        clearContents();
-        return clearProperties();
+        this.clearContents();
+        return this.clearProperties();
     }
 
     /**
@@ -197,7 +197,7 @@ public class PropertyMenu<E> extends Menu {
      */
     @NotNull
     public Optional<E> getSlotProperty(int slot) {
-        checkElement(slot, getInventory().getSize());
-        return Optional.ofNullable(properties[slot]);
+        checkElement(slot, this.getInventory().getSize());
+        return Optional.ofNullable(this.properties[slot]);
     }
 }

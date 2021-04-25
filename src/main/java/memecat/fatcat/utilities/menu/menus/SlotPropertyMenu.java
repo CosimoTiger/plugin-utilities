@@ -37,7 +37,7 @@ public class SlotPropertyMenu<E extends ISlotProperty> extends PropertyMenu<ISlo
 
         // If only those stubborn servers migrated to Java 9 at least so we could simplify it to:
         // getSlotProperty(event.getSlot()).ifPresentOrElse(property -> property.run(event, this), event.setCancelled(true));
-        Optional<ISlotProperty> property = getSlotProperty(event.getSlot());
+        Optional<ISlotProperty> property = this.getSlotProperty(event.getSlot());
 
         if (property.isPresent()) {
             property.get().run(event, this);
@@ -50,7 +50,7 @@ public class SlotPropertyMenu<E extends ISlotProperty> extends PropertyMenu<ISlo
         Preconditions.checkArgument(applyProperty != null, "Consumer<ISlotProperty> argument can't be null");
         Preconditions.checkArgument(type != null, "Class<ISlotProperty> argument can't be null");
 
-        getSlotProperty(slot).ifPresent(property -> {
+        this.getSlotProperty(slot).ifPresent(property -> {
             if (property.getClass().equals(type)) {
                 applyProperty.accept(property);
             }

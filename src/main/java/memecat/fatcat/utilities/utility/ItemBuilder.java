@@ -74,7 +74,7 @@ public class ItemBuilder implements Cloneable {
      */
     public ItemBuilder(@NotNull ItemStack itemStack, @Nullable String title) {
         this(itemStack);
-        title(title);
+        this.title(title);
     }
 
     /**
@@ -136,10 +136,10 @@ public class ItemBuilder implements Cloneable {
         Preconditions.checkArgument(metaClass != null, "Class<T extends ItemMeta> argument can't be null");
         Preconditions.checkArgument(metaConsumer != null, "Consumer<T extends ItemMeta> argument can't be null");
 
-        getItemMeta().ifPresent(meta -> {
+        this.getItemMeta().ifPresent(meta -> {
             if (metaClass.isInstance(meta)) {
                 metaConsumer.accept(metaClass.cast(meta));
-                itemStack.setItemMeta(meta);
+                this.itemStack.setItemMeta(meta);
             }
         });
 
@@ -156,7 +156,7 @@ public class ItemBuilder implements Cloneable {
     @NotNull
     public ItemBuilder removeEnchantments(@NotNull Collection<Enchantment> enchantments) {
         Preconditions.checkArgument(enchantments != null, "Enchantments list argument can't be null");
-        enchantments.forEach(itemStack::removeEnchantment);
+        enchantments.forEach(this.itemStack::removeEnchantment);
         return this;
     }
 
@@ -172,7 +172,7 @@ public class ItemBuilder implements Cloneable {
         Preconditions.checkArgument(enchantments != null, "Enchantments array argument can't be null");
 
         for (Enchantment enchantment : enchantments) {
-            itemStack.removeEnchantment(enchantment);
+            this.itemStack.removeEnchantment(enchantment);
         }
 
         return this;
@@ -190,10 +190,10 @@ public class ItemBuilder implements Cloneable {
     public ItemBuilder addLoreAt(int index, @NotNull Collection<String> lines) {
         Preconditions.checkArgument(lines != null, "Collection<String> of lore lines argument can't be null");
 
-        List<String> lore = getLore();
+        List<String> lore = this.getLore();
         lore.addAll(index, lines);
 
-        return lore(lore);
+        return this.lore(lore);
     }
 
     /**
@@ -212,14 +212,14 @@ public class ItemBuilder implements Cloneable {
     public ItemBuilder loreAt(@Nullable String line, @NotNull int... indexes) {
         Preconditions.checkArgument(indexes != null, "Array of lore line indexes argument can't be null");
 
-        List<String> lore = getItemMeta().map(ItemMeta::getLore).orElse(null);
+        List<String> lore = this.getItemMeta().map(ItemMeta::getLore).orElse(null);
         lore = lore == null || lore.isEmpty() ? new ArrayList<>(Utility.max(indexes) + 1) : lore;
 
         for (int index : indexes) {
             lore.set(index, line);
         }
 
-        return lore(lore);
+        return this.lore(lore);
     }
 
     /**
@@ -232,7 +232,7 @@ public class ItemBuilder implements Cloneable {
     @NotNull
     public ItemBuilder changeItem(@NotNull Consumer<ItemStack> itemConsumer) {
         Preconditions.checkArgument(itemConsumer != null, "Consumer<ItemStack> argument can't be null");
-        itemConsumer.accept(itemStack);
+        itemConsumer.accept(this.itemStack);
         return this;
     }
 
@@ -248,9 +248,9 @@ public class ItemBuilder implements Cloneable {
     public ItemBuilder changeMeta(@NotNull Consumer<ItemMeta> metaConsumer) {
         Preconditions.checkArgument(metaConsumer != null, "Consumer<T extends ItemMeta> argument can't be null");
 
-        getItemMeta().ifPresent(meta -> {
+        this.getItemMeta().ifPresent(meta -> {
             metaConsumer.accept(meta);
-            itemStack.setItemMeta(meta);
+            this.itemStack.setItemMeta(meta);
         });
 
         return this;
@@ -267,7 +267,7 @@ public class ItemBuilder implements Cloneable {
     @NotNull
     public ItemBuilder addLoreAt(int index, @NotNull String... lines) {
         Preconditions.checkArgument(lines != null, "String array of lore lines argument can't be null");
-        return addLoreAt(index, Arrays.asList(lines));
+        return this.addLoreAt(index, Arrays.asList(lines));
     }
 
     /**
@@ -281,10 +281,10 @@ public class ItemBuilder implements Cloneable {
     public ItemBuilder addLore(@NotNull Collection<String> lines) {
         Preconditions.checkArgument(lines != null, "Collection<String> of lore lines argument can't be null");
 
-        List<String> lore = getLore();
+        List<String> lore = this.getLore();
         lore.addAll(lines);
 
-        return lore(lore);
+        return this.lore(lore);
     }
 
     /**
@@ -297,7 +297,7 @@ public class ItemBuilder implements Cloneable {
     @NotNull
     public ItemBuilder removeFlags(@NotNull ItemFlag... flags) {
         Preconditions.checkArgument(flags != null, "ItemFlag array of enums argument can't be null");
-        return changeMeta(meta -> meta.removeItemFlags(flags));
+        return this.changeMeta(meta -> meta.removeItemFlags(flags));
     }
 
     /**
@@ -315,13 +315,13 @@ public class ItemBuilder implements Cloneable {
     public ItemBuilder removeLoreAt(@NotNull int... indexes) {
         Preconditions.checkArgument(indexes != null, "Array of lore line indexes argument can't be null");
 
-        List<String> lore = getLore();
+        List<String> lore = this.getLore();
 
         for (int index : indexes) {
             lore.remove(index);
         }
 
-        return lore(lore);
+        return this.lore(lore);
     }
 
     /**
@@ -334,7 +334,7 @@ public class ItemBuilder implements Cloneable {
     @NotNull
     public ItemBuilder material(@NotNull Material material) {
         Preconditions.checkArgument(material != null, "Material argument can't be null");
-        return changeItem(item -> item.setType(material));
+        return this.changeItem(item -> item.setType(material));
     }
 
     /**
@@ -345,7 +345,7 @@ public class ItemBuilder implements Cloneable {
      */
     @NotNull
     public ItemBuilder localizedName(@Nullable String name) {
-        return changeMeta(meta -> meta.setLocalizedName(name));
+        return this.changeMeta(meta -> meta.setLocalizedName(name));
     }
 
     /**
@@ -358,7 +358,7 @@ public class ItemBuilder implements Cloneable {
     @NotNull
     public ItemBuilder addFlags(@NotNull ItemFlag... flags) {
         Preconditions.checkArgument(flags != null, "ItemFlag array of enums argument can't be null");
-        return changeMeta(meta -> meta.addItemFlags(flags));
+        return this.changeMeta(meta -> meta.addItemFlags(flags));
     }
 
     /**
@@ -369,7 +369,7 @@ public class ItemBuilder implements Cloneable {
      */
     @NotNull
     public ItemBuilder lore(@Nullable List<String> lines) {
-        return changeMeta(meta -> meta.setLore(lines));
+        return this.changeMeta(meta -> meta.setLore(lines));
     }
 
     /**
@@ -382,7 +382,7 @@ public class ItemBuilder implements Cloneable {
     @NotNull
     public ItemBuilder addLore(@NotNull String... lines) {
         Preconditions.checkArgument(lines != null, "String array of lore lines argument can't be null");
-        return addLore(Arrays.asList(lines));
+        return this.addLore(Arrays.asList(lines));
     }
 
     /**
@@ -393,7 +393,7 @@ public class ItemBuilder implements Cloneable {
      */
     @NotNull
     public ItemBuilder itemMeta(@Nullable ItemMeta meta) {
-        return changeItem(item -> item.setItemMeta(meta));
+        return this.changeItem(item -> item.setItemMeta(meta));
     }
 
     /**
@@ -404,7 +404,7 @@ public class ItemBuilder implements Cloneable {
      */
     @NotNull
     public ItemBuilder lore(@Nullable String... lines) {
-        return lore(lines == null ? null : Arrays.asList(lines));
+        return this.lore(lines == null ? null : Arrays.asList(lines));
     }
 
     /**
@@ -415,7 +415,7 @@ public class ItemBuilder implements Cloneable {
      */
     @NotNull
     public ItemBuilder title(@Nullable String title) {
-        return changeMeta(meta -> meta.setDisplayName(title));
+        return this.changeMeta(meta -> meta.setDisplayName(title));
     }
 
     /**
@@ -426,7 +426,7 @@ public class ItemBuilder implements Cloneable {
      */
     @NotNull
     public ItemBuilder breakable(boolean breakable) {
-        return changeMeta(meta -> meta.setUnbreakable(!breakable));
+        return this.changeMeta(meta -> meta.setUnbreakable(!breakable));
     }
 
     /**
@@ -437,7 +437,7 @@ public class ItemBuilder implements Cloneable {
      */
     @NotNull
     public ItemBuilder amount(int amount) {
-        return changeItem(item -> item.setAmount(amount));
+        return this.changeItem(item -> item.setAmount(amount));
     }
 
     /**
@@ -447,7 +447,7 @@ public class ItemBuilder implements Cloneable {
      */
     @NotNull
     public ItemBuilder clearLore() {
-        return lore((ArrayList<String>) null);
+        return this.lore((ArrayList<String>) null);
     }
 
     /**
@@ -457,7 +457,7 @@ public class ItemBuilder implements Cloneable {
      */
     @NotNull
     public Optional<ItemMeta> getItemMeta() {
-        return Optional.ofNullable(itemStack.getItemMeta());
+        return Optional.ofNullable(this.itemStack.getItemMeta());
     }
 
     /**
@@ -467,7 +467,7 @@ public class ItemBuilder implements Cloneable {
      */
     @NotNull
     public List<String> getLore() {
-        return getItemMeta().map(ItemMeta::getLore).orElse(new ArrayList<>());
+        return this.getItemMeta().map(ItemMeta::getLore).orElse(new ArrayList<>());
     }
 
     /**
@@ -476,7 +476,7 @@ public class ItemBuilder implements Cloneable {
      * @return Whether the {@link ItemStack} can lose it's durability through use
      */
     public boolean isBreakable() {
-        return getItemMeta().map(meta -> !meta.isUnbreakable()).orElse(true);
+        return this.getItemMeta().map(meta -> !meta.isUnbreakable()).orElse(true);
     }
 
     /**
@@ -486,11 +486,11 @@ public class ItemBuilder implements Cloneable {
      */
     @NotNull
     public ItemStack get() {
-        return itemStack;
+        return this.itemStack;
     }
 
     @Override
     public Object clone() {
-        return new ItemBuilder(itemStack.clone());
+        return new ItemBuilder(this.itemStack.clone());
     }
 }

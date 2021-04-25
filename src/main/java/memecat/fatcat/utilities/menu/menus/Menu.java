@@ -36,8 +36,8 @@ public class Menu extends AbstractMenu {
 
     @Override
     public void onClose(@NotNull InventoryCloseEvent event) {
-        if (getInventory().getViewers().size() < 2) {
-            setBukkitTask(null);
+        if (this.getInventory().getViewers().size() < 2) {
+            this.setBukkitTask(null);
         }
     }
 
@@ -58,11 +58,11 @@ public class Menu extends AbstractMenu {
      */
     @NotNull
     public Menu fillSkip(@Nullable ItemStack item, int fromSlot, int toSlot, int skipForSlots) {
-        checkRange(fromSlot, toSlot, getInventory().getSize());
+        checkRange(fromSlot, toSlot, this.getInventory().getSize());
         Preconditions.checkArgument(skipForSlots > 0, "skipForSlots argument (" + skipForSlots + ") can't be smaller than 1");
 
         for (int slot = fromSlot; slot < toSlot; slot += skipForSlots) {
-            getInventory().setItem(slot, item);
+            this.getInventory().setItem(slot, item);
         }
 
         return this;
@@ -84,7 +84,7 @@ public class Menu extends AbstractMenu {
      */
     @NotNull
     public Menu fillInterval(@Nullable ItemStack item, int fromSlot, int toSlot) {
-        return fillSkip(item, fromSlot, toSlot, 1);
+        return this.fillSkip(item, fromSlot, toSlot, 1);
     }
 
     /**
@@ -99,7 +99,7 @@ public class Menu extends AbstractMenu {
     @NotNull
     public Menu changeItem(@NotNull Consumer<ItemStack> applyItem, int slot) {
         Preconditions.checkArgument(applyItem != null, "Consumer<ItemStack> argument can't be null");
-        getItem(slot).ifPresent(applyItem);
+        this.getItem(slot).ifPresent(applyItem);
         return this;
     }
 
@@ -113,13 +113,13 @@ public class Menu extends AbstractMenu {
     @NotNull
     public Menu fill(@Nullable ItemStack item, boolean replace) {
         if (replace) {
-            for (int slot = 0; slot < getInventory().getSize(); slot++) {
-                getInventory().setItem(slot, item);
+            for (int slot = 0; slot < this.getInventory().getSize(); slot++) {
+                this.getInventory().setItem(slot, item);
             }
         } else {
-            for (int slot = 0; slot < getInventory().getSize(); slot++) {
-                if (getInventory().getItem(slot) == null) {
-                    getInventory().setItem(slot, item);
+            for (int slot = 0; slot < this.getInventory().getSize(); slot++) {
+                if (this.getInventory().getItem(slot) == null) {
+                    this.getInventory().setItem(slot, item);
                 }
             }
         }
@@ -142,11 +142,11 @@ public class Menu extends AbstractMenu {
      */
     @NotNull
     public Menu setBukkitTask(@Nullable BukkitTask task) {
-        if (taskId > -1) {
-            Bukkit.getScheduler().cancelTask(taskId);
+        if (this.taskId > -1) {
+            Bukkit.getScheduler().cancelTask(this.taskId);
         }
 
-        taskId = task == null ? -1 : task.getTaskId();
+        this.taskId = task == null ? -1 : task.getTaskId();
 
         return this;
     }
@@ -184,7 +184,7 @@ public class Menu extends AbstractMenu {
      */
     @NotNull
     public Menu clearContents() {
-        getInventory().setStorageContents(new ItemStack[0]);
+        this.getInventory().setStorageContents(new ItemStack[0]);
         return this;
     }
 
@@ -196,7 +196,7 @@ public class Menu extends AbstractMenu {
     @NotNull
     @Override
     public Menu clear() {
-        return clearContents();
+        return this.clearContents();
     }
 
     /**
@@ -206,6 +206,6 @@ public class Menu extends AbstractMenu {
      * @return {@link BukkitTask} identifier number
      */
     public int getBukkitTask() {
-        return taskId;
+        return this.taskId;
     }
 }

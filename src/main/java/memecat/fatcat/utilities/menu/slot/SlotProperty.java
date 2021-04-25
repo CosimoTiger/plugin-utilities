@@ -22,7 +22,7 @@ public class SlotProperty implements ISlotProperty {
      * @param event Actions that should be executed with the given InventoryClickEvent argument
      */
     public SlotProperty(@Nullable BiConsumer<InventoryClickEvent, AbstractMenu> event) {
-        eventConsumer = event;
+        this.eventConsumer = event;
     }
 
     /**
@@ -33,7 +33,7 @@ public class SlotProperty implements ISlotProperty {
      */
     @NotNull
     public SlotProperty setAction(@Nullable BiConsumer<InventoryClickEvent, AbstractMenu> event) {
-        eventConsumer = event;
+        this.eventConsumer = event;
         return this;
     }
 
@@ -45,7 +45,7 @@ public class SlotProperty implements ISlotProperty {
      */
     @Nullable
     public BiConsumer<InventoryClickEvent, AbstractMenu> getAction() {
-        return eventConsumer;
+        return this.eventConsumer;
     }
 
     /**
@@ -57,11 +57,11 @@ public class SlotProperty implements ISlotProperty {
      * @throws IllegalArgumentException If {@link InventoryClickEvent} or {@link AbstractMenu} argument is null
      */
     public void run(@NotNull InventoryClickEvent event, @NotNull AbstractMenu menu) {
-        if (getAction() != null) {
+        if (this.getAction() != null) {
             Preconditions.checkArgument(event != null, "InventoryClickEvent argument can't be null");
             Preconditions.checkArgument(menu != null, "AbstractMenu argument can't be null");
 
-            getAction().accept(event, menu);
+            this.getAction().accept(event, menu);
         }
     }
 }

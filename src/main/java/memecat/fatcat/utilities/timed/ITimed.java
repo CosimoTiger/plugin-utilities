@@ -1,5 +1,9 @@
 package memecat.fatcat.utilities.timed;
 
+import org.jetbrains.annotations.NotNull;
+
+import java.util.concurrent.TimeUnit;
+
 /**
  * Interface for classes that use current time of a specific system (e.g. {@link System#currentTimeMillis()} returns the
  * System's counted time since start-up, while some games have their own counting since they started.)
@@ -14,5 +18,31 @@ public interface ITimed {
      */
     default long getCurrentTime() {
         return System.currentTimeMillis();
+    }
+
+    /**
+     * Converts the given time from the given {@link TimeUnit} into a duration in the unit equivalent to
+     * {@link #getCurrentTime()}'s unit.
+     *
+     * @param unit {@link TimeUnit} of the given duration argument
+     * @param duration Time duration to be converted
+     * @return Time duration in an unit equivalent to {@link #getCurrentTime()}'s
+     * @see memecat.fatcat.utilities.timed.type.MinecraftTimed implementation which uses ticks as a different unit
+     */
+    default long toEquivalentTime(long duration, @NotNull TimeUnit unit) {
+        return unit.toMillis(duration);
+    }
+
+    /**
+     * Converts the given time in the unit equivalent to {@link #getCurrentTime()}'s unit to the duration in the given
+     * {@link TimeUnit}.
+     *
+     * @param unit {@link TimeUnit} of the given duration argument
+     * @param duration Time duration to be converted
+     * @return Time duration in an unit equivalent to {@link #getCurrentTime()}'s
+     * @see memecat.fatcat.utilities.timed.type.MinecraftTimed implementation which uses ticks as a different unit
+     */
+    default long fromEquivalentTime(long duration, @NotNull TimeUnit unit) {
+        return TimeUnit.MILLISECONDS.convert(duration, unit);
     }
 }

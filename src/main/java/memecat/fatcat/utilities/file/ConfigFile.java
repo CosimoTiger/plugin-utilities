@@ -81,12 +81,12 @@ public class ConfigFile extends PluginFile {
      */
     @Override
     public void reloadFile() {
-        createFile();
+        this.createFile();
 
-        fileConfig = YamlConfiguration.loadConfiguration(this);
+        this.fileConfig = YamlConfiguration.loadConfiguration(this);
 
         try (InputStream inputStream = new FileInputStream(this)) {
-            fileConfig.setDefaults(YamlConfiguration.loadConfiguration(new InputStreamReader(inputStream)));
+            this.fileConfig.setDefaults(YamlConfiguration.loadConfiguration(new InputStreamReader(inputStream)));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -94,12 +94,12 @@ public class ConfigFile extends PluginFile {
 
     @Override
     public void saveFile() {
-        if (fileConfig == null) {
-            reloadFile();
+        if (this.fileConfig == null) {
+            this.reloadFile();
         }
 
         try {
-            fileConfig.save(this);
+            this.fileConfig.save(this);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -112,6 +112,6 @@ public class ConfigFile extends PluginFile {
      */
     @NotNull
     public FileConfiguration getConfig() {
-        return fileConfig;
+        return this.fileConfig;
     }
 }

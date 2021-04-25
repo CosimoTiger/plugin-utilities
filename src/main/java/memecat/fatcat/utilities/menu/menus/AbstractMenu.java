@@ -105,7 +105,7 @@ public abstract class AbstractMenu {
      * @param event {@link PluginDisableEvent} event
      */
     public void onDisable(@NotNull PluginDisableEvent event) {
-        close();
+        this.close();
     }
 
     /**
@@ -118,8 +118,8 @@ public abstract class AbstractMenu {
      * @param event {@link InventoryCloseEvent} event
      */
     public void onClose(@NotNull InventoryCloseEvent event) {
-        if (getInventory().getViewers().size() < 2) {
-            getManager().unregisterMenu(this);
+        if (this.getInventory().getViewers().size() < 2) {
+            this.getManager().unregisterMenu(this);
         }
     }
 
@@ -162,14 +162,14 @@ public abstract class AbstractMenu {
      */
     @NotNull
     public AbstractMenu open(@NotNull Collection<? extends HumanEntity> viewers) {
-        Preconditions.checkState(menuManager.isRegistered(),
+        Preconditions.checkState(this.menuManager.isRegistered(),
                 "MenuManager has no enabled plugin registered to handle inventory menu events");
         Preconditions.checkArgument(viewers != null && !viewers.isEmpty(),
                 "Collection<? extends HumanEntity> of viewers argument can't be null");
         Preconditions.checkArgument(!viewers.contains(null), "Collection<? extends HumanEntity> of viewers argument can't contain null");
 
-        menuManager.registerMenu(this);
-        viewers.forEach(viewer -> viewer.openInventory(getInventory()));
+        this.menuManager.registerMenu(this);
+        viewers.forEach(viewer -> viewer.openInventory(this.getInventory()));
 
         return this;
     }
@@ -186,11 +186,11 @@ public abstract class AbstractMenu {
     @NotNull
     public AbstractMenu set(@Nullable ItemStack item, @NotNull int... slots) {
         Preconditions.checkArgument(slots != null, "Array of slots can't be null");
-        int size = getInventory().getSize();
+        int size = this.getInventory().getSize();
 
         for (int slot : slots) {
             Menu.checkElement(slot, size);
-            getInventory().setItem(slot, item);
+            this.getInventory().setItem(slot, item);
         }
 
         return this;
@@ -227,7 +227,7 @@ public abstract class AbstractMenu {
      */
     @NotNull
     public AbstractMenu open(@NotNull HumanEntity... viewers) {
-        return open(Arrays.asList(viewers));
+        return this.open(Arrays.asList(viewers));
     }
 
     /**
@@ -242,7 +242,7 @@ public abstract class AbstractMenu {
     public AbstractMenu close() {
         // Careful! An Iterator is required to prevent ConcurrentModificationException during indirect removal of
         // viewers.
-        for (Iterator<HumanEntity> iterator = getInventory().getViewers().iterator(); iterator.hasNext(); ) {
+        for (Iterator<HumanEntity> iterator = this.getInventory().getViewers().iterator(); iterator.hasNext(); ) {
             iterator.next().closeInventory();
         }
         return this;
@@ -255,7 +255,7 @@ public abstract class AbstractMenu {
      */
     @NotNull
     public AbstractMenu clear() {
-        getInventory().clear();
+        this.getInventory().clear();
         return this;
     }
 
@@ -268,8 +268,8 @@ public abstract class AbstractMenu {
      */
     @NotNull
     public Optional<ItemStack> getItem(int slot) {
-        Menu.checkElement(slot, getInventory().getSize());
-        return Optional.ofNullable(getInventory().getItem(slot));
+        Menu.checkElement(slot, this.getInventory().getSize());
+        return Optional.ofNullable(this.getInventory().getItem(slot));
     }
 
     /**
@@ -279,7 +279,7 @@ public abstract class AbstractMenu {
      */
     @NotNull
     public final Inventory getInventory() {
-        return inventory;
+        return this.inventory;
     }
 
     /**
@@ -290,6 +290,6 @@ public abstract class AbstractMenu {
      */
     @NotNull
     public MenuManager getManager() {
-        return menuManager;
+        return this.menuManager;
     }
 }
