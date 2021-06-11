@@ -67,10 +67,10 @@ public class UtilitiesPlugin extends JavaPlugin {
     }
 
     /**
-     * Returns {@link Optional<MenuManager>} of the common {@link MenuManager} that might be null or not, depending on
+     * Returns {@link Optional} of the common {@link MenuManager} that might be null or not, depending on
      * the state.
      *
-     * @return {@link Optional<MenuManager>} of nullable {@link MenuManager}
+     * @return {@link Optional} of nullable {@link MenuManager}
      */
     @NotNull
     public static Optional<MenuManager> getMenuManager() {

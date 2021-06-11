@@ -6,7 +6,7 @@
 
     <groupId>memecat.fatcat</groupId>
     <artifactId>plugin-utilities</artifactId>
-    <version>1.1.0</version>
+    <version>1.1.1</version>
     <name>PluginUtilities</name>
     <description>A library with many utilities that help with developing Bukkit or Spigot plugins.</description>
 
@@ -55,7 +55,7 @@
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot</artifactId>
-            <version>1.16.4-R0.1-SNAPSHOT</version>
+            <version>1.16.5-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

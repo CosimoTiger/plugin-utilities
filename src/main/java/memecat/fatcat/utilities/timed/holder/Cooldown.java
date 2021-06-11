@@ -15,7 +15,7 @@ public class Cooldown extends AbstractCooldown {
      *
      * @param duration For how long this cooldown will last
      * @param unit {@link TimeUnit} of the given cooldown duration parameter
-     * @see Cooldown(long) - duration unit conversion to milliseconds
+     * @see Cooldown - duration unit conversion to milliseconds
      */
     public Cooldown(long duration, @NotNull TimeUnit unit) {
         Preconditions.checkArgument(unit != null, "TimeUnit argument can't be null");
