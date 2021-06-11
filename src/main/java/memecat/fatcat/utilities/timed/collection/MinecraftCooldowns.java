@@ -20,13 +20,13 @@ public class MinecraftCooldowns<K> extends AbstractCooldowns<K> implements Minec
      */
     public MinecraftCooldowns(@NotNull AbstractCooldowns<K> initial) {
         Preconditions.checkArgument(initial != null, "Initial Cooldowns object can't be null");
-        cooldowns = new HashMap<>(initial.cooldowns);
+        this.cooldowns = new HashMap<>(initial.cooldowns);
     }
 
     /**
      * Creates a new {@link MinecraftCooldowns} holder by creating a new {@link HashMap} with initialCapacity of 8.
      */
     public MinecraftCooldowns() {
-        cooldowns = new HashMap<>(8);
+        this.cooldowns = new HashMap<>(8);
     }
 }

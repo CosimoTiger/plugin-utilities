@@ -1,6 +1,5 @@
 package memecat.fatcat.utilities.menu;
 
-import com.google.common.base.Preconditions;
 import memecat.fatcat.utilities.UtilitiesPlugin;
 import memecat.fatcat.utilities.menu.menus.AbstractMenu;
 import org.bukkit.Bukkit;
@@ -18,7 +17,13 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Queue;
 
 /**
  * A class that filters {@link org.bukkit.event.inventory.InventoryEvent}s to registered {@link Inventory} {@link
@@ -69,7 +74,6 @@ public class MenuManager implements Listener {
      * @throws IllegalArgumentException If the {@link Inventory} argument is null
      */
     public Optional<AbstractMenu> unregisterMenu(@NotNull Inventory inventory) {
-        Preconditions.checkArgument(inventory != null, "Inventory argument can't be null");
         return Optional.ofNullable(this.menus.remove(inventory));
     }
 
@@ -81,7 +85,6 @@ public class MenuManager implements Listener {
      * @throws IllegalArgumentException If the {@link AbstractMenu} argument is null
      */
     public Optional<AbstractMenu> unregisterMenu(@NotNull AbstractMenu menu) {
-        Preconditions.checkArgument(menu != null, "AbstractMenu argument can't be null");
         return Optional.ofNullable(this.menus.remove(menu.getInventory()));
     }
 
@@ -94,7 +97,6 @@ public class MenuManager implements Listener {
      * @throws IllegalArgumentException If the {@link AbstractMenu} argument is null
      */
     public Optional<AbstractMenu> registerMenu(@NotNull AbstractMenu menu) {
-        Preconditions.checkArgument(menu != null, "AbstractMenu argument can't be null");
         return Optional.ofNullable(this.menus.put(menu.getInventory(), menu));
     }
 
@@ -146,7 +148,6 @@ public class MenuManager implements Listener {
      */
     @NotNull
     public Optional<AbstractMenu> getMenu(@NotNull Inventory inventory) {
-        Preconditions.checkArgument(inventory != null, "Inventory argument can't be null");
         return Optional.ofNullable(this.menus.get(inventory));
     }
 
@@ -159,7 +160,6 @@ public class MenuManager implements Listener {
      */
     @NotNull
     public Optional<AbstractMenu> getMenu(@NotNull HumanEntity viewer) {
-        Preconditions.checkArgument(viewer != null, "HumanEntity viewer argument can't be null");
         return this.getMenu(viewer.getOpenInventory().getTopInventory());
     }
 

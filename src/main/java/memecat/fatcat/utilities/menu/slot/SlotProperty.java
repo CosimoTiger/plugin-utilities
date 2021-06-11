@@ -1,10 +1,8 @@
 package memecat.fatcat.utilities.menu.slot;
 
-import com.google.common.base.Preconditions;
 import memecat.fatcat.utilities.menu.menus.AbstractMenu;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiConsumer;
 
@@ -21,7 +19,7 @@ public class SlotProperty implements ISlotProperty {
      *
      * @param event Actions that should be executed with the given InventoryClickEvent argument
      */
-    public SlotProperty(@Nullable BiConsumer<InventoryClickEvent, AbstractMenu> event) {
+    public SlotProperty(@NotNull BiConsumer<InventoryClickEvent, AbstractMenu> event) {
         this.eventConsumer = event;
     }
 
@@ -32,7 +30,7 @@ public class SlotProperty implements ISlotProperty {
      * @return This instance, useful for chaining
      */
     @NotNull
-    public SlotProperty setAction(@Nullable BiConsumer<InventoryClickEvent, AbstractMenu> event) {
+    public SlotProperty setAction(@NotNull BiConsumer<InventoryClickEvent, AbstractMenu> event) {
         this.eventConsumer = event;
         return this;
     }
@@ -43,7 +41,7 @@ public class SlotProperty implements ISlotProperty {
      *
      * @return {@link BiConsumer}&lt;{@link InventoryClickEvent}, {@link AbstractMenu}&gt; runnable object
      */
-    @Nullable
+    @NotNull
     public BiConsumer<InventoryClickEvent, AbstractMenu> getAction() {
         return this.eventConsumer;
     }
@@ -57,11 +55,6 @@ public class SlotProperty implements ISlotProperty {
      * @throws IllegalArgumentException If {@link InventoryClickEvent} or {@link AbstractMenu} argument is null
      */
     public void run(@NotNull InventoryClickEvent event, @NotNull AbstractMenu menu) {
-        if (this.getAction() != null) {
-            Preconditions.checkArgument(event != null, "InventoryClickEvent argument can't be null");
-            Preconditions.checkArgument(menu != null, "AbstractMenu argument can't be null");
-
-            this.getAction().accept(event, menu);
-        }
+        this.getAction().accept(event, menu);
     }
 }

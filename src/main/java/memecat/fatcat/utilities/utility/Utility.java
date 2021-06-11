@@ -1,6 +1,5 @@
 package memecat.fatcat.utilities.utility;
 
-import com.google.common.base.Preconditions;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,7 +17,6 @@ public class Utility {
      * @throws IllegalArgumentException If the numbers argument is null
      */
     public static int max(@NotNull Iterable<Integer> numbers) {
-        Preconditions.checkArgument(numbers != null, "Array of integers can't be null");
         int max = Integer.MIN_VALUE;
 
         for (int number : numbers) {
@@ -58,8 +56,7 @@ public class Utility {
      * @return Greatest integer from the given array
      * @throws IllegalArgumentException If the numbers argument is null
      */
-    public static int max(@NotNull int... numbers) {
-        Preconditions.checkArgument(numbers != null, "Array of integers can't be null");
+    public static int max(int... numbers) {
         int max = Integer.MIN_VALUE;
 
         for (int number : numbers) {

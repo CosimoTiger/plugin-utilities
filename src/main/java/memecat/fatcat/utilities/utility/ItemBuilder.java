@@ -209,8 +209,10 @@ public class ItemBuilder implements Cloneable {
      * @throws IllegalArgumentException If the integer array of indexes is null
      */
     @NotNull
-    public ItemBuilder loreAt(@Nullable String line, @NotNull int... indexes) {
-        Preconditions.checkArgument(indexes != null, "Array of lore line indexes argument can't be null");
+    public ItemBuilder loreAt(@Nullable String line, int... indexes) {
+        if (indexes == null || indexes.length == 0) {
+            indexes = new int[]{0};
+        }
 
         List<String> lore = this.getItemMeta().map(ItemMeta::getLore).orElse(null);
         lore = lore == null || lore.isEmpty() ? new ArrayList<>(Utility.max(indexes) + 1) : lore;
@@ -312,8 +314,10 @@ public class ItemBuilder implements Cloneable {
      * @throws IllegalArgumentException If the integer array of indexes is null
      */
     @NotNull
-    public ItemBuilder removeLoreAt(@NotNull int... indexes) {
-        Preconditions.checkArgument(indexes != null, "Array of lore line indexes argument can't be null");
+    public ItemBuilder removeLoreAt(int... indexes) {
+        if (indexes == null || indexes.length == 0) {
+            indexes = new int[] {0};
+        }
 
         List<String> lore = this.getLore();
 

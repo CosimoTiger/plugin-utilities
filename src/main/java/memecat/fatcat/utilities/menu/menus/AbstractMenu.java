@@ -3,6 +3,7 @@ package memecat.fatcat.utilities.menu.menus;
 import com.google.common.base.Preconditions;
 import memecat.fatcat.utilities.menu.MenuManager;
 import memecat.fatcat.utilities.menu.slot.ISlotProperty;
+import memecat.fatcat.utilities.menu.slot.SlotProperty;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -84,7 +85,7 @@ public abstract class AbstractMenu {
      * @param event    {@link InventoryClickEvent} event
      * @param external Whether the clicked inventory is not this one, possibly not any (outside)
      * @see ISlotProperty
-     * @see memecat.fatcat.utilities.menu.slot.SlotProperty
+     * @see SlotProperty
      */
     public void onClick(@NotNull InventoryClickEvent event, boolean external) {
         InventoryAction action = event.getAction();
@@ -184,7 +185,7 @@ public abstract class AbstractMenu {
      * @throws IllegalArgumentException  If the slot array argument is null
      */
     @NotNull
-    public AbstractMenu set(@Nullable ItemStack item, @NotNull int... slots) {
+    public AbstractMenu set(@Nullable ItemStack item, int... slots) {
         Preconditions.checkArgument(slots != null, "Array of slots can't be null");
         int size = this.getInventory().getSize();
 
@@ -242,9 +243,10 @@ public abstract class AbstractMenu {
     public AbstractMenu close() {
         // Careful! An Iterator is required to prevent ConcurrentModificationException during indirect removal of
         // viewers.
-        for (Iterator<HumanEntity> iterator = this.getInventory().getViewers().iterator(); iterator.hasNext(); ) {
+        for (Iterator<HumanEntity> iterator = this.getInventory().getViewers().iterator(); iterator.hasNext();) {
             iterator.next().closeInventory();
         }
+
         return this;
     }
 

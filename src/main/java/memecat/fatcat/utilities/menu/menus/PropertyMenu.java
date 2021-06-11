@@ -12,12 +12,10 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
- * The default implementation of {@link Menu} with an {@link ISlotProperty} array of the same size as the
- * inventory, with many methods for working with these properties. This class is generified to allow different
- * subclasses of {@link ISlotProperty} to be used.
+ * Implementation of {@link Menu} with an {@link Object} array of the same size as the inventory, with many
+ * methods for working with these properties.
  *
- * @param <E> Type that is a subclass of {@link ISlotProperty}, can be left empty ({@code <>}, but never nothing)
- *            to allow any subclass
+ * @param <E> Single object type to be stored in the slots of this menu inventory
  * @author Alan B. | FatCat
  * @see ISlotProperty
  */
@@ -77,7 +75,6 @@ public class PropertyMenu<E> extends Menu {
      * @throws IllegalArgumentException  If the slot array argument is null
      */
     public PropertyMenu<E> set(@Nullable E property, @Nullable ItemStack item, int... slots) {
-        Preconditions.checkArgument(slots != null, "Array of slots can't be null");
 
         for (int slot : slots) {
             checkElement(slot, this.getInventory().getSize());
@@ -154,8 +151,7 @@ public class PropertyMenu<E> extends Menu {
      * @throws IllegalArgumentException  If the array of slots is null
      * @throws IndexOutOfBoundsException If a slot in the slot array argument is out of this inventory's boundaries
      */
-    public PropertyMenu<E> set(@Nullable E property, @NotNull int... slots) {
-        Preconditions.checkArgument(slots != null, "Array of slots can't be null");
+    public PropertyMenu<E> set(@Nullable E property, int... slots) {
         int size = this.getInventory().getSize();
 
         for (int slot : slots) {
