@@ -180,7 +180,7 @@ public class MenuManager implements Listener {
      */
     @NotNull
     public Optional<Plugin> getPlugin() {
-        return Optional.ofNullable(this.providers.poll());
+        return Optional.ofNullable(this.providers.peek());
     }
 
     /**
