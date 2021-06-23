@@ -73,6 +73,7 @@ public class MenuManager implements Listener {
      * @return {@link AbstractMenu} that was a value to the given {@link Inventory}'s {@link AbstractMenu}
      * @throws IllegalArgumentException If the {@link Inventory} argument is null
      */
+    @NotNull
     public Optional<AbstractMenu> unregisterMenu(@NotNull Inventory inventory) {
         return Optional.ofNullable(this.menus.remove(inventory));
     }
@@ -84,6 +85,7 @@ public class MenuManager implements Listener {
      * @return {@link AbstractMenu} that was a value to the given {@link AbstractMenu}'s {@link Inventory}
      * @throws IllegalArgumentException If the {@link AbstractMenu} argument is null
      */
+    @NotNull
     public Optional<AbstractMenu> unregisterMenu(@NotNull AbstractMenu menu) {
         return Optional.ofNullable(this.menus.remove(menu.getInventory()));
     }
@@ -96,6 +98,7 @@ public class MenuManager implements Listener {
      * @return Previous {@link AbstractMenu} that was a value to the given {@link AbstractMenu}'s {@link Inventory}
      * @throws IllegalArgumentException If the {@link AbstractMenu} argument is null
      */
+    @NotNull
     public Optional<AbstractMenu> registerMenu(@NotNull AbstractMenu menu) {
         return Optional.ofNullable(this.menus.put(menu.getInventory(), menu));
     }
@@ -110,6 +113,7 @@ public class MenuManager implements Listener {
      * @throws IllegalArgumentException If the {@link Plugin} argument is null
      * @throws IllegalStateException    If the {@link Plugin} argument is not enabled
      */
+    @NotNull
     public MenuManager provide(@NotNull Plugin newProvider) {
         if (!this.isRegistered()) {
             Bukkit.getPluginManager().registerEvents(this, UtilitiesPlugin.checkProvider(newProvider));
@@ -130,6 +134,7 @@ public class MenuManager implements Listener {
      *
      * @return This instance, useful for chaining
      */
+    @NotNull
     public MenuManager closeMenus() {
         //noinspection ForLoopReplaceableByForEach
         for (Iterator<Map.Entry<Inventory, AbstractMenu>> iterator = this.menus.entrySet().iterator(); iterator.hasNext(); ) {

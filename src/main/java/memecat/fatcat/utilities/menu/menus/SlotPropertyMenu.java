@@ -46,6 +46,7 @@ public class SlotPropertyMenu<E extends ISlotProperty> extends PropertyMenu<ISlo
         }
     }
 
+    @NotNull
     public SlotPropertyMenu<E> changeProperty(@NotNull Consumer<ISlotProperty> applyProperty, int slot, @NotNull Class<E> type) {
         Preconditions.checkArgument(applyProperty != null, "Consumer<ISlotProperty> argument can't be null");
 

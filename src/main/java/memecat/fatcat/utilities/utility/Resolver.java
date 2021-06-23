@@ -16,6 +16,7 @@ public class Resolver {
         this.clazz = clazz;
     }
 
+    @NotNull
     public Optional<Field> resolveField(@NotNull String name) {
         try {
             Field field = this.clazz.getDeclaredField(name);
@@ -29,6 +30,7 @@ public class Resolver {
         return Optional.empty();
     }
 
+    @NotNull
     public Class<?> getClazz() {
         return this.clazz;
     }
