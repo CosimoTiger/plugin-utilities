@@ -77,7 +77,6 @@ public class PropertyMenu<E> extends Menu {
      */
     @NotNull
     public PropertyMenu<E> set(@Nullable E property, @Nullable ItemStack item, int... slots) {
-
         for (int slot : slots) {
             checkElement(slot, this.getInventory().getSize());
             this.properties[slot] = property;
@@ -138,7 +137,7 @@ public class PropertyMenu<E> extends Menu {
             }
         } else {
             for (int slot = 0; slot < this.getInventory().getSize(); slot++) {
-                if (!this.getItem(slot).isPresent()) { // Java 11: .isEmpty()
+                if (this.getItem(slot).isEmpty()) {
                     this.properties[slot] = property;
                 }
             }
@@ -180,7 +179,7 @@ public class PropertyMenu<E> extends Menu {
     }
 
     /**
-     * Clears the whole inventory of it's contents and slot properties.
+     * Clears the whole inventory of its contents and slot properties.
      *
      * @return This instance, useful for chaining
      */
@@ -192,7 +191,7 @@ public class PropertyMenu<E> extends Menu {
     }
 
     /**
-     * Returns an property stored at the given slot of this inventory menu or null if it doesn't exist.
+     * Returns a property stored at the given slot of this inventory menu or null if it doesn't exist.
      *
      * @param slot Slot index location of the Object in the inventory
      * @return {@link Optional} of nullable Object

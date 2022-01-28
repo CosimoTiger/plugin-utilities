@@ -171,7 +171,6 @@ public abstract class AbstractMenu {
 
         this.menuManager.registerMenu(this);
         viewers.forEach(viewer -> viewer.openInventory(this.getInventory()));
-
         return this;
     }
 

@@ -7,7 +7,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -34,16 +33,8 @@ public class SlotPropertyMenu<E extends ISlotProperty> extends PropertyMenu<ISlo
     @Override
     public void onClick(@NotNull InventoryClickEvent event, boolean external) {
         super.onClick(event, external);
-
-        // If only those stubborn servers migrated to Java 9 at least so we could simplify it to:
-        // getSlotProperty(event.getSlot()).ifPresentOrElse(property -> property.run(event, this), event.setCancelled(true));
-        Optional<ISlotProperty> property = this.getSlotProperty(event.getSlot());
-
-        if (property.isPresent()) {
-            property.get().run(event, this);
-        } else {
-            event.setCancelled(true);
-        }
+        this.getSlotProperty(event.getSlot()).ifPresentOrElse(property -> property.run(event, this),
+                () -> event.setCancelled(true));
     }
 
     @NotNull

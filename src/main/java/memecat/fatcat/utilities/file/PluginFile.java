@@ -23,7 +23,7 @@ public abstract class PluginFile extends File {
     private final Plugin plugin;
 
     /**
-     * Creates a new {@link PluginFile} from a given file name in it's given file path.
+     * Creates a new {@link PluginFile} from a given file name in its given file path.
      * <p>
      * The File path parameter can be a plugin's data folder which is accessible through the method
      * Plugin#getDataFolder().
@@ -34,12 +34,11 @@ public abstract class PluginFile extends File {
      */
     public PluginFile(@NotNull Plugin plugin, @Nullable File path, @NotNull String name) {
         super(path, name);
-
         this.plugin = plugin;
     }
 
     /**
-     * Creates a new {@link PluginFile} from a given file name in it's given file path.
+     * Creates a new {@link PluginFile} from a given file name in its given file path.
      * <p>
      * The File path parameter can be a plugin's data folder which is accessible through the method
      * Plugin#getDataFolder().
@@ -50,7 +49,6 @@ public abstract class PluginFile extends File {
      */
     public PluginFile(@NotNull Plugin plugin, @Nullable String path, @NotNull String name) {
         super(path, name);
-
         this.plugin = plugin;
     }
 
@@ -62,7 +60,6 @@ public abstract class PluginFile extends File {
      */
     public PluginFile(@NotNull Plugin plugin, @NotNull String path) {
         super(path);
-
         this.plugin = plugin;
     }
 
@@ -74,12 +71,11 @@ public abstract class PluginFile extends File {
      */
     public PluginFile(@NotNull Plugin plugin, @NotNull URI uri) {
         super(uri);
-
         this.plugin = plugin;
     }
 
     /**
-     * Creates a new {@link PluginFile} if it doesn't exist in it's location in the file system by copying it from the
+     * Creates a new {@link PluginFile} if it doesn't exist in its location in the file system by copying it from the
      * plugin's embedded resources folder.
      *
      * @return Whether this file already existed
@@ -108,7 +104,7 @@ public abstract class PluginFile extends File {
     public abstract void reloadFile();
 
     /**
-     * Saves the file to it's file location.
+     * Saves the file to its file location.
      */
     public abstract void saveFile();
 

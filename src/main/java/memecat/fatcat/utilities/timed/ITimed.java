@@ -26,8 +26,7 @@ public interface ITimed {
      *
      * @param unit {@link TimeUnit} of the given duration argument
      * @param duration Time duration to be converted
-     * @return Time duration in an unit equivalent to {@link #getCurrentTime()}'s
-     * @see memecat.fatcat.utilities.timed.type.MinecraftTimed implementation which uses ticks as a different unit
+     * @return Time duration in a unit equivalent to {@link #getCurrentTime()}'s
      */
     default long toEquivalentTime(long duration, @NotNull TimeUnit unit) {
         return unit.toMillis(duration);
@@ -39,8 +38,7 @@ public interface ITimed {
      *
      * @param unit {@link TimeUnit} of the given duration argument
      * @param duration Time duration to be converted
-     * @return Time duration in an unit equivalent to {@link #getCurrentTime()}'s
-     * @see memecat.fatcat.utilities.timed.type.MinecraftTimed implementation which uses ticks as a different unit
+     * @return Time duration in a unit equivalent to {@link #getCurrentTime()}'s
      */
     default long fromEquivalentTime(long duration, @NotNull TimeUnit unit) {
         return TimeUnit.MILLISECONDS.convert(duration, unit);
