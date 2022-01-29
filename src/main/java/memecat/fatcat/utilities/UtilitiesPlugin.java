@@ -4,8 +4,8 @@ import com.google.common.base.Preconditions;
 import memecat.fatcat.utilities.menu.MenuManager;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
 import java.util.Optional;
 
 /**
@@ -34,8 +34,8 @@ public class UtilitiesPlugin extends JavaPlugin {
      * @throws IllegalArgumentException If the {@link Plugin} argument is null
      * @throws IllegalStateException    If the {@link Plugin} argument is not enabled
      */
-    @NotNull
-    public static Plugin checkProvider(@NotNull Plugin provider) {
+    @Nonnull
+    public static Plugin checkProvider(@Nonnull Plugin provider) {
         Preconditions.checkArgument(provider != null, "Plugin provider argument can't be null");
         Preconditions.checkState(provider.isEnabled(), "Plugin provider argument can't be disabled");
 
@@ -57,8 +57,8 @@ public class UtilitiesPlugin extends JavaPlugin {
      * @see MenuManager#MenuManager(Plugin)
      * @see MenuManager#provide(Plugin)
      */
-    @NotNull
-    public static MenuManager getMenuManager(@NotNull Plugin provider) {
+    @Nonnull
+    public static MenuManager getMenuManager(@Nonnull Plugin provider) {
         if (instance == null) {
             return menuManager == null ? menuManager = new MenuManager(provider) : menuManager.provide(provider);
         }
@@ -72,7 +72,7 @@ public class UtilitiesPlugin extends JavaPlugin {
      *
      * @return {@link Optional} of nullable {@link MenuManager}
      */
-    @NotNull
+    @Nonnull
     public static Optional<MenuManager> getMenuManager() {
         return Optional.ofNullable(menuManager);
     }
@@ -82,7 +82,7 @@ public class UtilitiesPlugin extends JavaPlugin {
      *
      * @return {@link Optional} nullable singleton instance of this class, not null when enabled
      */
-    @NotNull
+    @Nonnull
     public static Optional<UtilitiesPlugin> getInstance() {
         return Optional.ofNullable(instance);
     }

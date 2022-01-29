@@ -1,7 +1,6 @@
 package memecat.fatcat.utilities.utility;
 
-import org.jetbrains.annotations.NotNull;
-
+import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
 import java.util.Optional;
 
@@ -12,12 +11,12 @@ public class Resolver {
 
     private final Class<?> clazz;
 
-    public Resolver(@NotNull Class<?> clazz) {
+    public Resolver(@Nonnull Class<?> clazz) {
         this.clazz = clazz;
     }
 
-    @NotNull
-    public Optional<Field> resolveField(@NotNull String name) {
+    @Nonnull
+    public Optional<Field> resolveField(@Nonnull String name) {
         try {
             Field field = this.clazz.getDeclaredField(name);
             field.setAccessible(true);
@@ -30,7 +29,7 @@ public class Resolver {
         return Optional.empty();
     }
 
-    @NotNull
+    @Nonnull
     public Class<?> getClazz() {
         return this.clazz;
     }

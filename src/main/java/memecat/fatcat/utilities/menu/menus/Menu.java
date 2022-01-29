@@ -3,13 +3,14 @@ package memecat.fatcat.utilities.menu.menus;
 import com.google.common.base.Preconditions;
 import memecat.fatcat.utilities.menu.MenuManager;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.function.Consumer;
 
 /**
@@ -30,12 +31,12 @@ public class Menu extends AbstractMenu {
     /**
      * {@inheritDoc} Creates a new {@link Menu} using the default constructor for {@link AbstractMenu}.
      */
-    public Menu(@NotNull Inventory inventory, @NotNull MenuManager menuManager) {
+    public Menu(@Nonnull Inventory inventory, @Nonnull MenuManager menuManager) {
         super(inventory, menuManager);
     }
 
     @Override
-    public void onClose(@NotNull InventoryCloseEvent event) {
+    public void onClose(@Nonnull InventoryCloseEvent event) {
         if (this.getInventory().getViewers().size() < 2) {
             this.setBukkitTask(null);
         }
@@ -56,10 +57,11 @@ public class Menu extends AbstractMenu {
      * @throws IllegalArgumentException  If the fromSlot is greater than the toSlot argument or the skipForSlots
      *                                   argument is lower than 1
      */
-    @NotNull
+    @Nonnull
     public Menu fillSkip(@Nullable ItemStack item, int fromSlot, int toSlot, int skipForSlots) {
-        checkRange(fromSlot, toSlot, this.getInventory().getSize());
         Preconditions.checkArgument(skipForSlots > 0, "skipForSlots argument (" + skipForSlots + ") can't be smaller than 1");
+        fromSlot = Math.max(0, fromSlot);
+        toSlot = Math.min(this.getInventory().getSize() - 1, toSlot);
 
         for (int slot = fromSlot; slot < toSlot; slot += skipForSlots) {
             this.getInventory().setItem(slot, item);
@@ -82,7 +84,7 @@ public class Menu extends AbstractMenu {
      * @throws IndexOutOfBoundsException If the fromSlot or toSlot argument isn't within the inventory's boundaries
      * @throws IllegalArgumentException  If the fromSlot is greater than the toSlot argument
      */
-    @NotNull
+    @Nonnull
     public Menu fillInterval(@Nullable ItemStack item, int fromSlot, int toSlot) {
         return this.fillSkip(item, fromSlot, toSlot, 1);
     }
@@ -96,8 +98,8 @@ public class Menu extends AbstractMenu {
      * @throws IndexOutOfBoundsException If the slot argument is out of this inventory's boundaries
      * @throws IllegalArgumentException  If the {@link Consumer}&lt;{@link ItemStack}&gt; argument is null
      */
-    @NotNull
-    public Menu changeItem(@NotNull Consumer<ItemStack> applyItem, int slot) {
+    @Nonnull
+    public Menu changeItem(@Nonnull Consumer<ItemStack> applyItem, int slot) {
         Preconditions.checkArgument(applyItem != null, "Consumer<ItemStack> argument can't be null");
         this.getItem(slot).ifPresent(applyItem);
         return this;
@@ -110,7 +112,7 @@ public class Menu extends AbstractMenu {
      * @param replace Whether existing {@link ItemStack}s should be replaced with a new one
      * @return This instance, useful for chaining
      */
-    @NotNull
+    @Nonnull
     public Menu fill(@Nullable ItemStack item, boolean replace) {
         if (replace) {
             for (int slot = 0; slot < this.getInventory().getSize(); slot++) {
@@ -140,30 +142,14 @@ public class Menu extends AbstractMenu {
      * @param task The created {@link BukkitTask} that is returned by scheduling it
      * @return This instance, useful for chaining
      */
-    @NotNull
+    @Nonnull
     public Menu setBukkitTask(@Nullable BukkitTask task) {
         if (this.taskId > -1) {
             Bukkit.getScheduler().cancelTask(this.taskId);
         }
 
         this.taskId = task == null ? -1 : task.getTaskId();
-
         return this;
-    }
-
-    /**
-     * Package-protected methods for reuse.
-     */
-    static void checkRange(int from, int to, int size) {
-        if (from > to) {
-            throw new IllegalArgumentException("fromSlot argument (" + from + ") can't be greater than toSlot argument (" + to + ")");
-        } else if (from < 0) {
-            throw new IndexOutOfBoundsException("fromSlot argument (" + from + ") can't be smaller than 0");
-        } else if (from > size) {
-            throw new IndexOutOfBoundsException("fromSlot argument (" + from + ") can't be greater than the inventory size (" + size + ")");
-        } else if (to > size) {
-            throw new IndexOutOfBoundsException("toSlot argument (" + from + ") can't be greater than the inventory size (" + size + ")");
-        }
     }
 
     /**
@@ -182,7 +168,7 @@ public class Menu extends AbstractMenu {
      *
      * @return This instance, useful for chaining
      */
-    @NotNull
+    @Nonnull
     public Menu clearContents() {
         this.getInventory().setStorageContents(new ItemStack[0]);
         return this;
@@ -193,10 +179,34 @@ public class Menu extends AbstractMenu {
      *
      * @return This instance, useful for chaining
      */
-    @NotNull
+    @Nonnull
     @Override
     public Menu clear() {
         return this.clearContents();
+    }
+
+    @Nonnull
+    @Override
+    public Menu open(@Nonnull Iterable<? extends HumanEntity> viewers) {
+        return (Menu) super.open(viewers);
+    }
+
+    @Nonnull
+    @Override
+    public Menu set(@Nullable ItemStack item, int... slots) {
+        return (Menu) super.set(item, slots);
+    }
+
+    @Nonnull
+    @Override
+    public Menu setManager(@Nonnull MenuManager menuManager) {
+        return (Menu) super.setManager(menuManager);
+    }
+
+    @Nonnull
+    @Override
+    public Menu open(@Nonnull HumanEntity... viewers) {
+        return (Menu) super.open(viewers);
     }
 
     /**

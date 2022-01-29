@@ -2,8 +2,8 @@ package memecat.fatcat.utilities.timed.collection;
 
 import com.google.common.base.Preconditions;
 import memecat.fatcat.utilities.timed.holder.AbstractCooldown;
-import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
 import java.util.HashMap;
 
 /**
@@ -17,7 +17,7 @@ public class Cooldowns<K> extends AbstractCooldowns<K> {
      *
      * @param initial The original {@link AbstractCooldowns} whose contents will be transferred into this new one
      */
-    public Cooldowns(@NotNull AbstractCooldowns<K> initial) {
+    public Cooldowns(@Nonnull AbstractCooldowns<K> initial) {
         Preconditions.checkArgument(initial != null, "Initial Cooldowns object can't be null");
         this.cooldowns = new HashMap<>(initial.cooldowns);
     }

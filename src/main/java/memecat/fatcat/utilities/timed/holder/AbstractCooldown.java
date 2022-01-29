@@ -2,8 +2,8 @@ package memecat.fatcat.utilities.timed.holder;
 
 import com.google.common.base.Preconditions;
 import memecat.fatcat.utilities.timed.ITimed;
-import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
 import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractCooldown implements ITimed {
@@ -17,7 +17,7 @@ public abstract class AbstractCooldown implements ITimed {
      * @param unit {@link TimeUnit} that the given duration argument is in
      * @return Previous ending time of this {@link AbstractCooldown}
      */
-    public long extend(long duration, @NotNull TimeUnit unit) {
+    public long extend(long duration, @Nonnull TimeUnit unit) {
         Preconditions.checkArgument(unit != null, "TimeUnit argument can't be null");
         return this.extend(this.toEquivalentTime(duration, unit));
     }
@@ -41,7 +41,7 @@ public abstract class AbstractCooldown implements ITimed {
      * @param unit {@link TimeUnit} in which the remaining milliseconds should be converted to
      * @return The remaining cooldown time, expressed as a double in the given {@link TimeUnit}
      */
-    public long getRemaining(@NotNull TimeUnit unit) {
+    public long getRemaining(@Nonnull TimeUnit unit) {
         Preconditions.checkArgument(unit != null, "TimeUnit argument can't be null");
         return this.fromEquivalentTime(this.getRemaining(), unit);
     }

@@ -1,7 +1,7 @@
 package memecat.fatcat.utilities.utility;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * An utility class that contains static methods.
@@ -16,7 +16,7 @@ public class Utility {
      * @return Greatest integer from the given array
      * @throws IllegalArgumentException If the numbers argument is null
      */
-    public static int max(@NotNull Iterable<Integer> numbers) {
+    public static int max(@Nonnull Iterable<Integer> numbers) {
         int max = Integer.MIN_VALUE;
 
         for (int number : numbers) {
@@ -40,7 +40,7 @@ public class Utility {
     }
 
     @Nullable
-    public static String possessive(@Nullable String input, @NotNull String sCase, @NotNull String noneCase) {
+    public static String possessive(@Nullable String input, @Nonnull String sCase, @Nonnull String noneCase) {
         return input == null ? null : input.concat(input.endsWith("s") ? noneCase : sCase);
     }
 

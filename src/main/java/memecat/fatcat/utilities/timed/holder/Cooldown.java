@@ -1,8 +1,8 @@
 package memecat.fatcat.utilities.timed.holder;
 
 import com.google.common.base.Preconditions;
-import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -17,7 +17,7 @@ public class Cooldown extends AbstractCooldown {
      * @param unit {@link TimeUnit} of the given cooldown duration parameter
      * @see Cooldown - duration unit conversion to milliseconds
      */
-    public Cooldown(long duration, @NotNull TimeUnit unit) {
+    public Cooldown(long duration, @Nonnull TimeUnit unit) {
         Preconditions.checkArgument(unit != null, "TimeUnit argument can't be null");
         this.end = this.getCurrentTime() + this.toEquivalentTime(duration, unit);
     }

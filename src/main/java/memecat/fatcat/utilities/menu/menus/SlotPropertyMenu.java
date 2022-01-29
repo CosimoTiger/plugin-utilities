@@ -5,8 +5,8 @@ import memecat.fatcat.utilities.menu.MenuManager;
 import memecat.fatcat.utilities.menu.slot.ISlotProperty;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
-import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
 import java.util.function.Consumer;
 
 /**
@@ -20,7 +20,7 @@ public class SlotPropertyMenu<E extends ISlotProperty> extends PropertyMenu<ISlo
     /**
      * {@inheritDoc}
      */
-    public SlotPropertyMenu(@NotNull Inventory inventory, @NotNull MenuManager menuManager) {
+    public SlotPropertyMenu(@Nonnull Inventory inventory, @Nonnull MenuManager menuManager) {
         super(inventory, menuManager);
     }
 
@@ -31,14 +31,14 @@ public class SlotPropertyMenu<E extends ISlotProperty> extends PropertyMenu<ISlo
      * {@link org.bukkit.event.Cancellable#setCancelled(boolean)}.
      */
     @Override
-    public void onClick(@NotNull InventoryClickEvent event, boolean external) {
+    public void onClick(@Nonnull InventoryClickEvent event, boolean external) {
         super.onClick(event, external);
         this.getSlotProperty(event.getSlot()).ifPresentOrElse(property -> property.run(event, this),
                 () -> event.setCancelled(true));
     }
 
-    @NotNull
-    public SlotPropertyMenu<E> changeProperty(@NotNull Consumer<ISlotProperty> applyProperty, int slot, @NotNull Class<E> type) {
+    @Nonnull
+    public SlotPropertyMenu<E> changeProperty(@Nonnull Consumer<ISlotProperty> applyProperty, int slot, @Nonnull Class<E> type) {
         Preconditions.checkArgument(applyProperty != null, "Consumer<ISlotProperty> argument can't be null");
 
         this.getSlotProperty(slot).ifPresent(property -> {

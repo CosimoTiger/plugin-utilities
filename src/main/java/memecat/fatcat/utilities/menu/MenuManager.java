@@ -15,8 +15,8 @@ import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;
-import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.HashMap;
@@ -60,7 +60,7 @@ public class MenuManager implements Listener {
      * @throws IllegalArgumentException If the {@link Plugin} argument is null
      * @throws IllegalStateException    If the {@link Plugin} argument is not enabled
      */
-    public MenuManager(@NotNull Plugin newProvider) {
+    public MenuManager(@Nonnull Plugin newProvider) {
         Bukkit.getPluginManager().registerEvents(this, UtilitiesPlugin.checkProvider(newProvider));
         this.providers.add(newProvider);
     }
@@ -73,8 +73,8 @@ public class MenuManager implements Listener {
      * @return {@link AbstractMenu} that was a value to the given {@link Inventory}'s {@link AbstractMenu}
      * @throws IllegalArgumentException If the {@link Inventory} argument is null
      */
-    @NotNull
-    public Optional<AbstractMenu> unregisterMenu(@NotNull Inventory inventory) {
+    @Nonnull
+    public Optional<AbstractMenu> unregisterMenu(@Nonnull Inventory inventory) {
         return Optional.ofNullable(this.menus.remove(inventory));
     }
 
@@ -85,8 +85,8 @@ public class MenuManager implements Listener {
      * @return {@link AbstractMenu} that was a value to the given {@link AbstractMenu}'s {@link Inventory}
      * @throws IllegalArgumentException If the {@link AbstractMenu} argument is null
      */
-    @NotNull
-    public Optional<AbstractMenu> unregisterMenu(@NotNull AbstractMenu menu) {
+    @Nonnull
+    public Optional<AbstractMenu> unregisterMenu(@Nonnull AbstractMenu menu) {
         return Optional.ofNullable(this.menus.remove(menu.getInventory()));
     }
 
@@ -98,8 +98,8 @@ public class MenuManager implements Listener {
      * @return Previous {@link AbstractMenu} that was a value to the given {@link AbstractMenu}'s {@link Inventory}
      * @throws IllegalArgumentException If the {@link AbstractMenu} argument is null
      */
-    @NotNull
-    public Optional<AbstractMenu> registerMenu(@NotNull AbstractMenu menu) {
+    @Nonnull
+    public Optional<AbstractMenu> registerMenu(@Nonnull AbstractMenu menu) {
         return Optional.ofNullable(this.menus.put(menu.getInventory(), menu));
     }
 
@@ -113,8 +113,8 @@ public class MenuManager implements Listener {
      * @throws IllegalArgumentException If the {@link Plugin} argument is null
      * @throws IllegalStateException    If the {@link Plugin} argument is not enabled
      */
-    @NotNull
-    public MenuManager provide(@NotNull Plugin newProvider) {
+    @Nonnull
+    public MenuManager provide(@Nonnull Plugin newProvider) {
         if (!this.isRegistered()) {
             Bukkit.getPluginManager().registerEvents(this, UtilitiesPlugin.checkProvider(newProvider));
         }
@@ -134,7 +134,7 @@ public class MenuManager implements Listener {
      *
      * @return This instance, useful for chaining
      */
-    @NotNull
+    @Nonnull
     public MenuManager closeMenus() {
         //noinspection ForLoopReplaceableByForEach
         for (Iterator<Map.Entry<Inventory, AbstractMenu>> iterator = this.menus.entrySet().iterator(); iterator.hasNext(); ) {
@@ -151,8 +151,8 @@ public class MenuManager implements Listener {
      * @return Optional of nullable {@link AbstractMenu} that matches the given inventory
      * @throws IllegalArgumentException If the {@link Inventory} argument is null
      */
-    @NotNull
-    public Optional<AbstractMenu> getMenu(@NotNull Inventory inventory) {
+    @Nonnull
+    public Optional<AbstractMenu> getMenu(@Nonnull Inventory inventory) {
         return Optional.ofNullable(this.menus.get(inventory));
     }
 
@@ -163,8 +163,8 @@ public class MenuManager implements Listener {
      * @return Optional of nullable {@link AbstractMenu} of the given viewer's top inventory
      * @throws IllegalArgumentException If the viewer argument is null
      */
-    @NotNull
-    public Optional<AbstractMenu> getMenu(@NotNull HumanEntity viewer) {
+    @Nonnull
+    public Optional<AbstractMenu> getMenu(@Nonnull HumanEntity viewer) {
         return this.getMenu(viewer.getOpenInventory().getTopInventory());
     }
 
@@ -183,7 +183,7 @@ public class MenuManager implements Listener {
      *
      * @return {@link Optional} of a nullable {@link Plugin}
      */
-    @NotNull
+    @Nonnull
     public Optional<Plugin> getPlugin() {
         return Optional.ofNullable(this.providers.peek());
     }
@@ -204,7 +204,7 @@ public class MenuManager implements Listener {
      * @see AbstractMenu#onClick(InventoryClickEvent, boolean)
      */
     @EventHandler
-    public void onInventoryClick(@NotNull InventoryClickEvent event) {
+    public void onInventoryClick(@Nonnull InventoryClickEvent event) {
         Optional.ofNullable(this.menus.get(event.getInventory()))
                 .ifPresent(menu -> menu.onClick(event, !menu.getInventory().equals(event.getClickedInventory())));
     }
@@ -216,7 +216,7 @@ public class MenuManager implements Listener {
      * @see AbstractMenu#onClose(InventoryCloseEvent)
      */
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onInventoryClose(@NotNull InventoryCloseEvent event) {
+    public void onInventoryClose(@Nonnull InventoryCloseEvent event) {
         Optional.ofNullable(this.menus.get(event.getInventory())).ifPresent(menu -> menu.onClose(event));
     }
 
@@ -227,7 +227,7 @@ public class MenuManager implements Listener {
      * @see AbstractMenu#onOpen(InventoryOpenEvent)
      */
     @EventHandler
-    public void onInventoryOpen(@NotNull InventoryOpenEvent event) {
+    public void onInventoryOpen(@Nonnull InventoryOpenEvent event) {
         Optional.ofNullable(this.menus.get(event.getInventory())).ifPresent(menu -> menu.onOpen(event));
     }
 
@@ -238,7 +238,7 @@ public class MenuManager implements Listener {
      * @see AbstractMenu#onDrag(InventoryDragEvent)
      */
     @EventHandler
-    public void onInventoryDrag(@NotNull InventoryDragEvent event) {
+    public void onInventoryDrag(@Nonnull InventoryDragEvent event) {
         Optional.ofNullable(this.menus.get(event.getInventory())).ifPresent(menu -> menu.onDrag(event));
     }
 
@@ -249,7 +249,7 @@ public class MenuManager implements Listener {
      * @see AbstractMenu#onItemMove(InventoryMoveItemEvent, boolean)
      */
     @EventHandler
-    public void onItemMove(@NotNull InventoryMoveItemEvent event) {
+    public void onItemMove(@Nonnull InventoryMoveItemEvent event) {
         // Optional.ofNullable(MENUS.get(event.getDestination())).ifPresentOrElse(menu -> menu.onItemMove(event, true),
         // () -> Optional.ofNullable(MENUS.get(event.getSource())).ifPresent(menu -> menu.onItemMove(event, false)));
         Optional<AbstractMenu> menu = Optional.ofNullable(this.menus.get(event.getDestination()));
@@ -269,7 +269,7 @@ public class MenuManager implements Listener {
      * @see AbstractMenu#onDisable(PluginDisableEvent)
      */
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onPluginDisable(@NotNull PluginDisableEvent event) {
+    public void onPluginDisable(@Nonnull PluginDisableEvent event) {
         Optional<Plugin> currentProvider = this.getPlugin();
 
         if (this.providers.remove(event.getPlugin())) {

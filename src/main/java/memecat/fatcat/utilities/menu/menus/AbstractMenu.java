@@ -14,13 +14,14 @@ import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Represents a collection of functional actions and features of an inventory that multiple viewers can see and interact
@@ -53,7 +54,7 @@ public abstract class AbstractMenu {
      *                    and passing events to it
      * @throws IllegalArgumentException If the {@link Inventory} or {@link MenuManager} argument is null
      */
-    public AbstractMenu(@NotNull Inventory inventory, @NotNull MenuManager menuManager) {
+    public AbstractMenu(@Nonnull Inventory inventory, @Nonnull MenuManager menuManager) {
         Preconditions.checkArgument(inventory != null, "Inventory argument can't be null");
         Preconditions.checkArgument(menuManager != null, "MenuManager argument can't be null");
 
@@ -71,7 +72,7 @@ public abstract class AbstractMenu {
      * @param isDestination Whether this {@link org.bukkit.inventory.Inventory} is equal to the {@link
      *                      InventoryMoveItemEvent#getDestination()}
      */
-    public void onItemMove(@NotNull InventoryMoveItemEvent event, boolean isDestination) {
+    public void onItemMove(@Nonnull InventoryMoveItemEvent event, boolean isDestination) {
         event.setCancelled(true);
     }
 
@@ -87,7 +88,7 @@ public abstract class AbstractMenu {
      * @see ISlotProperty
      * @see SlotProperty
      */
-    public void onClick(@NotNull InventoryClickEvent event, boolean external) {
+    public void onClick(@Nonnull InventoryClickEvent event, boolean external) {
         InventoryAction action = event.getAction();
         if (action == InventoryAction.COLLECT_TO_CURSOR || action == InventoryAction.MOVE_TO_OTHER_INVENTORY
                 || !external) {
@@ -105,7 +106,7 @@ public abstract class AbstractMenu {
      *
      * @param event {@link PluginDisableEvent} event
      */
-    public void onDisable(@NotNull PluginDisableEvent event) {
+    public void onDisable(@Nonnull PluginDisableEvent event) {
         this.close();
     }
 
@@ -118,7 +119,7 @@ public abstract class AbstractMenu {
      *
      * @param event {@link InventoryCloseEvent} event
      */
-    public void onClose(@NotNull InventoryCloseEvent event) {
+    public void onClose(@Nonnull InventoryCloseEvent event) {
         if (this.getInventory().getViewers().size() < 2) {
             this.getManager().unregisterMenu(this);
         }
@@ -131,7 +132,7 @@ public abstract class AbstractMenu {
      *
      * @param event {@link InventoryDragEvent} event
      */
-    public void onDrag(@NotNull InventoryDragEvent event) {
+    public void onDrag(@Nonnull InventoryDragEvent event) {
         int size = event.getView().getTopInventory().getSize();
 
         for (int slot : event.getRawSlots()) {
@@ -147,7 +148,7 @@ public abstract class AbstractMenu {
      *
      * @param event {@link InventoryOpenEvent} event
      */
-    public void onOpen(@NotNull InventoryOpenEvent event) {
+    public void onOpen(@Nonnull InventoryOpenEvent event) {
     }
 
     /**
@@ -161,16 +162,25 @@ public abstract class AbstractMenu {
      *                                  events
      * @throws NullPointerException     If a {@link HumanEntity} is null
      */
-    @NotNull
-    public AbstractMenu open(@NotNull Collection<? extends HumanEntity> viewers) {
+    @Nonnull
+    public AbstractMenu open(@Nonnull Iterable<? extends HumanEntity> viewers) {
         Preconditions.checkState(this.menuManager.isRegistered(),
                 "MenuManager has no enabled plugin registered to handle inventory menu events");
-        Preconditions.checkArgument(viewers != null && !viewers.isEmpty(),
+        Preconditions.checkArgument(viewers != null,
                 "Collection<? extends HumanEntity> of viewers argument can't be null");
-        Preconditions.checkArgument(!viewers.contains(null), "Collection<? extends HumanEntity> of viewers argument can't contain null");
 
-        this.menuManager.registerMenu(this);
-        viewers.forEach(viewer -> viewer.openInventory(this.getInventory()));
+        final AtomicInteger count = new AtomicInteger();
+        this.getManager().registerMenu(this);
+        viewers.forEach(viewer -> {
+            Preconditions.checkArgument(viewer != null, "HumanEntity in an Iterable of viewers argument can't be null");
+            viewer.openInventory(this.getInventory());
+            count.getAndIncrement();
+        });
+
+        if (count.get() == 0) {
+            this.getManager().unregisterMenu(this);
+        }
+
         return this;
     }
 
@@ -183,7 +193,7 @@ public abstract class AbstractMenu {
      * @throws IndexOutOfBoundsException If a slot in the slot array argument is out of this inventory's boundaries
      * @throws IllegalArgumentException  If the slot array argument is null
      */
-    @NotNull
+    @Nonnull
     public AbstractMenu set(@Nullable ItemStack item, int... slots) {
         Preconditions.checkArgument(slots != null, "Array of slots can't be null");
         int size = this.getInventory().getSize();
@@ -204,8 +214,8 @@ public abstract class AbstractMenu {
      * @return Previous {@link MenuManager} of this {@link AbstractMenu}
      * @throws IllegalArgumentException If the {@link MenuManager} argument is null
      */
-    @NotNull
-    public AbstractMenu setManager(@NotNull MenuManager menuManager) {
+    @Nonnull
+    public AbstractMenu setManager(@Nonnull MenuManager menuManager) {
         Preconditions.checkArgument(menuManager != null, "MenuManager argument can't be null");
 
         this.menuManager.unregisterMenu(this);
@@ -225,8 +235,8 @@ public abstract class AbstractMenu {
      *                                  events
      * @throws NullPointerException     If a {@link HumanEntity} is null
      */
-    @NotNull
-    public AbstractMenu open(@NotNull HumanEntity... viewers) {
+    @Nonnull
+    public AbstractMenu open(@Nonnull HumanEntity... viewers) {
         return this.open(Arrays.asList(viewers));
     }
 
@@ -235,17 +245,13 @@ public abstract class AbstractMenu {
      *
      * <p>Closing an {@link AbstractMenu} for a {@link HumanEntity} might not always work because their {@link
      * #onClose(InventoryCloseEvent)} can choose to open a new {@link AbstractMenu}, possibly the same one.
+     * <p>Remember to schedule this action for the next tick if you're running it inside an inventory event handler!
      *
      * @return This instance, useful for chaining
      */
-    @NotNull
+    @Nonnull
     public AbstractMenu close() {
-        // Careful! An Iterator is required to prevent ConcurrentModificationException during indirect removal of
-        // viewers.
-        for (Iterator<HumanEntity> iterator = this.getInventory().getViewers().iterator(); iterator.hasNext();) {
-            iterator.next().closeInventory();
-        }
-
+        new ArrayList<>(this.getInventory().getViewers()).forEach(HumanEntity::closeInventory);
         return this;
     }
 
@@ -254,7 +260,7 @@ public abstract class AbstractMenu {
      *
      * @return This instance, useful for chaining
      */
-    @NotNull
+    @Nonnull
     public AbstractMenu clear() {
         this.getInventory().clear();
         return this;
@@ -267,7 +273,7 @@ public abstract class AbstractMenu {
      * @return {@link Optional} of a nullable {@link ItemStack}
      * @throws IndexOutOfBoundsException If the given slot argument is out of the inventory's array bounds
      */
-    @NotNull
+    @Nonnull
     public Optional<ItemStack> getItem(int slot) {
         Menu.checkElement(slot, this.getInventory().getSize());
         return Optional.ofNullable(this.getInventory().getItem(slot));
@@ -278,7 +284,7 @@ public abstract class AbstractMenu {
      *
      * @return Always the same {@link Inventory}
      */
-    @NotNull
+    @Nonnull
     public final Inventory getInventory() {
         return this.inventory;
     }
@@ -289,7 +295,7 @@ public abstract class AbstractMenu {
      *
      * @return The {@link MenuManager} this inventory is or will be registered in
      */
-    @NotNull
+    @Nonnull
     public MenuManager getManager() {
         return this.menuManager;
     }

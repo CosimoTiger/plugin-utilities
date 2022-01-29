@@ -1,9 +1,9 @@
 package memecat.fatcat.utilities.file;
 
 import org.bukkit.plugin.Plugin;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,7 +32,7 @@ public abstract class PluginFile extends File {
      * @param path   Folder file or a directory in which this file should be, also called a "parent" file
      * @param name   File name or path to file, also called a "child" file, ending with a file extension
      */
-    public PluginFile(@NotNull Plugin plugin, @Nullable File path, @NotNull String name) {
+    public PluginFile(@Nonnull Plugin plugin, @Nullable File path, @Nonnull String name) {
         super(path, name);
         this.plugin = plugin;
     }
@@ -47,7 +47,7 @@ public abstract class PluginFile extends File {
      * @param path   Folder file or a directory in which this file should be, also called a "parent" file
      * @param name   File name or path to file, also called a "child" file, ending with a file extension
      */
-    public PluginFile(@NotNull Plugin plugin, @Nullable String path, @NotNull String name) {
+    public PluginFile(@Nonnull Plugin plugin, @Nullable String path, @Nonnull String name) {
         super(path, name);
         this.plugin = plugin;
     }
@@ -58,7 +58,7 @@ public abstract class PluginFile extends File {
      * @param plugin Plugin that this file belongs to
      * @param path   File path to this file, ending with it's name and an extension
      */
-    public PluginFile(@NotNull Plugin plugin, @NotNull String path) {
+    public PluginFile(@Nonnull Plugin plugin, @Nonnull String path) {
         super(path);
         this.plugin = plugin;
     }
@@ -69,7 +69,7 @@ public abstract class PluginFile extends File {
      * @param plugin Plugin that this file belongs to
      * @param uri    URI parameter that is used in the creation of {@link java.io.File}
      */
-    public PluginFile(@NotNull Plugin plugin, @NotNull URI uri) {
+    public PluginFile(@Nonnull Plugin plugin, @Nonnull URI uri) {
         super(uri);
         this.plugin = plugin;
     }
@@ -113,7 +113,7 @@ public abstract class PluginFile extends File {
      *
      * @return Plugin that this file belongs to
      */
-    @NotNull
+    @Nonnull
     public Plugin getPlugin() {
         return this.plugin;
     }

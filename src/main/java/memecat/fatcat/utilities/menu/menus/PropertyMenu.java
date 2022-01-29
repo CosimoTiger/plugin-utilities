@@ -3,11 +3,12 @@ package memecat.fatcat.utilities.menu.menus;
 import com.google.common.base.Preconditions;
 import memecat.fatcat.utilities.menu.MenuManager;
 import memecat.fatcat.utilities.menu.slot.ISlotProperty;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -34,7 +35,7 @@ public class PropertyMenu<E> extends Menu {
      * @param menuManager Not null {@link MenuManager} that will be used for (un)registering this {@link AbstractMenu}
      *                    and passing events to it
      */
-    public PropertyMenu(@NotNull Inventory inventory, @NotNull MenuManager menuManager) {
+    public PropertyMenu(@Nonnull Inventory inventory, @Nonnull MenuManager menuManager) {
         super(inventory, menuManager);
     }
 
@@ -53,10 +54,11 @@ public class PropertyMenu<E> extends Menu {
      * @throws IllegalArgumentException  If the fromSlot is greater than the toSlot argument or the skipForSlots
      *                                   argument is lower than 1
      */
-    @NotNull
+    @Nonnull
     public PropertyMenu<E> fillSkip(@Nullable E property, int fromSlot, int toSlot, int skipForSlots) {
-        checkRange(fromSlot, toSlot, this.getInventory().getSize());
         Preconditions.checkArgument(skipForSlots > 0, "skipForSlots argument (" + skipForSlots + ") can't be smaller than 1");
+        fromSlot = Math.max(0, fromSlot);
+        toSlot = Math.min(this.getInventory().getSize() - 1, toSlot);
 
         for (int slot = fromSlot; slot < toSlot; slot += skipForSlots) {
             this.properties[slot] = property;
@@ -75,7 +77,7 @@ public class PropertyMenu<E> extends Menu {
      * @throws IndexOutOfBoundsException If a slot in the slot array argument is out of this inventory's boundaries
      * @throws IllegalArgumentException  If the slot array argument is null
      */
-    @NotNull
+    @Nonnull
     public PropertyMenu<E> set(@Nullable E property, @Nullable ItemStack item, int... slots) {
         for (int slot : slots) {
             checkElement(slot, this.getInventory().getSize());
@@ -96,8 +98,8 @@ public class PropertyMenu<E> extends Menu {
      * @throws IndexOutOfBoundsException If the slot argument is out of this inventory's array boundaries
      * @throws IllegalArgumentException  If the {@link Consumer}&lt;{@link ISlotProperty}&gt; argument is null
      */
-    @NotNull
-    public PropertyMenu<E> changeProperty(@NotNull Consumer<E> applyProperty, int slot) {
+    @Nonnull
+    public PropertyMenu<E> changeProperty(@Nonnull Consumer<E> applyProperty, int slot) {
         Preconditions.checkArgument(applyProperty != null, "Consumer<ISlotProperty> argument can't be null");
         this.getSlotProperty(slot).ifPresent(applyProperty);
         return this;
@@ -117,7 +119,7 @@ public class PropertyMenu<E> extends Menu {
      * @throws IndexOutOfBoundsException If the fromSlot or to-slot argument isn't within the inventory's boundaries
      * @throws IllegalArgumentException  If the fromSlot is greater than the to-slot argument
      */
-    @NotNull
+    @Nonnull
     public PropertyMenu<E> fillInterval(@Nullable E property, int fromSlot, int toSlot) {
         return this.fillSkip(property, fromSlot, toSlot, 1);
     }
@@ -129,7 +131,7 @@ public class PropertyMenu<E> extends Menu {
      * @param replace  Whether existing properties should be replaced with a new one
      * @return This instance, useful for chaining
      */
-    @NotNull
+    @Nonnull
     public PropertyMenu<E> fill(@Nullable E property, boolean replace) {
         if (replace) {
             for (int slot = 0; slot < this.getInventory().getSize(); slot++) {
@@ -155,7 +157,7 @@ public class PropertyMenu<E> extends Menu {
      * @throws IllegalArgumentException  If the array of slots is null
      * @throws IndexOutOfBoundsException If a slot in the slot array argument is out of this inventory's boundaries
      */
-    @NotNull
+    @Nonnull
     public PropertyMenu<E> set(@Nullable E property, int... slots) {
         int size = this.getInventory().getSize();
 
@@ -172,7 +174,7 @@ public class PropertyMenu<E> extends Menu {
      *
      * @return This instance, useful for chaining
      */
-    @NotNull
+    @Nonnull
     public PropertyMenu<E> clearProperties() {
         this.properties = (E[]) new Object[this.getInventory().getSize()];
         return this;
@@ -183,11 +185,65 @@ public class PropertyMenu<E> extends Menu {
      *
      * @return This instance, useful for chaining
      */
-    @NotNull
+    @Nonnull
     @Override
     public PropertyMenu<E> clear() {
         this.clearContents();
         return this.clearProperties();
+    }
+
+    @Nonnull
+    @Override
+    public PropertyMenu<E>fillSkip(@Nullable ItemStack item, int fromSlot, int toSlot, int skipForSlots) {
+        return (PropertyMenu<E>) super.fillSkip(item, fromSlot, toSlot, skipForSlots);
+    }
+
+    @Nonnull
+    @Override
+    public PropertyMenu<E>fillInterval(@Nullable ItemStack item, int fromSlot, int toSlot) {
+        return (PropertyMenu<E>) super.fillInterval(item, fromSlot, toSlot);
+    }
+
+    @Nonnull
+    @Override
+    public PropertyMenu<E>changeItem(@Nonnull Consumer<ItemStack> applyItem, int slot) {
+        return (PropertyMenu<E>) super.changeItem(applyItem, slot);
+    }
+
+    @Nonnull
+    @Override
+    public PropertyMenu<E>fill(@Nullable ItemStack item, boolean replace) {
+        return (PropertyMenu<E>) super.fill(item, replace);
+    }
+
+    @Nonnull
+    @Override
+    public PropertyMenu<E>clearContents() {
+        return (PropertyMenu<E>) super.clearContents();
+    }
+
+    @Nonnull
+    @Override
+    public PropertyMenu<E>open(@Nonnull Iterable<? extends HumanEntity> viewers) {
+        return (PropertyMenu<E>) super.open(viewers);
+    }
+
+    @Nonnull
+    @Override
+    public PropertyMenu<E>set(@Nullable ItemStack item, int... slots) {
+        return (PropertyMenu<E>) super.set(item, slots);
+    }
+
+    @Nonnull
+    @Override
+    public PropertyMenu<E>setManager(@Nonnull MenuManager menuManager) {
+        return (PropertyMenu<E>) super.setManager(menuManager);
+    }
+
+    @Nonnull
+    @Override
+    public PropertyMenu<E>open(@Nonnull HumanEntity... viewers) {
+        return (PropertyMenu<E>) super.open(viewers);
     }
 
     /**
@@ -197,7 +253,7 @@ public class PropertyMenu<E> extends Menu {
      * @return {@link Optional} of nullable Object
      * @throws IndexOutOfBoundsException If the given slot argument is out of this inventory's boundaries
      */
-    @NotNull
+    @Nonnull
     public Optional<E> getSlotProperty(int slot) {
         checkElement(slot, this.getInventory().getSize());
         return Optional.ofNullable(this.properties[slot]);
