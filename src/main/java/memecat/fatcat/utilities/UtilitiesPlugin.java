@@ -2,10 +2,13 @@ package memecat.fatcat.utilities;
 
 import com.google.common.base.Preconditions;
 import memecat.fatcat.utilities.menu.MenuManager;
+import memecat.fatcat.utilities.utility.DummyEnchantment;
+import memecat.fatcat.utilities.utility.StringUtil;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.Optional;
 
 /**
@@ -19,6 +22,7 @@ public class UtilitiesPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
+        DummyEnchantment.register();
     }
 
     @Override
@@ -59,11 +63,10 @@ public class UtilitiesPlugin extends JavaPlugin {
      */
     @Nonnull
     public static MenuManager getMenuManager(@Nonnull Plugin provider) {
-        if (instance == null) {
-            return menuManager == null ? menuManager = new MenuManager(provider) : menuManager.provide(provider);
-        }
-
-        return menuManager == null ? menuManager = new MenuManager(instance).provide(provider) : menuManager.provide(provider);
+        menuManager = (menuManager == null)
+                ? new MenuManager(instance == null ? provider : instance)
+                : menuManager.provide(provider);
+        return menuManager;
     }
 
     /**
