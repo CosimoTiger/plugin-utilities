@@ -10,12 +10,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -179,6 +174,17 @@ public class ItemBuilder implements Cloneable {
     }
 
     /**
+     * Adds a dummy enchantment to give the {@link ItemStack} an enchanted glow.
+     *
+     * @return This instance, useful for chaining
+     */
+    @Nonnull
+    public ItemBuilder setEnchanted() {
+        this.itemStack.addUnsafeEnchantment(new DummyEnchantment(), 1);
+        return this;
+    }
+
+    /**
      * Appends new lines of lore at the given index of the {@link ItemStack}'s lore from a given list.
      *
      * @param index Index at which the specified new lines of lore will be added
@@ -215,7 +221,7 @@ public class ItemBuilder implements Cloneable {
         }
 
         List<String> lore = this.getItemMeta().map(ItemMeta::getLore).orElse(null);
-        lore = lore == null || lore.isEmpty() ? new ArrayList<>(Utility.max(indexes) + 1) : lore;
+        lore = lore == null || lore.isEmpty() ? new ArrayList<>(NumberUtil.max(indexes) + 1) : lore;
 
         for (int index : indexes) {
             lore.set(index, line);
