@@ -1,4 +1,4 @@
-package memecat.fatcat.utilities.utility;
+package com.cosimo.utilities.utility;
 
 import javax.annotation.Nonnull;
 

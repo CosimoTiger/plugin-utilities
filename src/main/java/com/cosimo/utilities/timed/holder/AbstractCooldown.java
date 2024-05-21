@@ -1,7 +1,7 @@
-package memecat.fatcat.utilities.timed.holder;
+package com.cosimo.utilities.timed.holder;
 
 import com.google.common.base.Preconditions;
-import memecat.fatcat.utilities.timed.ITimed;
+import com.cosimo.utilities.timed.ITimed;
 
 import javax.annotation.Nonnull;
 import java.util.concurrent.TimeUnit;

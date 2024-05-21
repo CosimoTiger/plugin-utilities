@@ -1,8 +1,8 @@
-package memecat.fatcat.utilities.timed.collection;
+package com.cosimo.utilities.timed.collection;
 
 import com.google.common.base.Preconditions;
-import memecat.fatcat.utilities.timed.ITimed;
-import memecat.fatcat.utilities.timed.holder.Cooldown;
+import com.cosimo.utilities.timed.ITimed;
+import com.cosimo.utilities.timed.holder.Cooldown;
 
 import javax.annotation.Nonnull;
 import java.util.Collections;

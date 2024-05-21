@@ -1,4 +1,4 @@
-package memecat.fatcat.utilities.timed.holder;
+package com.cosimo.utilities.timed.holder;
 
 import com.google.common.base.Preconditions;
 

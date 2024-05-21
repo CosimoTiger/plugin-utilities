@@ -1,7 +1,7 @@
-package memecat.fatcat.utilities.utility;
+package com.cosimo.utilities.utility;
 
 import com.google.common.base.Preconditions;
-import memecat.fatcat.utilities.UtilitiesPlugin;
+import com.cosimo.utilities.UtilitiesPlugin;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;

@@ -1,4 +1,4 @@
-package memecat.fatcat.utilities.timed;
+package com.cosimo.utilities.timed;
 
 import javax.annotation.Nonnull;
 import java.util.concurrent.TimeUnit;

@@ -1,6 +1,6 @@
-package memecat.fatcat.utilities.menu.slot;
+package com.cosimo.utilities.menu.slot;
 
-import memecat.fatcat.utilities.menu.menus.AbstractMenu;
+import com.cosimo.utilities.menu.menus.AbstractMenu;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
 import javax.annotation.Nonnull;

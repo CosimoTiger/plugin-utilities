@@ -1,12 +1,12 @@
-package memecat.fatcat.utilities.menu.slot;
+package com.cosimo.utilities.menu.slot;
 
-import memecat.fatcat.utilities.menu.menus.AbstractMenu;
+import com.cosimo.utilities.menu.menus.AbstractMenu;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
 import javax.annotation.Nonnull;
 
 /**
- * This type is used by {@link memecat.fatcat.utilities.menu.menus.PropertyMenu} to store an action or even a value at
+ * This type is used by {@link com.cosimo.utilities.menu.menus.PropertyMenu} to store an action or even a value at
  * specific slots and react to an {@link InventoryClickEvent} at the slot. Of course, developers are able to implement
  * this for their own way of usage.
  *

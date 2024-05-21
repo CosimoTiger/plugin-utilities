@@ -1,8 +1,8 @@
-package memecat.fatcat.utilities.menu.menus;
+package com.cosimo.utilities.menu.menus;
 
 import com.google.common.base.Preconditions;
-import memecat.fatcat.utilities.menu.MenuManager;
-import memecat.fatcat.utilities.menu.slot.ISlotProperty;
+import com.cosimo.utilities.menu.MenuManager;
+import com.cosimo.utilities.menu.slot.ISlotProperty;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -17,7 +17,7 @@ import java.util.function.Consumer;
  * methods for working with these properties.
  *
  * @param <E> Single object type to be stored in the slots of this menu inventory
- * @author Alan B. | FatCat
+ * @author CosimoTiger
  * @see ISlotProperty
  */
 public class PropertyMenu<E> extends Menu {

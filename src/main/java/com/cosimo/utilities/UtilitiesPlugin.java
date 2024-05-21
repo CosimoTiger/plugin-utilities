@@ -1,14 +1,12 @@
-package memecat.fatcat.utilities;
+package com.cosimo.utilities;
 
 import com.google.common.base.Preconditions;
-import memecat.fatcat.utilities.menu.MenuManager;
-import memecat.fatcat.utilities.utility.DummyEnchantment;
-import memecat.fatcat.utilities.utility.StringUtil;
+import com.cosimo.utilities.menu.MenuManager;
+import com.cosimo.utilities.utility.DummyEnchantment;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
 import java.util.Optional;
 
 /**

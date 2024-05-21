@@ -1,7 +1,7 @@
-package memecat.fatcat.utilities.menu;
+package com.cosimo.utilities.menu;
 
-import memecat.fatcat.utilities.UtilitiesPlugin;
-import memecat.fatcat.utilities.menu.menus.AbstractMenu;
+import com.cosimo.utilities.UtilitiesPlugin;
+import com.cosimo.utilities.menu.menus.AbstractMenu;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.EventHandler;
@@ -38,7 +38,7 @@ import java.util.Queue;
  * multiple event handler calls. It is advised to use {@link UtilitiesPlugin#getMenuManager(Plugin)} which is accessible
  * and common to all {@link Plugin}s that are using this library.
  *
- * @author Alan B. | FatCat
+ * @author CosimoTiger
  */
 public class MenuManager implements Listener {
 

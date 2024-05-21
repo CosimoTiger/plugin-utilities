@@ -1,10 +1,9 @@
-package memecat.fatcat.utilities.utility;
+package com.cosimo.utilities.utility;
 
 import org.bukkit.ChatColor;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.text.Format;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;

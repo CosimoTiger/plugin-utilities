@@ -1,8 +1,8 @@
-package memecat.fatcat.utilities.menu.menus;
+package com.cosimo.utilities.menu.menus;
 
 import com.google.common.base.Preconditions;
-import memecat.fatcat.utilities.menu.MenuManager;
-import memecat.fatcat.utilities.menu.slot.ISlotProperty;
+import com.cosimo.utilities.menu.MenuManager;
+import com.cosimo.utilities.menu.slot.ISlotProperty;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 

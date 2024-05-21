@@ -1,9 +1,9 @@
-package memecat.fatcat.utilities.menu.menus;
+package com.cosimo.utilities.menu.menus;
 
 import com.google.common.base.Preconditions;
-import memecat.fatcat.utilities.menu.MenuManager;
-import memecat.fatcat.utilities.menu.slot.ISlotProperty;
-import memecat.fatcat.utilities.menu.slot.SlotProperty;
+import com.cosimo.utilities.menu.MenuManager;
+import com.cosimo.utilities.menu.slot.ISlotProperty;
+import com.cosimo.utilities.menu.slot.SlotProperty;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * <p>A developer can subclass this class, override the methods or add them to customise the ways of processing inputs
  * for inventory menu events or modifying the inventories.
  *
- * @author Alan B. | FatCat
+ * @author CosimoTiger
  * @see Menu
  * @see PropertyMenu
  */

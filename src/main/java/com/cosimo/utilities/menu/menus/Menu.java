@@ -1,7 +1,7 @@
-package memecat.fatcat.utilities.menu.menus;
+package com.cosimo.utilities.menu.menus;
 
 import com.google.common.base.Preconditions;
-import memecat.fatcat.utilities.menu.MenuManager;
+import com.cosimo.utilities.menu.MenuManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -16,7 +16,7 @@ import java.util.function.Consumer;
 /**
  * The default implementation of the {@link AbstractMenu} class.
  *
- * @author Alan B. | FatCat
+ * @author CosimoTiger
  * @see PropertyMenu
  */
 public class Menu extends AbstractMenu {

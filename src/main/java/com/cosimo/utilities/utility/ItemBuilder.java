@@ -1,4 +1,4 @@
-package memecat.fatcat.utilities.utility;
+package com.cosimo.utilities.utility;
 
 import com.google.common.base.Preconditions;
 import org.bukkit.Material;

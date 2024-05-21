@@ -1,4 +1,4 @@
-package memecat.fatcat.utilities.file;
+package com.cosimo.utilities.file;
 
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;

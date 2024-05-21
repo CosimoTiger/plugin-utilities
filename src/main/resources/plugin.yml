@@ -1,7 +1,7 @@
 name: PluginUtilities
-main: memecat.fatcat.utilities.UtilitiesPlugin
+main: com.cosimo.utilities.UtilitiesPlugin
 version: 1.0.0
 api-version: 1.13
-author: FatCatBuilds
+author: CosimoTiger
 description: PluginUtilities is a code utility library for Spigot developers.
-website: https://github.com/memecatFatCat/plugin-utilities
+website: https://github.com/CosimoTiger/plugin-utilities
