@@ -1,5 +1,6 @@
-package com.cosimo.utilities.utility;
+package com.cosimo.utilities.item;
 
+import com.cosimo.utilities.utility.NumberUtil;
 import com.google.common.base.Preconditions;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
