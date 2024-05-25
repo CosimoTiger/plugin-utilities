@@ -1,7 +1,6 @@
 package com.cosimo.utilities.menu;
 
 import com.cosimo.utilities.UtilitiesPlugin;
-import com.cosimo.utilities.menu.menus.AbstractMenu;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.EventHandler;

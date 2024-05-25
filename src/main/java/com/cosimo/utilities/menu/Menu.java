@@ -1,7 +1,6 @@
-package com.cosimo.utilities.menu.menus;
+package com.cosimo.utilities.menu;
 
 import com.google.common.base.Preconditions;
-import com.cosimo.utilities.menu.MenuManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryCloseEvent;

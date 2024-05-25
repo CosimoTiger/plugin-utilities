@@ -1,4 +1,4 @@
-package com.cosimo.utilities.menu.menus;
+package com.cosimo.utilities.menu;
 
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
