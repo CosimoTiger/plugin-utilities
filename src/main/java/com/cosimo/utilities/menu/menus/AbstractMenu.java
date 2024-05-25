@@ -1,8 +1,6 @@
 package com.cosimo.utilities.menu.menus;
 
 import com.cosimo.utilities.menu.MenuManager;
-import com.cosimo.utilities.menu.slot.ISlotProperty;
-import com.cosimo.utilities.menu.slot.SlotProperty;
 import com.google.common.base.Preconditions;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryAction;
@@ -69,17 +67,15 @@ public abstract class AbstractMenu {
     /**
      * Handles any {@link InventoryClickEvent} related to this inventory.
      *
-     * <p>By default, the {@link InventoryAction#COLLECT_TO_CURSOR} and {@link InventoryAction#MOVE_TO_OTHER_INVENTORY}
-     * are cancelled and any menu action is cancelled from interaction, but interaction with one's personal inventory is
-     * allowed.
+     * <p>By default, {@link InventoryAction#COLLECT_TO_CURSOR} and {@link InventoryAction#MOVE_TO_OTHER_INVENTORY}
+     * and any action on the menu are cancelled, but interaction with one's own inventory is allowed.
      *
      * @param event    {@link InventoryClickEvent} event
-     * @param external Whether the clicked inventory is not this one, possibly not any (outside)
-     * @see ISlotProperty
-     * @see SlotProperty
+     * @param external Whether the clicked inventory is not this one, possibly not any (outside of view)
      */
     public void onClick(@Nonnull InventoryClickEvent event, boolean external) {
-        InventoryAction action = event.getAction();
+        final var action = event.getAction();
+
         if (action == InventoryAction.COLLECT_TO_CURSOR || action == InventoryAction.MOVE_TO_OTHER_INVENTORY
                 || !external) {
             event.setCancelled(true);

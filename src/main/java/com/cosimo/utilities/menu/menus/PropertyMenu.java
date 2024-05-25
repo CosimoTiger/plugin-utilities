@@ -1,8 +1,7 @@
 package com.cosimo.utilities.menu.menus;
 
-import com.google.common.base.Preconditions;
 import com.cosimo.utilities.menu.MenuManager;
-import com.cosimo.utilities.menu.slot.ISlotProperty;
+import com.google.common.base.Preconditions;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -18,7 +17,6 @@ import java.util.function.Consumer;
  *
  * @param <E> Single object type to be stored in the slots of this menu inventory
  * @author CosimoTiger
- * @see ISlotProperty
  */
 public class PropertyMenu<E> extends Menu {
 
@@ -66,10 +64,10 @@ public class PropertyMenu<E> extends Menu {
     }
 
     /**
-     * Sets the same {@link ISlotProperty} and {@link ItemStack} instance at the given slots in the inventory.
+     * Sets the provided property and {@link ItemStack} instance at the given slots in the inventory.
      *
      * @param item     Nullable {@link ItemStack} that will be set in all given slots
-     * @param property Nullable {@link ISlotProperty} that will be set in all given slots
+     * @param property Nullable property that will be set in all given slots
      * @param slots    Slots in which the given item and property will be set
      * @return This instance, useful for chaining
      * @throws IndexOutOfBoundsException If a slot in the slot array argument is out of this inventory's boundaries
@@ -87,18 +85,18 @@ public class PropertyMenu<E> extends Menu {
     }
 
     /**
-     * Modifies an {@link ISlotProperty} located at a given slot with given operations to perform.
+     * Modifies a property located at a given slot with given operations to perform.
      *
      * @param applyProperty Lambda method that'll take a slot property object as an argument and perform operations on
      *                      it
-     * @param slot          Slot at which an {@link ISlotProperty} that is being modified is located at
+     * @param slot          Slot at which a property that is being modified is located at
      * @return This instance, useful for chaining
      * @throws IndexOutOfBoundsException If the slot argument is out of this inventory's array boundaries
-     * @throws IllegalArgumentException  If the {@link Consumer}&lt;{@link ISlotProperty}&gt; argument is null
+     * @throws IllegalArgumentException  If the {@link Consumer} argument is null
      */
     @Nonnull
     public PropertyMenu<E> changeProperty(@Nonnull Consumer<E> applyProperty, int slot) {
-        Preconditions.checkArgument(applyProperty != null, "Consumer<ISlotProperty> argument can't be null");
+        Preconditions.checkArgument(applyProperty != null, "Consumer<E> argument can't be null");
         this.getSlotProperty(slot).ifPresent(applyProperty);
         return this;
     }
@@ -125,7 +123,7 @@ public class PropertyMenu<E> extends Menu {
     /**
      * Sets all or only empty inventory slot properties to equal to the given property object.
      *
-     * @param property {@link ISlotProperty} that will be set in all slots
+     * @param property Property that will be set in all slots
      * @param replace  Whether existing properties should be replaced with a new one
      * @return This instance, useful for chaining
      */
@@ -149,7 +147,7 @@ public class PropertyMenu<E> extends Menu {
     /**
      * Sets a slot property object at the given inventory {@link AbstractMenu} slot(s).
      *
-     * @param property {@link ISlotProperty} object
+     * @param property Property {@link Object}
      * @param slots    Slots that these properties will belong to
      * @return This instance, useful for chaining
      * @throws IllegalArgumentException  If the array of slots is null
