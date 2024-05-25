@@ -13,8 +13,8 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
- * Implementation of {@link Menu} with an {@link Object} array of the same size as the inventory, with many
- * methods for working with these properties.
+ * Implementation of {@link Menu} with an {@link Object} array of the same size as the inventory, with many methods for
+ * working with these properties.
  *
  * @param <E> Single object type to be stored in the slots of this menu inventory
  * @author CosimoTiger
@@ -31,12 +31,10 @@ public class PropertyMenu<E> extends Menu {
      * Creates a new {@link PropertyMenu} using the default constructor for {@link Menu}, with an array of this
      * instance's generic type.
      *
-     * @param inventory   Not null {@link Inventory} that will be wrapped and controlled by an {@link AbstractMenu}
-     * @param menuManager Not null {@link MenuManager} that will be used for (un)registering this {@link AbstractMenu}
-     *                    and passing events to it
+     * @param inventory Not null {@link Inventory} that will be wrapped and controlled by an {@link AbstractMenu}
      */
-    public PropertyMenu(@Nonnull Inventory inventory, @Nonnull MenuManager menuManager) {
-        super(inventory, menuManager);
+    public PropertyMenu(@Nonnull Inventory inventory) {
+        super(inventory);
     }
 
     /**
@@ -194,56 +192,50 @@ public class PropertyMenu<E> extends Menu {
 
     @Nonnull
     @Override
-    public PropertyMenu<E>fillSkip(@Nullable ItemStack item, int fromSlot, int toSlot, int skipForSlots) {
+    public PropertyMenu<E> fillSkip(@Nullable ItemStack item, int fromSlot, int toSlot, int skipForSlots) {
         return (PropertyMenu<E>) super.fillSkip(item, fromSlot, toSlot, skipForSlots);
     }
 
     @Nonnull
     @Override
-    public PropertyMenu<E>fillInterval(@Nullable ItemStack item, int fromSlot, int toSlot) {
+    public PropertyMenu<E> fillInterval(@Nullable ItemStack item, int fromSlot, int toSlot) {
         return (PropertyMenu<E>) super.fillInterval(item, fromSlot, toSlot);
     }
 
     @Nonnull
     @Override
-    public PropertyMenu<E>changeItem(@Nonnull Consumer<ItemStack> applyItem, int slot) {
+    public PropertyMenu<E> changeItem(@Nonnull Consumer<ItemStack> applyItem, int slot) {
         return (PropertyMenu<E>) super.changeItem(applyItem, slot);
     }
 
     @Nonnull
     @Override
-    public PropertyMenu<E>fill(@Nullable ItemStack item, boolean replace) {
+    public PropertyMenu<E> fill(@Nullable ItemStack item, boolean replace) {
         return (PropertyMenu<E>) super.fill(item, replace);
     }
 
     @Nonnull
     @Override
-    public PropertyMenu<E>clearContents() {
+    public PropertyMenu<E> clearContents() {
         return (PropertyMenu<E>) super.clearContents();
     }
 
     @Nonnull
     @Override
-    public PropertyMenu<E>open(@Nonnull Iterable<? extends HumanEntity> viewers) {
-        return (PropertyMenu<E>) super.open(viewers);
+    public PropertyMenu<E> open(@Nonnull MenuManager menuManager, @Nonnull Iterable<? extends HumanEntity> viewers) {
+        return (PropertyMenu<E>) super.open(menuManager, viewers);
     }
 
     @Nonnull
     @Override
-    public PropertyMenu<E>set(@Nullable ItemStack item, int... slots) {
+    public PropertyMenu<E> set(@Nullable ItemStack item, int... slots) {
         return (PropertyMenu<E>) super.set(item, slots);
     }
 
     @Nonnull
     @Override
-    public PropertyMenu<E>setManager(@Nonnull MenuManager menuManager) {
-        return (PropertyMenu<E>) super.setManager(menuManager);
-    }
-
-    @Nonnull
-    @Override
-    public PropertyMenu<E>open(@Nonnull HumanEntity... viewers) {
-        return (PropertyMenu<E>) super.open(viewers);
+    public PropertyMenu<E> open(@Nonnull MenuManager menuManager, @Nonnull HumanEntity... viewers) {
+        return (PropertyMenu<E>) super.open(menuManager, viewers);
     }
 
     /**

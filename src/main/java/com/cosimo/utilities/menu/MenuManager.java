@@ -25,13 +25,13 @@ import java.util.Optional;
 import java.util.Queue;
 
 /**
- * A class that filters {@link org.bukkit.event.inventory.InventoryEvent}s to registered {@link Inventory} {@link
- * AbstractMenu}s.
+ * A class that filters {@link org.bukkit.event.inventory.InventoryEvent}s to registered {@link Inventory}
+ * {@link AbstractMenu}s.
  *
  * <p><strong>Note:</strong> {@link AbstractMenu}s should be unregistered from their {@link MenuManager} when they're
  * not in use anymore, such as when the last viewer closes an {@link AbstractMenu}. The unfollowing of this rule will
- * cause the increase in memory usage because the {@link AbstractMenu} reference(s) won't be removed from a {@link
- * MenuManager}'s {@link java.util.Map}.
+ * cause the increase in memory usage because the {@link AbstractMenu} reference(s) won't be removed from a
+ * {@link MenuManager}'s {@link java.util.Map}.
  *
  * <p><strong>Warning:</strong> {@link AbstractMenu}s in multiple instances of {@link MenuManager}s might cause
  * multiple event handler calls. It is advised to use {@link UtilitiesPlugin#getMenuManager(Plugin)} which is accessible
@@ -43,9 +43,9 @@ public class MenuManager implements Listener {
 
     /**
      * All menus are stored here at a 1:1 ratio ({@link Inventory} for {@link AbstractMenu}) while being viewed,
-     * compared to a {@link HumanEntity} key to {@link AbstractMenu} value which can grower much larger (e.g. 50
-     * players viewing the same menu would cause 50 keys). <strong>Multiple {@link AbstractMenu}s of a single
-     * {@link Inventory} won't work in one {@link MenuManager} because of unique key mappings.</strong>
+     * compared to a {@link HumanEntity} key to {@link AbstractMenu} value which can grower much larger (e.g. 50 players
+     * viewing the same menu would cause 50 keys). <strong>Multiple {@link AbstractMenu}s of a single {@link Inventory}
+     * won't work in one {@link MenuManager} because of unique key mappings.</strong>
      * TODO: WeakHashMap? Inventories might be referenced only by their Bukkit viewers.
      */
     private final Map<Inventory, AbstractMenu> menus = new HashMap<>(8);
@@ -65,8 +65,8 @@ public class MenuManager implements Listener {
     }
 
     /**
-     * Removes an {@link AbstractMenu} that matches a given {@link Inventory} from this {@link MenuManager}'s {@link
-     * HashMap}.
+     * Removes an {@link AbstractMenu} that matches a given {@link Inventory} from this {@link MenuManager}'s
+     * {@link HashMap}.
      *
      * @param inventory Not null {@link Inventory} whose {@link AbstractMenu} will be unregistered
      * @return {@link AbstractMenu} that was a value to the given {@link Inventory}'s {@link AbstractMenu}
@@ -106,8 +106,8 @@ public class MenuManager implements Listener {
      * Provides a new {@link Plugin} to register this {@link Listener}'s events if it's current provider is null or
      * disabled.
      *
-     * @param newProvider Not null enabled {@link Plugin} for registering this {@link Listener} instance's event handlers
-     *                    immediately or later
+     * @param newProvider Not null enabled {@link Plugin} for registering this {@link Listener} instance's event
+     *                    handlers immediately or later
      * @return This instance, useful for chaining
      * @throws IllegalArgumentException If the {@link Plugin} argument is null
      * @throws IllegalStateException    If the {@link Plugin} argument is not enabled
@@ -189,9 +189,9 @@ public class MenuManager implements Listener {
     }
 
     /**
-     * Returns whether this listener has it's events registered under a plugin.
+     * Returns whether this listener has its events registered under a plugin.
      *
-     * @return Whether this listener has it's events registered under a plugin
+     * @return Whether this listener has its events registered under a plugin
      */
     public boolean isRegistered() {
         return !this.providers.isEmpty(); // Assuming that the disabled provider is always removed...
@@ -217,7 +217,13 @@ public class MenuManager implements Listener {
      */
     @EventHandler(priority = EventPriority.MONITOR)
     public void onInventoryClose(@Nonnull InventoryCloseEvent event) {
-        this.getMenu(event.getInventory()).ifPresent(menu -> menu.onClose(event));
+        this.getMenu(event.getInventory()).ifPresent(menu -> {
+            if (menu.getInventory().getViewers().size() < 2) {
+                this.unregisterMenu(menu);
+            }
+
+            menu.onClose(event);
+        });
     }
 
     /**

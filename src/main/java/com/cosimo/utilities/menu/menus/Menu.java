@@ -31,8 +31,8 @@ public class Menu extends AbstractMenu {
     /**
      * {@inheritDoc} Creates a new {@link Menu} using the default constructor for {@link AbstractMenu}.
      */
-    public Menu(@Nonnull Inventory inventory, @Nonnull MenuManager menuManager) {
-        super(inventory, menuManager);
+    public Menu(@Nonnull Inventory inventory) {
+        super(inventory);
     }
 
     @Override
@@ -187,26 +187,20 @@ public class Menu extends AbstractMenu {
 
     @Nonnull
     @Override
-    public Menu open(@Nonnull Iterable<? extends HumanEntity> viewers) {
-        return (Menu) super.open(viewers);
-    }
-
-    @Nonnull
-    @Override
     public Menu set(@Nullable ItemStack item, int... slots) {
         return (Menu) super.set(item, slots);
     }
 
     @Nonnull
     @Override
-    public Menu setManager(@Nonnull MenuManager menuManager) {
-        return (Menu) super.setManager(menuManager);
+    public Menu open(@Nonnull MenuManager menuManager, @Nonnull Iterable<? extends HumanEntity> viewers) {
+        return (Menu) super.open(menuManager, viewers);
     }
 
     @Nonnull
     @Override
-    public Menu open(@Nonnull HumanEntity... viewers) {
-        return (Menu) super.open(viewers);
+    public Menu open(@Nonnull MenuManager menuManager, @Nonnull HumanEntity... viewers) {
+        return (Menu) super.open(menuManager, viewers);
     }
 
     /**
