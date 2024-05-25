@@ -20,7 +20,6 @@ import javax.annotation.Nonnull;
 import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
@@ -137,7 +136,7 @@ public class MenuManager implements Listener {
     @Nonnull
     public MenuManager closeMenus() {
         //noinspection ForLoopReplaceableByForEach
-        for (Iterator<Map.Entry<Inventory, AbstractMenu>> iterator = this.menus.entrySet().iterator(); iterator.hasNext(); ) {
+        for (var iterator = this.menus.entrySet().iterator(); iterator.hasNext(); ) {
             iterator.next().getValue().close();
         }
 
@@ -157,7 +156,8 @@ public class MenuManager implements Listener {
     }
 
     /**
-     * Returns the current inventory {@link AbstractMenu} that a given player is viewing.
+     * Returns the current inventory {@link AbstractMenu} that a given player is viewing, assuming it's the top
+     * inventory of their {@link org.bukkit.inventory.InventoryView}.
      *
      * @param viewer {@link HumanEntity} that's viewing an inventory
      * @return Optional of nullable {@link AbstractMenu} of the given viewer's top inventory
@@ -205,7 +205,7 @@ public class MenuManager implements Listener {
      */
     @EventHandler
     public void onInventoryClick(@Nonnull InventoryClickEvent event) {
-        Optional.ofNullable(this.menus.get(event.getInventory()))
+        this.getMenu(event.getInventory())
                 .ifPresent(menu -> menu.onClick(event, !menu.getInventory().equals(event.getClickedInventory())));
     }
 
@@ -217,7 +217,7 @@ public class MenuManager implements Listener {
      */
     @EventHandler(priority = EventPriority.MONITOR)
     public void onInventoryClose(@Nonnull InventoryCloseEvent event) {
-        Optional.ofNullable(this.menus.get(event.getInventory())).ifPresent(menu -> menu.onClose(event));
+        this.getMenu(event.getInventory()).ifPresent(menu -> menu.onClose(event));
     }
 
     /**
@@ -228,7 +228,7 @@ public class MenuManager implements Listener {
      */
     @EventHandler
     public void onInventoryOpen(@Nonnull InventoryOpenEvent event) {
-        Optional.ofNullable(this.menus.get(event.getInventory())).ifPresent(menu -> menu.onOpen(event));
+        this.getMenu(event.getInventory()).ifPresent(menu -> menu.onOpen(event));
     }
 
     /**
@@ -239,7 +239,7 @@ public class MenuManager implements Listener {
      */
     @EventHandler
     public void onInventoryDrag(@Nonnull InventoryDragEvent event) {
-        Optional.ofNullable(this.menus.get(event.getInventory())).ifPresent(menu -> menu.onDrag(event));
+        this.getMenu(event.getInventory()).ifPresent(menu -> menu.onDrag(event));
     }
 
     /**
@@ -250,15 +250,8 @@ public class MenuManager implements Listener {
      */
     @EventHandler
     public void onItemMove(@Nonnull InventoryMoveItemEvent event) {
-        // Optional.ofNullable(MENUS.get(event.getDestination())).ifPresentOrElse(menu -> menu.onItemMove(event, true),
-        // () -> Optional.ofNullable(MENUS.get(event.getSource())).ifPresent(menu -> menu.onItemMove(event, false)));
-        Optional<AbstractMenu> menu = Optional.ofNullable(this.menus.get(event.getDestination()));
-
-        if (menu.isPresent()) {
-            menu.get().onItemMove(event, true);
-        } else {
-            Optional.ofNullable(this.menus.get(event.getSource())).ifPresent(m -> m.onItemMove(event, false));
-        }
+        this.getMenu(event.getDestination()).ifPresentOrElse(menu -> menu.onItemMove(event, true),
+                () -> this.getMenu(event.getSource()).ifPresent(menu -> menu.onItemMove(event, false)));
     }
 
     /**
@@ -273,7 +266,7 @@ public class MenuManager implements Listener {
         Optional<Plugin> currentProvider = this.getPlugin();
 
         if (this.providers.remove(event.getPlugin())) {
-            for (Iterator<Map.Entry<Inventory, AbstractMenu>> iterator = this.menus.entrySet().iterator(); iterator.hasNext(); ) {
+            for (var iterator = this.menus.entrySet().iterator(); iterator.hasNext(); ) {
                 try {
                     iterator.next().getValue().onDisable(event);
                 } catch (Exception e) {
@@ -282,8 +275,7 @@ public class MenuManager implements Listener {
                 }
             }
 
-            currentProvider.flatMap(provider ->
-                    Optional.ofNullable(this.providers.peek()))
+            currentProvider.flatMap(provider -> Optional.ofNullable(this.providers.peek()))
                     .ifPresent(newProvider -> Bukkit.getPluginManager().registerEvents(this, newProvider));
         }
     }

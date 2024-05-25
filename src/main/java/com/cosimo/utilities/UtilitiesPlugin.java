@@ -2,7 +2,6 @@ package com.cosimo.utilities;
 
 import com.google.common.base.Preconditions;
 import com.cosimo.utilities.menu.MenuManager;
-import com.cosimo.utilities.utility.DummyEnchantment;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -20,7 +19,6 @@ public class UtilitiesPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
-        DummyEnchantment.register();
     }
 
     @Override
@@ -52,7 +50,7 @@ public class UtilitiesPlugin extends JavaPlugin {
      * plugin to begin with.
      *
      * @param provider Backup {@link Plugin} that will be used for the creation or providing for this {@link UtilitiesPlugin}'s
-     *                {@link MenuManager} if the manager's without an enabled plugin
+     *                 {@link MenuManager} if the manager's without an enabled plugin
      * @return Not null registered {@link MenuManager}
      * @throws IllegalArgumentException If the {@link Plugin} argument is null when required
      * @throws IllegalStateException    If the {@link Plugin} argument is not enabled when required

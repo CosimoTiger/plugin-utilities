@@ -174,14 +174,13 @@ public class ItemBuilder implements Cloneable {
     }
 
     /**
-     * Adds a dummy enchantment to give the {@link ItemStack} an enchanted glow.
+     * Adds an enchantment glint (glow) to the {@link ItemStack} without applying any particular enchantment.
      *
      * @return This instance, useful for chaining
      */
     @Nonnull
-    public ItemBuilder setEnchanted() {
-        this.itemStack.addUnsafeEnchantment(new DummyEnchantment(), 1);
-        return this;
+    public ItemBuilder glint() {
+        return this.changeMeta(meta -> meta.setEnchantmentGlintOverride(true));
     }
 
     /**
@@ -322,7 +321,7 @@ public class ItemBuilder implements Cloneable {
     @Nonnull
     public ItemBuilder removeLoreAt(int... indexes) {
         if (indexes == null || indexes.length == 0) {
-            indexes = new int[] {0};
+            indexes = new int[]{0};
         }
 
         List<String> lore = this.getLore();
@@ -345,17 +344,6 @@ public class ItemBuilder implements Cloneable {
     public ItemBuilder material(@Nonnull Material material) {
         Preconditions.checkArgument(material != null, "Material argument can't be null");
         return this.changeItem(item -> item.setType(material));
-    }
-
-    /**
-     * Sets a newly given localized name for the {@link ItemStack}.
-     *
-     * @param name New localized name that the {@link ItemStack} will have
-     * @return This instance, useful for chaining
-     */
-    @Nonnull
-    public ItemBuilder localizedName(@Nullable String name) {
-        return this.changeMeta(meta -> meta.setLocalizedName(name));
     }
 
     /**

@@ -7,13 +7,7 @@ import java.util.Optional;
 /**
  * Reflection utility.
  */
-public class Resolver {
-
-    private final Class<?> clazz;
-
-    public Resolver(@Nonnull Class<?> clazz) {
-        this.clazz = clazz;
-    }
+public record Resolver(@Nonnull Class<?> clazz) {
 
     @Nonnull
     public Optional<Field> resolveField(@Nonnull String name) {
@@ -27,10 +21,5 @@ public class Resolver {
         }
 
         return Optional.empty();
-    }
-
-    @Nonnull
-    public Class<?> getClazz() {
-        return this.clazz;
     }
 }
