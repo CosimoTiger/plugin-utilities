@@ -143,8 +143,6 @@ public abstract class AbstractMenu {
      */
     @Nonnull
     public AbstractMenu open(@Nonnull MenuManager menuManager, @Nonnull Iterable<? extends HumanEntity> viewers) {
-        Preconditions.checkState(menuManager.isRegistered(),
-                "MenuManager has no enabled plugin registered to handle inventory menu events");
         Preconditions.checkArgument(viewers != null,
                 "Collection<? extends HumanEntity> of viewers argument can't be null");
 

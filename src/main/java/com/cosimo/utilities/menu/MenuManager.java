@@ -1,6 +1,6 @@
 package com.cosimo.utilities.menu;
 
-import com.cosimo.utilities.UtilitiesPlugin;
+import com.google.common.base.Preconditions;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.EventHandler;
@@ -16,15 +16,13 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Queue;
 
 /**
- * A class that filters {@link org.bukkit.event.inventory.InventoryEvent}s to registered {@link Inventory}
+ * A {@link Listener} that filters {@link org.bukkit.event.inventory.InventoryEvent}s to registered {@link Inventory}
  * {@link AbstractMenu}s.
  *
  * <p><strong>Note:</strong> {@link AbstractMenu}s should be unregistered from their {@link MenuManager} when they're
@@ -33,34 +31,32 @@ import java.util.Queue;
  * {@link MenuManager}'s {@link java.util.Map}.
  *
  * <p><strong>Warning:</strong> {@link AbstractMenu}s in multiple instances of {@link MenuManager}s might cause
- * multiple event handler calls. It is advised to use {@link UtilitiesPlugin#getMenuManager(Plugin)} which is accessible
- * and common to all {@link Plugin}s that are using this library.
+ * multiple event handler calls.
  *
  * @author CosimoTiger
  */
 public class MenuManager implements Listener {
 
+    // TODO: WeakHashMap? Inventories might be referenced only by their Bukkit viewers.
     /**
-     * All menus are stored here at a 1:1 ratio ({@link Inventory} for {@link AbstractMenu}) while being viewed,
-     * compared to a {@link HumanEntity} key to {@link AbstractMenu} value which can grower much larger (e.g. 50 players
-     * viewing the same menu would cause 50 keys). <strong>Multiple {@link AbstractMenu}s of a single {@link Inventory}
-     * won't work in one {@link MenuManager} because of unique key mappings.</strong>
-     * TODO: WeakHashMap? Inventories might be referenced only by their Bukkit viewers.
+     * <strong>Multiple {@link AbstractMenu}s of a single {@link Inventory} won't work in one {@link MenuManager}
+     * due to unique keys.</strong>
      */
-    private final Map<Inventory, AbstractMenu> menus = new HashMap<>(8);
-    private final Queue<Plugin> providers = new ArrayDeque<>();
+    private final Map<Inventory, AbstractMenu> menus = new HashMap<>(4);
+    private final Plugin provider;
 
     /**
      * Creates a new instance that registers itself with the enabled {@link Listener} provider {@link Plugin}.
      *
-     * @param newProvider Not null enabled {@link Plugin} for registering this {@link Listener} instance's event
-     *                    handlers
+     * @param provider Not null enabled {@link Plugin} for registering this {@link Listener} instance's event handlers
      * @throws IllegalArgumentException If the {@link Plugin} argument is null
      * @throws IllegalStateException    If the {@link Plugin} argument is not enabled
      */
-    public MenuManager(@Nonnull Plugin newProvider) {
-        Bukkit.getPluginManager().registerEvents(this, UtilitiesPlugin.checkProvider(newProvider));
-        this.providers.add(newProvider);
+    public MenuManager(@Nonnull Plugin provider) {
+        Preconditions.checkArgument(provider != null, "Plugin provider argument can't be null");
+        Preconditions.checkState(provider.isEnabled(), "Plugin provider argument can't be disabled");
+
+        Bukkit.getPluginManager().registerEvents(this, this.provider = provider);
     }
 
     /**
@@ -102,29 +98,6 @@ public class MenuManager implements Listener {
     }
 
     /**
-     * Provides a new {@link Plugin} to register this {@link Listener}'s events if it's current provider is null or
-     * disabled.
-     *
-     * @param newProvider Not null enabled {@link Plugin} for registering this {@link Listener} instance's event
-     *                    handlers immediately or later
-     * @return This instance, useful for chaining
-     * @throws IllegalArgumentException If the {@link Plugin} argument is null
-     * @throws IllegalStateException    If the {@link Plugin} argument is not enabled
-     */
-    @Nonnull
-    public MenuManager provide(@Nonnull Plugin newProvider) {
-        if (!this.isRegistered()) {
-            Bukkit.getPluginManager().registerEvents(this, UtilitiesPlugin.checkProvider(newProvider));
-        }
-
-        if (!this.providers.contains(newProvider)) {
-            this.providers.add(newProvider);
-        }
-
-        return this;
-    }
-
-    /**
      * Closes all inventory menus that are currently registered.
      *
      * <p>Closing an {@link AbstractMenu} for a {@link HumanEntity} might not always work because their {@link
@@ -134,6 +107,9 @@ public class MenuManager implements Listener {
      */
     @Nonnull
     public MenuManager closeMenus() {
+        // Closing each menu calls an InventoryCloseEvent which may unregister a menu from the MenuManager Map of menus.
+        // Therefore, a ConcurrentModificationException needs to be avoided using an Iterator.
+        
         //noinspection ForLoopReplaceableByForEach
         for (var iterator = this.menus.entrySet().iterator(); iterator.hasNext(); ) {
             iterator.next().getValue().close();
@@ -178,22 +154,13 @@ public class MenuManager implements Listener {
     }
 
     /**
-     * Returns the {@link Optional} of a nullable {@link Plugin} that registers this {@link Listener}'s event handlers.
+     * Returns the {@link Plugin} that registers this {@link Listener}'s event handlers.
      *
-     * @return {@link Optional} of a nullable {@link Plugin}
+     * @return {@link Plugin} of this {@link MenuManager}
      */
     @Nonnull
-    public Optional<Plugin> getPlugin() {
-        return Optional.ofNullable(this.providers.peek());
-    }
-
-    /**
-     * Returns whether this listener has its events registered under a plugin.
-     *
-     * @return Whether this listener has its events registered under a plugin
-     */
-    public boolean isRegistered() {
-        return !this.providers.isEmpty(); // Assuming that the disabled provider is always removed...
+    public Plugin getPlugin() {
+        return this.provider;
     }
 
     /**
@@ -259,6 +226,9 @@ public class MenuManager implements Listener {
                 () -> this.getMenu(event.getSource()).ifPresent(menu -> menu.onItemMove(event, false)));
     }
 
+    // TODO: Test whether this is called at all, since the listener is being
+    //  unregistered for the plugin that's being disabled
+
     /**
      * Handles a {@link PluginDisableEvent} of this {@link MenuManager}'s {@link Listener} provider to all inventory
      * menus.
@@ -268,20 +238,16 @@ public class MenuManager implements Listener {
      */
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPluginDisable(@Nonnull PluginDisableEvent event) {
-        Optional<Plugin> currentProvider = this.getPlugin();
-
-        if (this.providers.remove(event.getPlugin())) {
+        if (this.getPlugin().equals(event.getPlugin())) {
             for (var iterator = this.menus.entrySet().iterator(); iterator.hasNext(); ) {
                 try {
                     iterator.next().getValue().onDisable(event);
                 } catch (Exception e) {
-                    Bukkit.getLogger().warning("An error occurred while handling a menu plugin disable event");
+                    // TODO: See how logging is properly done
+                    Bukkit.getLogger().warning("An error occurred while handling a menu plugin disable event:");
                     e.printStackTrace();
                 }
             }
-
-            currentProvider.flatMap(provider -> Optional.ofNullable(this.providers.peek()))
-                    .ifPresent(newProvider -> Bukkit.getPluginManager().registerEvents(this, newProvider));
         }
     }
 }
