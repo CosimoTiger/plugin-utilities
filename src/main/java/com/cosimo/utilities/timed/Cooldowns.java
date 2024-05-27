@@ -1,8 +1,6 @@
-package com.cosimo.utilities.timed.collection;
+package com.cosimo.utilities.timed;
 
 import com.google.common.base.Preconditions;
-import com.cosimo.utilities.timed.ITimed;
-import com.cosimo.utilities.timed.holder.Cooldown;
 
 import javax.annotation.Nonnull;
 import java.util.Collections;
@@ -11,20 +9,39 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
- * A class that keeps track of timed cooldowns stored inside a {@link HashMap}, updated lazily, on access[, which
- * greatly saves performance unlike some common ones that work on the basis of {@link Runnable}s]. It is enough
- * to store one instance per project.
+ * A class that keeps track of timed cooldowns stored inside a {@link Map}, updated lazily, on access[, which greatly
+ * saves performance unlike some common ones that work on the basis of {@link Runnable}s]. It is enough to store one
+ * instance per project.
  *
- * @param <K> Key type of this class's {@link HashMap}, {@link String} is suggested as it provides many variations for
+ * @param <K> Key type of this class's {@link Map}, {@link String} is suggested as it provides many variations for
  *            unique keys
  */
-public abstract class AbstractCooldowns<K> implements ITimed {
+public abstract class Cooldowns<K> implements ITimed {
 
+    // TODO: consider <V extends Cooldown> Map<K, V>
     /**
      * Contains cooldown entries consisting of unique name keys and a {@link System#currentTimeMillis()} end time
      * value.
      */
     protected Map<K, Long> cooldowns;
+
+    /**
+     * Creates a new {@link Cooldowns} holder by creating a new {@link Map} by copying entries of the given
+     * {@link Cooldowns}.
+     *
+     * @param toCopy The original {@link Cooldowns} whose contents will be transferred into this new one
+     */
+    public Cooldowns(@Nonnull Cooldowns<K> toCopy) {
+        Preconditions.checkArgument(toCopy != null, "Initial Cooldowns object can't be null");
+        this.cooldowns = new HashMap<>(toCopy.cooldowns);
+    }
+
+    /**
+     * Creates a new {@link Cooldowns} holder by creating a new {@link HashMap} with initialCapacity of 8.
+     */
+    public Cooldowns() {
+        this.cooldowns = new HashMap<>(8);
+    }
 
     /**
      * Puts a cooldown entry converted into {@link #getCurrentTime()} unit from a given time duration expressed in the
@@ -33,8 +50,7 @@ public abstract class AbstractCooldowns<K> implements ITimed {
      * @param newKey   Unique key that the cooldown will be stored under
      * @param duration Time in the given time unit for how long the cooldown will last for
      * @param unit     {@link TimeUnit} of the given time parameter
-     * @return {@link #getCurrentTime()} ending time of the given cooldown or the current one that wasn't
-     * replaced
+     * @return {@link #getCurrentTime()} ending time of the given cooldown or the current one that wasn't replaced
      * @throws IllegalArgumentException If the cooldowns name or TimeUnit argument is null
      */
     public long putIfAbsent(@Nonnull K newKey, long duration, @Nonnull TimeUnit unit) {
@@ -43,8 +59,8 @@ public abstract class AbstractCooldowns<K> implements ITimed {
     }
 
     /**
-     * Puts a cooldown entry converted into milliseconds from a given time duration expressed in the given {@link
-     * TimeUnit}.
+     * Puts a cooldown entry converted into milliseconds from a given time duration expressed in the given
+     * {@link TimeUnit}.
      *
      * @param newKey   Unique key that the cooldown will be stored under
      * @param duration Time in the given {@link TimeUnit} for how long the cooldown will last for
@@ -60,9 +76,9 @@ public abstract class AbstractCooldowns<K> implements ITimed {
     /**
      * Prolongs the specified cooldown by adding the given duration in the given {@link TimeUnit} to it.
      *
-     * @param key Unique key that a cooldown is stored under
+     * @param key      Unique key that a cooldown is stored under
      * @param duration Duration to add, in the given {@link TimeUnit}
-     * @param unit {@link TimeUnit} that the given duration argument is in
+     * @param unit     {@link TimeUnit} that the given duration argument is in
      * @return New ending time of the specified cooldown, e.g. it can be nonexistent
      */
     public long extend(@Nonnull K key, long duration, @Nonnull TimeUnit unit) {
@@ -75,8 +91,7 @@ public abstract class AbstractCooldowns<K> implements ITimed {
      *
      * @param newKey   Unique key that the cooldown will be stored under
      * @param duration Time in milliseconds for how long the cooldown will last for
-     * @return {@link #getCurrentTime()} ending time of the given cooldown or the current one that wasn't
-     * replaced
+     * @return {@link #getCurrentTime()} ending time of the given cooldown or the current one that wasn't replaced
      * @throws IllegalArgumentException If the cooldowns key is null
      */
     public long putIfAbsent(@Nonnull K newKey, long duration) {
@@ -107,7 +122,7 @@ public abstract class AbstractCooldowns<K> implements ITimed {
     /**
      * Prolongs the specified cooldown by adding the given duration.
      *
-     * @param key Unique key that a cooldown is stored under
+     * @param key      Unique key that a cooldown is stored under
      * @param duration Duration to add to the specified cooldown
      * @return New ending time of the specified cooldown, e.g. it can be nonexistent
      */
@@ -125,7 +140,7 @@ public abstract class AbstractCooldowns<K> implements ITimed {
      * @return This instance, useful for chaining
      */
     @Nonnull
-    public AbstractCooldowns<K> cleanup() {
+    public Cooldowns<K> cleanup() {
         final long end = this.getCurrentTime();
         this.cooldowns.entrySet().removeIf(entry -> entry.getValue() <= end);
         return this;
@@ -137,7 +152,7 @@ public abstract class AbstractCooldowns<K> implements ITimed {
      * @return This instance, useful for chaining
      */
     @Nonnull
-    public AbstractCooldowns<K> clear() {
+    public Cooldowns<K> clear() {
         this.cooldowns.clear();
         return this;
     }
