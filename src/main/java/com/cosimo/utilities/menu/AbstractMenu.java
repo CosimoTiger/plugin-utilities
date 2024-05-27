@@ -21,8 +21,8 @@ import java.util.Optional;
 import java.util.stream.StreamSupport;
 
 /**
- * Represents a collection of algorithms and features upon a {@link Inventory} that multiple viewers can see and
- * interact with, with the wide possibilities of adding more features.
+ * Represents a collection of algorithms and features upon a {@link Inventory} of any type that multiple viewers can see
+ * and interact with.
  *
  * <p>A developer can subclass this class, override the methods or add them to customise the ways of processing inputs
  * for inventory menu events or modifying the inventories.
@@ -115,7 +115,7 @@ public abstract class AbstractMenu {
      * @param event {@link InventoryDragEvent} event
      */
     public void onDrag(@Nonnull InventoryDragEvent event) {
-        int size = event.getView().getTopInventory().getSize();
+        final int size = event.getView().getTopInventory().getSize();
 
         if (event.getRawSlots().stream().mapToInt(slot -> slot).anyMatch(slot -> slot < size)) {
             event.setCancelled(true);
@@ -144,7 +144,7 @@ public abstract class AbstractMenu {
     @Nonnull
     public AbstractMenu open(@Nonnull MenuManager menuManager, @Nonnull Iterable<? extends HumanEntity> viewers) {
         Preconditions.checkArgument(viewers != null,
-                "Collection<? extends HumanEntity> of viewers argument can't be null");
+                "Iterable<? extends HumanEntity> of viewers argument can't be null");
 
         menuManager.registerMenu(this);
 
@@ -162,6 +162,7 @@ public abstract class AbstractMenu {
         return this;
     }
 
+
     /**
      * Sets an {@link ItemStack} at this {@link AbstractMenu}'s given slot(s).
      *
@@ -172,12 +173,26 @@ public abstract class AbstractMenu {
      * @throws IllegalArgumentException  If the slot array argument is null
      */
     @Nonnull
-    public AbstractMenu set(@Nullable ItemStack item, int... slots) {
+    public AbstractMenu set(@Nullable ItemStack item, @Nonnull Iterable<Integer> slots) {
         Preconditions.checkArgument(slots != null, "Array of slots can't be null");
-        int size = this.getInventory().getSize();
+        slots.forEach(slot -> this.getInventory().setItem(slot, item));
+        return this;
+    }
+
+    /**
+     * Sets an {@link ItemStack} at this {@link AbstractMenu}'s given slot(s).
+     *
+     * @param item  {@link ItemStack} to set at given slots
+     * @param slots Slots that the {@link ItemStack} will be placed at
+     * @return This instance, useful for chaining
+     * @throws IndexOutOfBoundsException If a slot in the slot array argument is out of this inventory's boundaries
+     * @throws IllegalArgumentException  If the slot array argument is null
+     */
+    @Nonnull
+    public AbstractMenu set(@Nullable ItemStack item, @Nonnull int... slots) {
+        Preconditions.checkArgument(slots != null, "Array of slots can't be null");
 
         for (int slot : slots) {
-            Menu.checkElement(slot, size);
             this.getInventory().setItem(slot, item);
         }
 
@@ -230,11 +245,10 @@ public abstract class AbstractMenu {
      *
      * @param slot Slot index location of the item in the inventory
      * @return {@link Optional} of a nullable {@link ItemStack}
-     * @throws IndexOutOfBoundsException If the given slot argument is out of the inventory's array bounds
+     * @throws IndexOutOfBoundsException If the given slot argument is out of the inventory's bounds
      */
     @Nonnull
     public Optional<ItemStack> getItem(int slot) {
-        Menu.checkElement(slot, this.getInventory().getSize());
         return Optional.ofNullable(this.getInventory().getItem(slot));
     }
 

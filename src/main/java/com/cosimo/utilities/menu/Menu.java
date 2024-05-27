@@ -10,7 +10,9 @@ import org.bukkit.scheduler.BukkitTask;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.function.BiPredicate;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
  * The default implementation of the {@link AbstractMenu} class.
@@ -41,51 +43,102 @@ public class Menu extends AbstractMenu {
         }
     }
 
+    public Menu setIf(@Nullable ItemStack item, @Nonnull BiPredicate<ItemStack, Integer> itemSlotPredicate, int start, int end, int step) {
+        Preconditions.checkArgument(step != 0, "step argument (" + step + ") can't be 0");
+
+        for (int slot = start; slot < end; slot += step) {
+            if (itemSlotPredicate.test(this.getInventory().getItem(slot), slot)) {
+                this.getInventory().setItem(slot, item);
+            }
+        }
+
+        return this;
+    }
+
+    @Nonnull
+    public Menu setIf(@Nullable ItemStack item, @Nonnull BiPredicate<ItemStack, Integer> itemSlotPredicate, int start, int end) {
+        return this.setIf(item, itemSlotPredicate, start, end, 1);
+    }
+
+    @Nonnull
+    public Menu setIf(@Nullable ItemStack item, @Nonnull BiPredicate<ItemStack, Integer> itemSlotPredicate, int start) {
+        return this.setIf(item, itemSlotPredicate, start, this.getInventory().getSize());
+    }
+
+    @Nonnull
+    public Menu setIf(@Nullable ItemStack item, @Nonnull BiPredicate<ItemStack, Integer> itemSlotPredicate) {
+        return this.setIf(item, itemSlotPredicate, 0);
+    }
+
     /**
-     * Fills inventory slots with an {@link ItemStack} by skipping an amount of given slots from a start to the end.
-     * <p>
-     * This method places an {@link ItemStack} in the first slot and keeps on adding the skipForSlots amount until the
-     * current slot is bigger than toSlot.
+     * Sets a given {@link ItemStack} at every slot in given loop range if the existing {@link ItemStack} matches the
+     * given {@link Predicate}.
      *
-     * @param item         {@link ItemStack} or null
-     * @param fromSlot     Beginning index of a slot in an inventory
-     * @param toSlot       Ending index of a slot in an inventory
-     * @param skipForSlots Amount of slots to be skipped until next {@link ItemStack} placement
+     * @param item          Nullable (air) {@link ItemStack} to set
+     * @param itemPredicate Previous slot {@link ItemStack} condition to match
+     * @param start         Inclusive start slot index
+     * @param end           Exclusive end slot index
+     * @param step          Increment amount
      * @return This instance, useful for chaining
-     * @throws IndexOutOfBoundsException If the fromSlot or toSlot argument isn't within the inventory's boundaries
-     * @throws IllegalArgumentException  If the fromSlot is greater than the toSlot argument or the skipForSlots
-     *                                   argument is lower than 1
+     * @throws IllegalArgumentException If the step argument is 0
      */
     @Nonnull
-    public Menu fillSkip(@Nullable ItemStack item, int fromSlot, int toSlot, int skipForSlots) {
-        Preconditions.checkArgument(skipForSlots > 0, "skipForSlots argument (" + skipForSlots + ") can't be smaller than 1");
-        fromSlot = Math.max(0, fromSlot);
-        toSlot = Math.min(this.getInventory().getSize() - 1, toSlot);
+    public Menu setIf(@Nullable ItemStack item, @Nonnull Predicate<ItemStack> itemPredicate, int start, int end, int step) {
+        Preconditions.checkArgument(step != 0, "step argument (" + step + ") can't be 0");
 
-        for (int slot = fromSlot; slot < toSlot; slot += skipForSlots) {
+        for (int slot = start; slot < end; slot += step) {
+            if (itemPredicate.test(this.getInventory().getItem(slot))) {
+                this.getInventory().setItem(slot, item);
+            }
+        }
+
+        return this;
+    }
+
+    @Nonnull
+    public Menu setIf(@Nullable ItemStack item, @Nonnull Predicate<ItemStack> itemPredicate, int start, int end) {
+        return this.setIf(item, itemPredicate, start, end, 1);
+    }
+
+    @Nonnull
+    public Menu setIf(@Nullable ItemStack item, @Nonnull Predicate<ItemStack> itemPredicate, int start) {
+        return this.setIf(item, itemPredicate, start, this.getInventory().getSize());
+    }
+
+    @Nonnull
+    public Menu setIf(@Nullable ItemStack item, @Nonnull Predicate<ItemStack> itemPredicate) {
+        return this.setIf(item, itemPredicate, 0);
+    }
+
+    /**
+     * Sets an {@link ItemStack} by skipping an amount of given slots from the inclusive start to the exclusive end.
+     *
+     * @param item  {@link ItemStack} or null
+     * @param start Inclusive start slot index
+     * @param end   Exclusive end slot index for this inventory's size
+     * @param step  Amount of slots to be skipped until next {@link ItemStack} placement
+     * @return This instance, useful for chaining
+     * @throws IllegalArgumentException If step argument is lower than 1
+     */
+    @Nonnull
+    public Menu setRange(@Nullable ItemStack item, int start, int end, int step) {
+        Preconditions.checkArgument(step != 0, "step argument (" + step + ") can't be 0");
+
+        for (int slot = start; slot < end; slot += step) {
             this.getInventory().setItem(slot, item);
         }
 
         return this;
     }
 
-    /**
-     * Fills inventory slots with an {@link ItemStack} from a given beginning slot to a given ending slot (interval).
-     *
-     * <p>An "interval" in the case of this method can be defined as a set of whole numbers ranging from the given
-     * beginning slot index (inclusive) to the given slot index (exclusive). This is referenced to mathematical
-     * intervals, or simply shown with symbols: [fromSlot, toSlot&gt; or firstSlot = fromSlot, endSlot = (toSlot - 1)
-     *
-     * @param item     {@link ItemStack} or null
-     * @param fromSlot Start index location of a slot in an inventory
-     * @param toSlot   End index location of a slot in an inventory
-     * @return This instance, useful for chaining
-     * @throws IndexOutOfBoundsException If the fromSlot or toSlot argument isn't within the inventory's boundaries
-     * @throws IllegalArgumentException  If the fromSlot is greater than the toSlot argument
-     */
     @Nonnull
-    public Menu fillInterval(@Nullable ItemStack item, int fromSlot, int toSlot) {
-        return this.fillSkip(item, fromSlot, toSlot, 1);
+    public Menu setRange(@Nullable ItemStack item, int start, int end) {
+        return this.setRange(item, start, end, 1);
+    }
+
+    @Nonnull
+    public Menu setRange(@Nullable ItemStack item, int start) {
+        return this.setRange(item, start, this.getInventory().getSize());
     }
 
     /**
@@ -101,30 +154,6 @@ public class Menu extends AbstractMenu {
     public Menu changeItem(@Nonnull Consumer<ItemStack> applyItem, int slot) {
         Preconditions.checkArgument(applyItem != null, "Consumer<ItemStack> argument can't be null");
         this.getItem(slot).ifPresent(applyItem);
-        return this;
-    }
-
-    /**
-     * Sets all or only empty inventory slots to equal to the given {@link ItemStack}.
-     *
-     * @param item    {@link ItemStack} that will be in all inventory slots
-     * @param replace Whether existing {@link ItemStack}s should be replaced with a new one
-     * @return This instance, useful for chaining
-     */
-    @Nonnull
-    public Menu fill(@Nullable ItemStack item, boolean replace) {
-        if (replace) {
-            for (int slot = 0; slot < this.getInventory().getSize(); slot++) {
-                this.getInventory().setItem(slot, item);
-            }
-        } else {
-            for (int slot = 0; slot < this.getInventory().getSize(); slot++) {
-                if (this.getInventory().getItem(slot) == null) {
-                    this.getInventory().setItem(slot, item);
-                }
-            }
-        }
-
         return this;
     }
 
@@ -152,17 +181,6 @@ public class Menu extends AbstractMenu {
     }
 
     /**
-     * Package-protected methods for reuse.
-     */
-    static void checkElement(int index, int size) {
-        if (index < 0) {
-            throw new IndexOutOfBoundsException("Slot index argument (" + index + ") can't be smaller than 0");
-        } else if (index >= size) {
-            throw new IndexOutOfBoundsException("Slot index argument (" + index + ") can't be greater than or equal to the size");
-        }
-    }
-
-    /**
      * Clears the whole inventory of it's {@link ItemStack} contents.
      *
      * @return This instance, useful for chaining
@@ -186,7 +204,7 @@ public class Menu extends AbstractMenu {
 
     @Nonnull
     @Override
-    public Menu set(@Nullable ItemStack item, int... slots) {
+    public Menu set(@Nullable ItemStack item, @Nonnull int... slots) {
         return (Menu) super.set(item, slots);
     }
 

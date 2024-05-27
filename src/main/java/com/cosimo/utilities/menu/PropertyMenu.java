@@ -1,14 +1,14 @@
 package com.cosimo.utilities.menu;
 
 import com.google.common.base.Preconditions;
-import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Optional;
+import java.util.function.BiPredicate;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
  * Implementation of {@link Menu} with an {@link Object} array of the same size as the inventory, with many methods for
@@ -34,53 +34,86 @@ public class PropertyMenu<E> extends Menu {
         super(inventory);
     }
 
-    /**
-     * Fills inventory slots with slot properties by skipping an amount of given slots from a start to the end.
-     *
-     * <p>This method places a property in the first slot and keeps on adding the skipForSlots amount until the current
-     * slot is bigger than toSlot.
-     *
-     * @param property     Slot property object or null
-     * @param fromSlot     Start index location of a slot in an inventory
-     * @param toSlot       End index location of a slot in an inventory
-     * @param skipForSlots Amount of slots to be skipped till next property placement
-     * @return This instance, useful for chaining
-     * @throws IndexOutOfBoundsException If the fromSlot or toSlot argument isn't within the inventory's boundaries
-     * @throws IllegalArgumentException  If the fromSlot is greater than the toSlot argument or the skipForSlots
-     *                                   argument is lower than 1
-     */
-    @Nonnull
-    public PropertyMenu<E> fillSkip(@Nullable E property, int fromSlot, int toSlot, int skipForSlots) {
-        Preconditions.checkArgument(skipForSlots > 0, "skipForSlots argument (" + skipForSlots + ") can't be smaller than 1");
-        fromSlot = Math.max(0, fromSlot);
-        toSlot = Math.min(this.getInventory().getSize() - 1, toSlot);
+    public Menu setIf(@Nullable E property, @Nonnull BiPredicate<E, Integer> propertySlotPredicate, int start, int end, int step) {
+        Preconditions.checkArgument(step != 0, "step argument (" + step + ") can't be 0");
 
-        for (int slot = fromSlot; slot < toSlot; slot += skipForSlots) {
-            this.properties[slot] = property;
+        for (int slot = start; slot < end; slot += step) {
+            final int copy = slot;
+
+            if (this.getProperty(slot)
+                    .map(p -> propertySlotPredicate.test(p, copy))
+                    .orElse(false)) {
+                this.set(property, slot);
+            }
         }
 
         return this;
     }
 
-    /**
-     * Sets the provided property and {@link ItemStack} instance at the given slots in the inventory.
-     *
-     * @param item     Nullable {@link ItemStack} that will be set in all given slots
-     * @param property Nullable property that will be set in all given slots
-     * @param slots    Slots in which the given item and property will be set
-     * @return This instance, useful for chaining
-     * @throws IndexOutOfBoundsException If a slot in the slot array argument is out of this inventory's boundaries
-     * @throws IllegalArgumentException  If the slot array argument is null
-     */
     @Nonnull
-    public PropertyMenu<E> set(@Nullable E property, @Nullable ItemStack item, int... slots) {
-        for (int slot : slots) {
-            checkElement(slot, this.getInventory().getSize());
-            this.properties[slot] = property;
-            this.getInventory().setItem(slot, item);
+    public Menu setIf(@Nullable E property, @Nonnull BiPredicate<E, Integer> propertySlotPredicate, int start, int end) {
+        return this.setIf(property, propertySlotPredicate, start, end, 1);
+    }
+
+    @Nonnull
+    public Menu setIf(@Nullable E property, @Nonnull BiPredicate<E, Integer> propertySlotPredicate, int start) {
+        return this.setIf(property, propertySlotPredicate, start, this.getInventory().getSize());
+    }
+
+    @Nonnull
+    public Menu setIf(@Nullable E property, @Nonnull BiPredicate<E, Integer> propertySlotPredicate) {
+        return this.setIf(property, propertySlotPredicate, 0);
+    }
+
+    @Nonnull
+    public PropertyMenu<E> setIf(@Nullable E property, @Nonnull Predicate<E> propertyPredicate, int start, int end, int step) {
+        Preconditions.checkArgument(step != 0, "step argument (" + step + ") can't be 0");
+
+        for (int slot = start; slot < end; slot += step) {
+            if (this.getProperty(slot)
+                    .map(propertyPredicate::test)
+                    .orElse(false)) {
+                this.set(property, slot);
+            }
         }
 
         return this;
+    }
+
+    @Nonnull
+    public PropertyMenu<E> setIf(@Nullable E property, @Nonnull Predicate<E> propertyPredicate, int start, int end) {
+        return this.setIf(property, propertyPredicate, start, end, 1);
+    }
+
+    @Nonnull
+    public PropertyMenu<E> setIf(@Nullable E property, @Nonnull Predicate<E> propertyPredicate, int start) {
+        return this.setIf(property, propertyPredicate, start, this.getInventory().getSize());
+    }
+
+    @Nonnull
+    public PropertyMenu<E> setIf(@Nullable E property, @Nonnull Predicate<E> propertyPredicate) {
+        return this.setIf(property, propertyPredicate, 0);
+    }
+
+    @Nonnull
+    public PropertyMenu<E> setRange(@Nullable E property, int start, int end, int step) {
+        Preconditions.checkArgument(step != 0, "step argument (" + step + ") can't be 0");
+
+        for (int slot = start; slot < end; slot += step) {
+            this.set(property, slot);
+        }
+
+        return this;
+    }
+
+    @Nonnull
+    public PropertyMenu<E> setRange(@Nullable E property, int start, int end) {
+        return this.setRange(property, start, end, 1);
+    }
+
+    @Nonnull
+    public PropertyMenu<E> setRange(@Nullable E property, int start) {
+        return this.setRange(property, start, this.getInventory().getSize());
     }
 
     /**
@@ -96,50 +129,23 @@ public class PropertyMenu<E> extends Menu {
     @Nonnull
     public PropertyMenu<E> changeProperty(@Nonnull Consumer<E> applyProperty, int slot) {
         Preconditions.checkArgument(applyProperty != null, "Consumer<E> argument can't be null");
-        this.getSlotProperty(slot).ifPresent(applyProperty);
+        this.getProperty(slot).ifPresent(applyProperty);
         return this;
     }
 
     /**
-     * Fills inventory slots with a slot property from a beginning slot to an ending slot.
+     * Sets a slot property object at the given inventory {@link AbstractMenu} slots.
      *
-     * <p>An "interval" in the case of this method can be defined as a set of whole numbers ranging from the given
-     * beginning slot index (inclusive) to the given slot index (exclusive). This is referenced to mathematical
-     * intervals, or simply shown with symbols: [fromSlot, toSlot&gt; or firstSlot = fromSlot, endSlot = (toSlot - 1).
-     *
-     * @param property Slot property object or null
-     * @param fromSlot Beginning index of a slot in an inventory
-     * @param toSlot   Ending index of a slot in an inventory
+     * @param property Property {@link Object}
+     * @param slots    Slots that these properties will belong to
      * @return This instance, useful for chaining
-     * @throws IndexOutOfBoundsException If the fromSlot or to-slot argument isn't within the inventory's boundaries
-     * @throws IllegalArgumentException  If the fromSlot is greater than the to-slot argument
+     * @throws IllegalArgumentException  If the array of slots is null
+     * @throws IndexOutOfBoundsException If a slot in the slot array argument is out of this inventory's boundaries
      */
     @Nonnull
-    public PropertyMenu<E> fillInterval(@Nullable E property, int fromSlot, int toSlot) {
-        return this.fillSkip(property, fromSlot, toSlot, 1);
-    }
-
-    /**
-     * Sets all or only empty inventory slot properties to equal to the given property object.
-     *
-     * @param property Property that will be set in all slots
-     * @param replace  Whether existing properties should be replaced with a new one
-     * @return This instance, useful for chaining
-     */
-    @Nonnull
-    public PropertyMenu<E> fill(@Nullable E property, boolean replace) {
-        if (replace) {
-            for (int slot = 0; slot < this.getInventory().getSize(); slot++) {
-                this.properties[slot] = property;
-            }
-        } else {
-            for (int slot = 0; slot < this.getInventory().getSize(); slot++) {
-                if (this.getItem(slot).isEmpty()) {
-                    this.properties[slot] = property;
-                }
-            }
-        }
-
+    public PropertyMenu<E> set(@Nullable E property, @Nonnull Iterable<Integer> slots) {
+        Preconditions.checkArgument(slots != null, "Array of slots can't be null");
+        slots.forEach(slot -> this.properties[slot] = property);
         return this;
     }
 
@@ -153,11 +159,10 @@ public class PropertyMenu<E> extends Menu {
      * @throws IndexOutOfBoundsException If a slot in the slot array argument is out of this inventory's boundaries
      */
     @Nonnull
-    public PropertyMenu<E> set(@Nullable E property, int... slots) {
-        int size = this.getInventory().getSize();
+    public PropertyMenu<E> set(@Nullable E property, @Nonnull int... slots) {
+        Preconditions.checkArgument(slots != null, "Array of slots can't be null");
 
         for (int slot : slots) {
-            checkElement(slot, size);
             this.properties[slot] = property;
         }
 
@@ -187,54 +192,6 @@ public class PropertyMenu<E> extends Menu {
         return this.clearProperties();
     }
 
-    @Nonnull
-    @Override
-    public PropertyMenu<E> fillSkip(@Nullable ItemStack item, int fromSlot, int toSlot, int skipForSlots) {
-        return (PropertyMenu<E>) super.fillSkip(item, fromSlot, toSlot, skipForSlots);
-    }
-
-    @Nonnull
-    @Override
-    public PropertyMenu<E> fillInterval(@Nullable ItemStack item, int fromSlot, int toSlot) {
-        return (PropertyMenu<E>) super.fillInterval(item, fromSlot, toSlot);
-    }
-
-    @Nonnull
-    @Override
-    public PropertyMenu<E> changeItem(@Nonnull Consumer<ItemStack> applyItem, int slot) {
-        return (PropertyMenu<E>) super.changeItem(applyItem, slot);
-    }
-
-    @Nonnull
-    @Override
-    public PropertyMenu<E> fill(@Nullable ItemStack item, boolean replace) {
-        return (PropertyMenu<E>) super.fill(item, replace);
-    }
-
-    @Nonnull
-    @Override
-    public PropertyMenu<E> clearContents() {
-        return (PropertyMenu<E>) super.clearContents();
-    }
-
-    @Nonnull
-    @Override
-    public PropertyMenu<E> open(@Nonnull MenuManager menuManager, @Nonnull Iterable<? extends HumanEntity> viewers) {
-        return (PropertyMenu<E>) super.open(menuManager, viewers);
-    }
-
-    @Nonnull
-    @Override
-    public PropertyMenu<E> set(@Nullable ItemStack item, int... slots) {
-        return (PropertyMenu<E>) super.set(item, slots);
-    }
-
-    @Nonnull
-    @Override
-    public PropertyMenu<E> open(@Nonnull MenuManager menuManager, @Nonnull HumanEntity... viewers) {
-        return (PropertyMenu<E>) super.open(menuManager, viewers);
-    }
-
     /**
      * Returns a property stored at the given slot of this inventory menu or null if it doesn't exist.
      *
@@ -243,8 +200,7 @@ public class PropertyMenu<E> extends Menu {
      * @throws IndexOutOfBoundsException If the given slot argument is out of this inventory's boundaries
      */
     @Nonnull
-    public Optional<E> getSlotProperty(int slot) {
-        checkElement(slot, this.getInventory().getSize());
+    public Optional<E> getProperty(int slot) {
         return Optional.ofNullable(this.properties[slot]);
     }
 }
