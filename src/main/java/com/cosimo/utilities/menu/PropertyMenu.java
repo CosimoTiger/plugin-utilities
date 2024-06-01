@@ -18,7 +18,7 @@ import java.util.function.Consumer;
  * @param <E> Single object type to be stored in the slots of this menu inventory
  * @author CosimoTiger
  */
-public class PropertyMenu<E> extends Menu implements Iterable<E> {
+public class PropertyMenu<E> extends AbstractMenu implements Iterable<E> {
 
     /**
      * Properties of each slot in this inventory are stored in an array, linear like inventories.
@@ -35,7 +35,7 @@ public class PropertyMenu<E> extends Menu implements Iterable<E> {
         super(inventory);
     }
 
-    public Menu setIf(@Nullable E property, @Nonnull BiPredicate<E, Integer> propertySlotPredicate, int start, int end, int step) {
+    public PropertyMenu<E> setIf(@Nullable E property, @Nonnull BiPredicate<E, Integer> propertySlotPredicate, int start, int end, int step) {
         Preconditions.checkArgument(step != 0, "step argument (" + step + ") can't be 0");
 
         for (int slot = start; slot < end; slot += step) {
@@ -52,17 +52,17 @@ public class PropertyMenu<E> extends Menu implements Iterable<E> {
     }
 
     @Nonnull
-    public Menu setIf(@Nullable E property, @Nonnull BiPredicate<E, Integer> propertySlotPredicate, int start, int end) {
+    public PropertyMenu<E> setIf(@Nullable E property, @Nonnull BiPredicate<E, Integer> propertySlotPredicate, int start, int end) {
         return this.setIf(property, propertySlotPredicate, start, end, 1);
     }
 
     @Nonnull
-    public Menu setIf(@Nullable E property, @Nonnull BiPredicate<E, Integer> propertySlotPredicate, int start) {
+    public PropertyMenu<E> setIf(@Nullable E property, @Nonnull BiPredicate<E, Integer> propertySlotPredicate, int start) {
         return this.setIf(property, propertySlotPredicate, start, this.getInventory().getSize());
     }
 
     @Nonnull
-    public Menu setIf(@Nullable E property, @Nonnull BiPredicate<E, Integer> propertySlotPredicate) {
+    public PropertyMenu<E> setIf(@Nullable E property, @Nonnull BiPredicate<E, Integer> propertySlotPredicate) {
         return this.setIf(property, propertySlotPredicate, 0);
     }
 
