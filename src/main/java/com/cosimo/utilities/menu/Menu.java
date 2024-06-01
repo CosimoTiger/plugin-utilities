@@ -2,7 +2,6 @@ package com.cosimo.utilities.menu;
 
 import com.google.common.base.Preconditions;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -12,7 +11,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 /**
  * The default implementation of the {@link AbstractMenu} class.
@@ -23,11 +21,12 @@ import java.util.function.Predicate;
 public class Menu extends AbstractMenu {
 
     /**
-     * The identifier number of a BukkitTask task that's relevant to this inventory. The task is by default
+     * The identifier number of a {@link BukkitTask} that's relevant to this inventory. The task is by default
      * automatically cancelled when the menu is closed with no viewers left, but this can be modified by overriding the
-     * {@link #onClose(InventoryCloseEvent)} method.
+     * {@link #onClose(InventoryCloseEvent)} method. Example use is a constant animation that's setting new
+     * {@link ItemStack}s in the menu.
      */
-    protected int taskId = -1;
+    protected int taskID = -1;
 
     /**
      * {@inheritDoc} Creates a new {@link Menu} using the default constructor for {@link AbstractMenu}.
@@ -43,6 +42,21 @@ public class Menu extends AbstractMenu {
         }
     }
 
+    /**
+     * Sets a given {@link ItemStack} at every slot in given loop range if the existing {@link ItemStack} and/or slot
+     * index match the given {@link BiPredicate}.
+     *
+     * <p>This can be used as the fill function, for example:
+     * {@code menu.setIf(new ItemStack(Material.CAKE), (item, slot) -> item == null, 5, 15);}
+     *
+     * @param item              Nullable (air) {@link ItemStack} to set
+     * @param itemSlotPredicate Previous slot {@link ItemStack} condition to match
+     * @param start             Inclusive start slot index
+     * @param end               Exclusive end slot index
+     * @param step              Increment amount
+     * @return This instance, useful for chaining
+     * @throws IllegalArgumentException If the step argument is 0
+     */
     public Menu setIf(@Nullable ItemStack item, @Nonnull BiPredicate<ItemStack, Integer> itemSlotPredicate, int start, int end, int step) {
         Preconditions.checkArgument(step != 0, "step argument (" + step + ") can't be 0");
 
@@ -71,46 +85,6 @@ public class Menu extends AbstractMenu {
     }
 
     /**
-     * Sets a given {@link ItemStack} at every slot in given loop range if the existing {@link ItemStack} matches the
-     * given {@link Predicate}.
-     *
-     * @param item          Nullable (air) {@link ItemStack} to set
-     * @param itemPredicate Previous slot {@link ItemStack} condition to match
-     * @param start         Inclusive start slot index
-     * @param end           Exclusive end slot index
-     * @param step          Increment amount
-     * @return This instance, useful for chaining
-     * @throws IllegalArgumentException If the step argument is 0
-     */
-    @Nonnull
-    public Menu setIf(@Nullable ItemStack item, @Nonnull Predicate<ItemStack> itemPredicate, int start, int end, int step) {
-        Preconditions.checkArgument(step != 0, "step argument (" + step + ") can't be 0");
-
-        for (int slot = start; slot < end; slot += step) {
-            if (itemPredicate.test(this.getInventory().getItem(slot))) {
-                this.getInventory().setItem(slot, item);
-            }
-        }
-
-        return this;
-    }
-
-    @Nonnull
-    public Menu setIf(@Nullable ItemStack item, @Nonnull Predicate<ItemStack> itemPredicate, int start, int end) {
-        return this.setIf(item, itemPredicate, start, end, 1);
-    }
-
-    @Nonnull
-    public Menu setIf(@Nullable ItemStack item, @Nonnull Predicate<ItemStack> itemPredicate, int start) {
-        return this.setIf(item, itemPredicate, start, this.getInventory().getSize());
-    }
-
-    @Nonnull
-    public Menu setIf(@Nullable ItemStack item, @Nonnull Predicate<ItemStack> itemPredicate) {
-        return this.setIf(item, itemPredicate, 0);
-    }
-
-    /**
      * Sets an {@link ItemStack} by skipping an amount of given slots from the inclusive start to the exclusive end.
      *
      * @param item  {@link ItemStack} or null
@@ -136,6 +110,13 @@ public class Menu extends AbstractMenu {
         return this.setRange(item, start, end, 1);
     }
 
+    /**
+     * Sets an {@link ItemStack} from a given inclusive starting slot index to the end of {@link Inventory#getSize()}.
+     *
+     * @param item  Nullable {@link ItemStack} to set in slots
+     * @param start Positive inclusive starting slot index
+     * @return This instance, useful for chaining
+     */
     @Nonnull
     public Menu setRange(@Nullable ItemStack item, int start) {
         return this.setRange(item, start, this.getInventory().getSize());
@@ -158,75 +139,35 @@ public class Menu extends AbstractMenu {
     }
 
     /**
-     * Sets a {@link BukkitTask} that will run until the inventory is closed or a new {@link BukkitTask} is set.
+     * Assigns a {@link BukkitTask} that will run until the inventory is closed or a new {@link BukkitTask} is set, and
+     * cancels the currently assigned {@link #getBukkitTask()}.
      *
      * <p>The task should be scheduled first and then set, for an example:
      * <pre>{@code
      * BukkitTask task = Bukkit.getScheduler().runTaskTimer(plugin, () -> player.sendMessage("This menu is currently open!"), 0, 40);
-     *
      * menu.setBukkitTask(task);
      * }</pre>
      *
-     * @param task The created {@link BukkitTask} that is returned by scheduling it
+     * @param task Nullable {@link BukkitTask} to assign
      * @return This instance, useful for chaining
      */
     @Nonnull
     public Menu setBukkitTask(@Nullable BukkitTask task) {
-        if (this.taskId > -1) {
-            Bukkit.getScheduler().cancelTask(this.taskId);
+        if (this.taskID > -1) {
+            Bukkit.getScheduler().cancelTask(this.taskID);
         }
 
-        this.taskId = task == null ? -1 : task.getTaskId();
+        this.taskID = task == null ? -1 : task.getTaskId();
         return this;
-    }
-
-    /**
-     * Clears the whole inventory of it's {@link ItemStack} contents.
-     *
-     * @return This instance, useful for chaining
-     */
-    @Nonnull
-    public Menu clearContents() {
-        this.getInventory().setStorageContents(new ItemStack[0]);
-        return this;
-    }
-
-    /**
-     * Generally clears the inventory menu of its contents and attributes.
-     *
-     * @return This instance, useful for chaining
-     */
-    @Nonnull
-    @Override
-    public Menu clear() {
-        return this.clearContents();
-    }
-
-    @Nonnull
-    @Override
-    public Menu set(@Nullable ItemStack item, @Nonnull int... slots) {
-        return (Menu) super.set(item, slots);
-    }
-
-    @Nonnull
-    @Override
-    public Menu open(@Nonnull MenuManager menuManager, @Nonnull Iterable<? extends HumanEntity> viewers) {
-        return (Menu) super.open(menuManager, viewers);
-    }
-
-    @Nonnull
-    @Override
-    public Menu open(@Nonnull MenuManager menuManager, @Nonnull HumanEntity... viewers) {
-        return (Menu) super.open(menuManager, viewers);
     }
 
     /**
      * Returns the identifier number of the {@link BukkitTask} that is stored in this instance and running while it's
      * open.
      *
-     * @return {@link BukkitTask} identifier number
+     * @return {@link BukkitTask} identifier number or -1 if none is assigned
      */
     public int getBukkitTask() {
-        return this.taskId;
+        return this.taskID;
     }
 }

@@ -5,10 +5,11 @@ import org.bukkit.inventory.Inventory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Optional;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 /**
  * Implementation of {@link Menu} with an {@link Object} array of the same size as the inventory, with many methods for
@@ -17,7 +18,7 @@ import java.util.function.Predicate;
  * @param <E> Single object type to be stored in the slots of this menu inventory
  * @author CosimoTiger
  */
-public class PropertyMenu<E> extends Menu {
+public class PropertyMenu<E> extends Menu implements Iterable<E> {
 
     /**
      * Properties of each slot in this inventory are stored in an array, linear like inventories.
@@ -63,36 +64,6 @@ public class PropertyMenu<E> extends Menu {
     @Nonnull
     public Menu setIf(@Nullable E property, @Nonnull BiPredicate<E, Integer> propertySlotPredicate) {
         return this.setIf(property, propertySlotPredicate, 0);
-    }
-
-    @Nonnull
-    public PropertyMenu<E> setIf(@Nullable E property, @Nonnull Predicate<E> propertyPredicate, int start, int end, int step) {
-        Preconditions.checkArgument(step != 0, "step argument (" + step + ") can't be 0");
-
-        for (int slot = start; slot < end; slot += step) {
-            if (this.getProperty(slot)
-                    .map(propertyPredicate::test)
-                    .orElse(false)) {
-                this.set(property, slot);
-            }
-        }
-
-        return this;
-    }
-
-    @Nonnull
-    public PropertyMenu<E> setIf(@Nullable E property, @Nonnull Predicate<E> propertyPredicate, int start, int end) {
-        return this.setIf(property, propertyPredicate, start, end, 1);
-    }
-
-    @Nonnull
-    public PropertyMenu<E> setIf(@Nullable E property, @Nonnull Predicate<E> propertyPredicate, int start) {
-        return this.setIf(property, propertyPredicate, start, this.getInventory().getSize());
-    }
-
-    @Nonnull
-    public PropertyMenu<E> setIf(@Nullable E property, @Nonnull Predicate<E> propertyPredicate) {
-        return this.setIf(property, propertyPredicate, 0);
     }
 
     @Nonnull
@@ -188,7 +159,7 @@ public class PropertyMenu<E> extends Menu {
     @Nonnull
     @Override
     public PropertyMenu<E> clear() {
-        this.clearContents();
+        super.clear();
         return this.clearProperties();
     }
 
@@ -202,5 +173,11 @@ public class PropertyMenu<E> extends Menu {
     @Nonnull
     public Optional<E> getProperty(int slot) {
         return Optional.ofNullable(this.properties[slot]);
+    }
+
+    @Nonnull
+    @Override
+    public Iterator<E> iterator() {
+        return Arrays.stream(this.properties).iterator();
     }
 }

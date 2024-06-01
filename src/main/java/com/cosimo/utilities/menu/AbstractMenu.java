@@ -1,12 +1,12 @@
 package com.cosimo.utilities.menu;
 
+import com.cosimo.utilities.menu.manager.MenuManager;
 import com.google.common.base.Preconditions;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
-import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.Inventory;
@@ -18,11 +18,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.stream.StreamSupport;
 
 /**
- * Represents a collection of algorithms and features upon a {@link Inventory} of any type that multiple viewers can see
- * and interact with.
+ * Represents a collection of algorithms, features and event handlers upon an {@link Inventory} of any type that
+ * multiple viewers can see and interact with.
  *
  * <p>A developer can subclass this class, override the methods or add them to customise the ways of processing inputs
  * for inventory menu events or modifying the inventories.
@@ -31,10 +32,10 @@ import java.util.stream.StreamSupport;
  * @see Menu
  * @see PropertyMenu
  */
-public abstract class AbstractMenu {
+public abstract class AbstractMenu implements InventoryListener {
 
     /**
-     * Backing {@link Inventory} that's actually wrapped by this class.
+     * Backing {@link Inventory} that's wrapped and controlled by this class.
      */
     private final Inventory inventory;
 
@@ -50,20 +51,6 @@ public abstract class AbstractMenu {
     }
 
     /**
-     * Acts as an event handler for the movement of an {@link org.bukkit.inventory.ItemStack} from source to destination
-     * inventory.
-     *
-     * <p>This typically happens when listening to a container inventory; example of a situation is .</p>
-     *
-     * @param event         {@link InventoryMoveItemEvent} event
-     * @param isDestination Whether this {@link org.bukkit.inventory.Inventory} is equal to the
-     *                      {@link InventoryMoveItemEvent#getDestination()}
-     */
-    public void onItemMove(@Nonnull InventoryMoveItemEvent event, boolean isDestination) {
-        event.setCancelled(true);
-    }
-
-    /**
      * Handles any {@link InventoryClickEvent} related to this inventory.
      *
      * <p>By default, {@link InventoryAction#COLLECT_TO_CURSOR} and {@link InventoryAction#MOVE_TO_OTHER_INVENTORY}
@@ -72,6 +59,7 @@ public abstract class AbstractMenu {
      * @param event    {@link InventoryClickEvent} event
      * @param external Whether the clicked inventory is not this one, possibly not any (outside of view)
      */
+    @Override
     public void onClick(@Nonnull InventoryClickEvent event, boolean external) {
         final var action = event.getAction();
 
@@ -84,10 +72,10 @@ public abstract class AbstractMenu {
     /**
      * Handles the {@link PluginDisableEvent} of the {@link MenuManager} this {@link AbstractMenu} is registered in.
      *
-     * <p>{@link AbstractMenu}s should always close themselves during this event because their reference is mostly lost
-     * - {@link org.bukkit.plugin.Plugin}s are disabled on restart, their reference is lost and a totally new object is
-     * created on reload. The same happens with {@link MenuManager} as they are connected to their
-     * {@link org.bukkit.plugin.Plugin}s.
+     * <p>{@link AbstractMenu}s should always close themselves during this event because their {@link MenuManager} gets
+     * unregistered and stops receiving any events that it can pass to its menus, which means that this
+     * {@link AbstractMenu} will stop working and won't be able to control its {@link Inventory}; additionally, a
+     * {@link PluginDisableEvent}'s cause is typically a server reload or stopping.
      *
      * @param event {@link PluginDisableEvent} event
      */
@@ -104,6 +92,7 @@ public abstract class AbstractMenu {
      *
      * @param event {@link InventoryCloseEvent} event
      */
+    @Override
     public void onClose(@Nonnull InventoryCloseEvent event) {
     }
 
@@ -114,10 +103,12 @@ public abstract class AbstractMenu {
      *
      * @param event {@link InventoryDragEvent} event
      */
+    @Override
     public void onDrag(@Nonnull InventoryDragEvent event) {
-        final int size = event.getView().getTopInventory().getSize();
-
-        if (event.getRawSlots().stream().mapToInt(slot -> slot).anyMatch(slot -> slot < size)) {
+        if (event.getRawSlots()
+                .stream()
+                .mapToInt(integer -> integer)
+                .anyMatch(rawSlot -> this.getInventory().equals(event.getView().getInventory(rawSlot)))) {
             event.setCancelled(true);
         }
     }
@@ -127,6 +118,7 @@ public abstract class AbstractMenu {
      *
      * @param event {@link InventoryOpenEvent} event
      */
+    @Override
     public void onOpen(@Nonnull InventoryOpenEvent event) {
     }
 
@@ -154,7 +146,7 @@ public abstract class AbstractMenu {
                 .count();
 
         if (count == 0) {
-            // We've been bamboozled and need to undo the menu registration
+            // We've been bamboozled and need to undo the menu registration, because nobody is viewing the menu now.
             menuManager.unregisterMenu(this);
             throw new IllegalArgumentException("Zero or all null menu viewers provided to open the menu");
         }
@@ -162,6 +154,39 @@ public abstract class AbstractMenu {
         return this;
     }
 
+    /**
+     * Opens this {@link AbstractMenu} for the given viewers, fail-fast.
+     *
+     * @param viewers Array of {@link HumanEntity} of which each will see this {@link AbstractMenu} {@link Inventory}
+     * @return This instance, useful for chaining
+     * @throws IllegalArgumentException If the {@link HumanEntity} array argument is null or empty
+     * @throws IllegalStateException    If this {@link AbstractMenu}'s {@link MenuManager} isn't registered for handling
+     *                                  events
+     * @throws NullPointerException     If a {@link HumanEntity} is null
+     */
+    @Nonnull
+    public AbstractMenu open(@Nonnull MenuManager menuManager, @Nonnull HumanEntity... viewers) {
+        return this.open(menuManager, List.of(viewers));
+    }
+
+    /**
+     * Applies a lambda function this {@link AbstractMenu}'s {@link Inventory}, such as
+     * {@link Inventory#addItem(ItemStack...)}, and returns this instance to chain it.
+     *
+     * @param consumer Lambda function that'll modify this {@link Inventory}
+     * @return This instance, useful for chaining
+     */
+    @Nonnull
+    public AbstractMenu change(@Nonnull Consumer<Inventory> consumer) {
+        consumer.accept(this.getInventory());
+        return this;
+    }
+
+    @Nonnull
+    public AbstractMenu change(@Nonnull Consumer<ItemStack> consumer, int slot) {
+        this.getItem(slot).ifPresent(consumer);
+        return this;
+    }
 
     /**
      * Sets an {@link ItemStack} at this {@link AbstractMenu}'s given slot(s).
@@ -197,21 +222,6 @@ public abstract class AbstractMenu {
         }
 
         return this;
-    }
-
-    /**
-     * Opens this {@link AbstractMenu} for the given viewers, fail-fast.
-     *
-     * @param viewers Array of {@link HumanEntity} of which each will see this {@link AbstractMenu} {@link Inventory}
-     * @return This instance, useful for chaining
-     * @throws IllegalArgumentException If the {@link HumanEntity} array argument is null or empty
-     * @throws IllegalStateException    If this {@link AbstractMenu}'s {@link MenuManager} isn't registered for handling
-     *                                  events
-     * @throws NullPointerException     If a {@link HumanEntity} is null
-     */
-    @Nonnull
-    public AbstractMenu open(@Nonnull MenuManager menuManager, @Nonnull HumanEntity... viewers) {
-        return this.open(menuManager, List.of(viewers));
     }
 
     /**

@@ -1,5 +1,6 @@
-package com.cosimo.utilities.menu;
+package com.cosimo.utilities.menu.manager;
 
+import com.cosimo.utilities.menu.AbstractMenu;
 import com.google.common.base.Preconditions;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
@@ -9,7 +10,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
-import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.Inventory;
@@ -23,27 +23,38 @@ import java.util.Optional;
 
 /**
  * A {@link Listener} that filters {@link org.bukkit.event.inventory.InventoryEvent}s to registered {@link Inventory}
- * {@link AbstractMenu}s.
+ * {@link AbstractMenu}s. Menu inventory listening is delegated and centralised in one {@link MenuManager} because of
+ * the assumption that constantly registering and unregistering new {@link Listener}s for each {@link AbstractMenu} is
+ * slow, especially because of the use of Reflection.
  *
  * <p><strong>Note:</strong> {@link AbstractMenu}s should be unregistered from their {@link MenuManager} when they're
  * not in use anymore, such as when the last viewer closes an {@link AbstractMenu}. The unfollowing of this rule will
- * cause the increase in memory usage because the {@link AbstractMenu} reference(s) won't be removed from a
- * {@link MenuManager}'s {@link java.util.Map}.
+ * cause a memory leak because the {@link AbstractMenu} reference(s) won't be removed from a {@link MenuManager}'s
+ * {@link Map}.
  *
  * <p><strong>Warning:</strong> {@link AbstractMenu}s in multiple instances of {@link MenuManager}s might cause
  * multiple event handler calls.
  *
  * @author CosimoTiger
  */
-public class MenuManager implements Listener {
+public class MenuManager<E extends AbstractMenu> implements Listener {
 
     // TODO: WeakHashMap? Inventories might be referenced only by their Bukkit viewers.
+    //  WeakHashMap<Inventory, WeakReference<AbstractMenu>> = new WeakHashMap<>(4);
     /**
      * <strong>Multiple {@link AbstractMenu}s of a single {@link Inventory} won't work in one {@link MenuManager}
      * due to unique keys.</strong>
      */
-    private final Map<Inventory, AbstractMenu> menus = new HashMap<>(4);
+    private final Map<Inventory, E> menus;
     private final Plugin provider;
+
+    protected MenuManager(@Nonnull Plugin provider, @Nonnull Map<Inventory, E> mapImpl) {
+        Preconditions.checkArgument(provider != null, "Plugin provider argument can't be null");
+        Preconditions.checkState(provider.isEnabled(), "Plugin provider argument can't be disabled");
+
+        Bukkit.getPluginManager().registerEvents(this, this.provider = provider);
+        this.menus = mapImpl;
+    }
 
     /**
      * Creates a new instance that registers itself with the enabled {@link Listener} provider {@link Plugin}.
@@ -53,10 +64,7 @@ public class MenuManager implements Listener {
      * @throws IllegalStateException    If the {@link Plugin} argument is not enabled
      */
     public MenuManager(@Nonnull Plugin provider) {
-        Preconditions.checkArgument(provider != null, "Plugin provider argument can't be null");
-        Preconditions.checkState(provider.isEnabled(), "Plugin provider argument can't be disabled");
-
-        Bukkit.getPluginManager().registerEvents(this, this.provider = provider);
+        this(provider, new HashMap<>(4));
     }
 
     /**
@@ -68,7 +76,7 @@ public class MenuManager implements Listener {
      * @throws IllegalArgumentException If the {@link Inventory} argument is null
      */
     @Nonnull
-    public Optional<AbstractMenu> unregisterMenu(@Nonnull Inventory inventory) {
+    public Optional<E> unregisterMenu(@Nonnull Inventory inventory) {
         return Optional.ofNullable(this.menus.remove(inventory));
     }
 
@@ -80,7 +88,7 @@ public class MenuManager implements Listener {
      * @throws IllegalArgumentException If the {@link AbstractMenu} argument is null
      */
     @Nonnull
-    public Optional<AbstractMenu> unregisterMenu(@Nonnull AbstractMenu menu) {
+    public Optional<E> unregisterMenu(@Nonnull E menu) {
         return Optional.ofNullable(this.menus.remove(menu.getInventory()));
     }
 
@@ -93,7 +101,7 @@ public class MenuManager implements Listener {
      * @throws IllegalArgumentException If the {@link AbstractMenu} argument is null
      */
     @Nonnull
-    public Optional<AbstractMenu> registerMenu(@Nonnull AbstractMenu menu) {
+    public Optional<E> registerMenu(@Nonnull E menu) {
         return Optional.ofNullable(this.menus.put(menu.getInventory(), menu));
     }
 
@@ -106,10 +114,10 @@ public class MenuManager implements Listener {
      * @return This instance, useful for chaining
      */
     @Nonnull
-    public MenuManager closeMenus() {
+    public MenuManager<E> closeMenus() {
         // Closing each menu calls an InventoryCloseEvent which may unregister a menu from the MenuManager Map of menus.
         // Therefore, a ConcurrentModificationException needs to be avoided using an Iterator.
-        
+
         //noinspection ForLoopReplaceableByForEach
         for (var iterator = this.menus.entrySet().iterator(); iterator.hasNext(); ) {
             iterator.next().getValue().close();
@@ -126,7 +134,7 @@ public class MenuManager implements Listener {
      * @throws IllegalArgumentException If the {@link Inventory} argument is null
      */
     @Nonnull
-    public Optional<AbstractMenu> getMenu(@Nonnull Inventory inventory) {
+    public Optional<E> getMenu(@Nonnull Inventory inventory) {
         return Optional.ofNullable(this.menus.get(inventory));
     }
 
@@ -139,7 +147,7 @@ public class MenuManager implements Listener {
      * @throws IllegalArgumentException If the viewer argument is null
      */
     @Nonnull
-    public Optional<AbstractMenu> getMenu(@Nonnull HumanEntity viewer) {
+    public Optional<E> getMenu(@Nonnull HumanEntity viewer) {
         return this.getMenu(viewer.getOpenInventory().getTopInventory());
     }
 
@@ -149,7 +157,7 @@ public class MenuManager implements Listener {
      *
      * @return Unmodifiable view of this {@link MenuManager}'s {@link HashMap}
      */
-    public Map<Inventory, AbstractMenu> getMap() {
+    public Map<Inventory, E> getMap() {
         return Collections.unmodifiableMap(this.menus);
     }
 
@@ -164,7 +172,7 @@ public class MenuManager implements Listener {
     }
 
     /**
-     * Handles any inventory ItemStack or slot click event that is related to an inventory menu.
+     * Passes any {@link InventoryClickEvent} to the {@link AbstractMenu} it happened on.
      *
      * @param event InventoryClickEvent event
      * @see AbstractMenu#onClick(InventoryClickEvent, boolean)
@@ -176,7 +184,7 @@ public class MenuManager implements Listener {
     }
 
     /**
-     * Handles any inventory closing event that is related to an inventory menu, and opens next inventory menus.
+     * Passes the {@link InventoryCloseEvent} to the {@link AbstractMenu} it happened on.
      *
      * @param event InventoryCloseEvent event
      * @see AbstractMenu#onClose(InventoryCloseEvent)
@@ -193,7 +201,7 @@ public class MenuManager implements Listener {
     }
 
     /**
-     * Handles any inventory opening events that are related to inventory menus.
+     * Passes any {@link InventoryOpenEvent} to the {@link AbstractMenu} it happened on.
      *
      * @param event InventoryOpenEvent event object
      * @see AbstractMenu#onOpen(InventoryOpenEvent)
@@ -204,7 +212,7 @@ public class MenuManager implements Listener {
     }
 
     /**
-     * Handles any inventory item stack dragging events that are related to inventory menus.
+     * Passes any {@link InventoryDragEvent} to the {@link AbstractMenu} it happened on.
      *
      * @param event InventoryDragEvent event object
      * @see AbstractMenu#onDrag(InventoryDragEvent)
@@ -214,24 +222,12 @@ public class MenuManager implements Listener {
         this.getMenu(event.getInventory()).ifPresent(menu -> menu.onDrag(event));
     }
 
-    /**
-     * Handles any inventory item stack movement events that are related to inventory menus.
-     *
-     * @param event InventoryMoveItemEvent event
-     * @see AbstractMenu#onItemMove(InventoryMoveItemEvent, boolean)
-     */
-    @EventHandler
-    public void onItemMove(@Nonnull InventoryMoveItemEvent event) {
-        this.getMenu(event.getDestination()).ifPresentOrElse(menu -> menu.onItemMove(event, true),
-                () -> this.getMenu(event.getSource()).ifPresent(menu -> menu.onItemMove(event, false)));
-    }
-
     // TODO: Test whether this is called at all, since the listener is being
     //  unregistered for the plugin that's being disabled
 
     /**
-     * Handles a {@link PluginDisableEvent} of this {@link MenuManager}'s {@link Listener} provider to all inventory
-     * menus.
+     * Passes a {@link PluginDisableEvent} of this {@link MenuManager}'s provider ({@link #getPlugin()}) to all
+     * inventory menus.
      *
      * @param event PluginDisableEvent event
      * @see AbstractMenu#onDisable(PluginDisableEvent)
@@ -243,7 +239,7 @@ public class MenuManager implements Listener {
                 try {
                     iterator.next().getValue().onDisable(event);
                 } catch (Exception e) {
-                    // TODO: See how logging is properly done
+                    // TODO: see how to properly log
                     Bukkit.getLogger().warning("An error occurred while handling a menu plugin disable event:");
                     e.printStackTrace();
                 }
