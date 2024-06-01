@@ -31,6 +31,7 @@ import java.util.stream.StreamSupport;
  * <p>A developer can subclass this class, override the methods or add them to customise the ways of processing inputs
  * for inventory menu events or modifying the inventories.
  *
+ * @param <S> Menu subclass type of {@link AbstractMenu}
  * @author CosimoTiger
  * @see Menu
  * @see PropertyMenu
@@ -148,7 +149,7 @@ public abstract class AbstractMenu<S extends AbstractMenu<S>> implements Invento
      * @throws NullPointerException     If a {@link HumanEntity} is null
      */
     @Nonnull
-    public S open(@Nonnull MenuManager menuManager, @Nonnull Iterable<? extends HumanEntity> viewers) {
+    public S open(@Nonnull MenuManager<AbstractMenu<S>> menuManager, @Nonnull Iterable<? extends HumanEntity> viewers) {
         Preconditions.checkArgument(viewers != null,
                 "Iterable<? extends HumanEntity> of viewers argument can't be null");
 
@@ -179,7 +180,7 @@ public abstract class AbstractMenu<S extends AbstractMenu<S>> implements Invento
      * @throws NullPointerException     If a {@link HumanEntity} is null
      */
     @Nonnull
-    public S open(@Nonnull MenuManager menuManager, @Nonnull HumanEntity... viewers) {
+    public S open(@Nonnull MenuManager<AbstractMenu<S>> menuManager, @Nonnull HumanEntity... viewers) {
         return this.open(menuManager, List.of(viewers));
     }
 

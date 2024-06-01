@@ -15,8 +15,9 @@ import java.util.function.Consumer;
  * Implementation of {@link Menu} with an {@link Object} array of the same size as the inventory, with many methods for
  * working with these properties.
  *
- * @param <E> Single object type to be stored in the slots of this menu inventory
+ * @param <E> Expected object type to be stored in each slot
  * @author CosimoTiger
+ * @see AbstractMenu
  */
 @SuppressWarnings("unchecked")
 public class PropertyMenu<E> extends AbstractMenu<PropertyMenu<E>> implements Iterable<E> {
@@ -28,7 +29,7 @@ public class PropertyMenu<E> extends AbstractMenu<PropertyMenu<E>> implements It
 
     /**
      * Creates a new {@link PropertyMenu} using the default constructor for {@link Menu}, with an array of this
-     * instance's generic type.
+     * instance's generic type with default null values.
      *
      * @param inventory Not null {@link Inventory} that will be wrapped and controlled by an {@link AbstractMenu}
      */

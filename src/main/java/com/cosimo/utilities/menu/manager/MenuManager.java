@@ -37,7 +37,7 @@ import java.util.Optional;
  *
  * @author CosimoTiger
  */
-public class MenuManager<E extends AbstractMenu> implements Listener {
+public class MenuManager<E extends AbstractMenu<?>> implements Listener {
 
     // TODO: WeakHashMap? Inventories might be referenced only by their Bukkit viewers.
     //  WeakHashMap<Inventory, WeakReference<AbstractMenu>> = new WeakHashMap<>(4);
