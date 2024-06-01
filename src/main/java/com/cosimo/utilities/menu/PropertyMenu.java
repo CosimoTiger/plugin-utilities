@@ -18,7 +18,8 @@ import java.util.function.Consumer;
  * @param <E> Single object type to be stored in the slots of this menu inventory
  * @author CosimoTiger
  */
-public class PropertyMenu<E> extends AbstractMenu implements Iterable<E> {
+@SuppressWarnings("unchecked")
+public class PropertyMenu<E> extends AbstractMenu<PropertyMenu<E>> implements Iterable<E> {
 
     /**
      * Properties of each slot in this inventory are stored in an array, linear like inventories.

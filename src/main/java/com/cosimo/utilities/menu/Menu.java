@@ -10,7 +10,7 @@ import javax.annotation.Nonnull;
  * @author CosimoTiger
  * @see PropertyMenu
  */
-public class Menu extends AbstractMenu {
+public class Menu extends AbstractMenu<Menu> {
 
     /**
      * {@inheritDoc} Creates a new {@link Menu} using the default constructor for {@link AbstractMenu}.

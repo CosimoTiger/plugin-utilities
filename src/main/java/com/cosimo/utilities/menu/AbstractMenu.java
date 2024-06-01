@@ -35,7 +35,8 @@ import java.util.stream.StreamSupport;
  * @see Menu
  * @see PropertyMenu
  */
-public abstract class AbstractMenu implements InventoryListener {
+@SuppressWarnings("unchecked")
+public abstract class AbstractMenu<S extends AbstractMenu<S>> implements InventoryListener {
 
     /**
      * Backing {@link Inventory} that's wrapped and controlled by this class.
@@ -147,7 +148,7 @@ public abstract class AbstractMenu implements InventoryListener {
      * @throws NullPointerException     If a {@link HumanEntity} is null
      */
     @Nonnull
-    public AbstractMenu open(@Nonnull MenuManager menuManager, @Nonnull Iterable<? extends HumanEntity> viewers) {
+    public S open(@Nonnull MenuManager menuManager, @Nonnull Iterable<? extends HumanEntity> viewers) {
         Preconditions.checkArgument(viewers != null,
                 "Iterable<? extends HumanEntity> of viewers argument can't be null");
 
@@ -164,7 +165,7 @@ public abstract class AbstractMenu implements InventoryListener {
             throw new IllegalArgumentException("Zero or all null menu viewers provided to open the menu");
         }
 
-        return this;
+        return (S) this;
     }
 
     /**
@@ -178,7 +179,7 @@ public abstract class AbstractMenu implements InventoryListener {
      * @throws NullPointerException     If a {@link HumanEntity} is null
      */
     @Nonnull
-    public AbstractMenu open(@Nonnull MenuManager menuManager, @Nonnull HumanEntity... viewers) {
+    public S open(@Nonnull MenuManager menuManager, @Nonnull HumanEntity... viewers) {
         return this.open(menuManager, List.of(viewers));
     }
 
@@ -190,9 +191,9 @@ public abstract class AbstractMenu implements InventoryListener {
      * @return This instance, useful for chaining
      */
     @Nonnull
-    public AbstractMenu change(@Nonnull Consumer<Inventory> consumer) {
+    public S change(@Nonnull Consumer<Inventory> consumer) {
         consumer.accept(this.getInventory());
-        return this;
+        return (S) this;
     }
 
     /**
@@ -205,11 +206,11 @@ public abstract class AbstractMenu implements InventoryListener {
      * @throws IllegalArgumentException  If the {@link Consumer}&lt;{@link ItemStack}&gt; argument is null
      */
     @Nonnull
-    public AbstractMenu change(@Nonnull Consumer<ItemStack> consumer, int slot) {
+    public S change(@Nonnull Consumer<ItemStack> consumer, int slot) {
         this.getItem(slot).ifPresent(consumer);
-        return this;
+        return (S) this;
     }
-    
+
     /**
      * Sets a given {@link ItemStack} at every slot in given loop range if the existing {@link ItemStack} and/or slot
      * index match the given {@link BiPredicate}.
@@ -225,7 +226,7 @@ public abstract class AbstractMenu implements InventoryListener {
      * @return This instance, useful for chaining
      * @throws IllegalArgumentException If the step argument is 0
      */
-    public AbstractMenu setIf(@Nullable ItemStack item, @Nonnull BiPredicate<ItemStack, Integer> itemSlotPredicate, int start, int end, int step) {
+    public S setIf(@Nullable ItemStack item, @Nonnull BiPredicate<ItemStack, Integer> itemSlotPredicate, int start, int end, int step) {
         Preconditions.checkArgument(step != 0, "step argument (" + step + ") can't be 0");
 
         for (int slot = start; slot < end; slot += step) {
@@ -234,21 +235,21 @@ public abstract class AbstractMenu implements InventoryListener {
             }
         }
 
-        return this;
+        return (S) this;
     }
 
     @Nonnull
-    public AbstractMenu setIf(@Nullable ItemStack item, @Nonnull BiPredicate<ItemStack, Integer> itemSlotPredicate, int start, int end) {
+    public S setIf(@Nullable ItemStack item, @Nonnull BiPredicate<ItemStack, Integer> itemSlotPredicate, int start, int end) {
         return this.setIf(item, itemSlotPredicate, start, end, 1);
     }
 
     @Nonnull
-    public AbstractMenu setIf(@Nullable ItemStack item, @Nonnull BiPredicate<ItemStack, Integer> itemSlotPredicate, int start) {
+    public S setIf(@Nullable ItemStack item, @Nonnull BiPredicate<ItemStack, Integer> itemSlotPredicate, int start) {
         return this.setIf(item, itemSlotPredicate, start, this.getInventory().getSize());
     }
 
     @Nonnull
-    public AbstractMenu setIf(@Nullable ItemStack item, @Nonnull BiPredicate<ItemStack, Integer> itemSlotPredicate) {
+    public S setIf(@Nullable ItemStack item, @Nonnull BiPredicate<ItemStack, Integer> itemSlotPredicate) {
         return this.setIf(item, itemSlotPredicate, 0);
     }
 
@@ -263,18 +264,18 @@ public abstract class AbstractMenu implements InventoryListener {
      * @throws IllegalArgumentException If step argument is lower than 1
      */
     @Nonnull
-    public AbstractMenu setRange(@Nullable ItemStack item, int start, int end, int step) {
+    public S setRange(@Nullable ItemStack item, int start, int end, int step) {
         Preconditions.checkArgument(step != 0, "step argument (" + step + ") can't be 0");
 
         for (int slot = start; slot < end; slot += step) {
             this.getInventory().setItem(slot, item);
         }
 
-        return this;
+        return (S) this;
     }
 
     @Nonnull
-    public AbstractMenu setRange(@Nullable ItemStack item, int start, int end) {
+    public S setRange(@Nullable ItemStack item, int start, int end) {
         return this.setRange(item, start, end, 1);
     }
 
@@ -286,7 +287,7 @@ public abstract class AbstractMenu implements InventoryListener {
      * @return This instance, useful for chaining
      */
     @Nonnull
-    public AbstractMenu setRange(@Nullable ItemStack item, int start) {
+    public S setRange(@Nullable ItemStack item, int start) {
         return this.setRange(item, start, this.getInventory().getSize());
     }
 
@@ -300,10 +301,10 @@ public abstract class AbstractMenu implements InventoryListener {
      * @throws IllegalArgumentException  If the slot array argument is null
      */
     @Nonnull
-    public AbstractMenu set(@Nullable ItemStack item, @Nonnull Iterable<Integer> slots) {
+    public S set(@Nullable ItemStack item, @Nonnull Iterable<Integer> slots) {
         Preconditions.checkArgument(slots != null, "Array of slots can't be null");
         slots.forEach(slot -> this.getInventory().setItem(slot, item));
-        return this;
+        return (S) this;
     }
 
     /**
@@ -316,14 +317,14 @@ public abstract class AbstractMenu implements InventoryListener {
      * @throws IllegalArgumentException  If the slot array argument is null
      */
     @Nonnull
-    public AbstractMenu set(@Nullable ItemStack item, @Nonnull int... slots) {
+    public S set(@Nullable ItemStack item, @Nonnull int... slots) {
         Preconditions.checkArgument(slots != null, "Array of slots can't be null");
 
         for (int slot : slots) {
             this.getInventory().setItem(slot, item);
         }
 
-        return this;
+        return (S) this;
     }
 
     /**
@@ -336,9 +337,9 @@ public abstract class AbstractMenu implements InventoryListener {
      * @return This instance, useful for chaining
      */
     @Nonnull
-    public AbstractMenu close() {
+    public S close() {
         List.copyOf(this.getInventory().getViewers()).forEach(HumanEntity::closeInventory);
-        return this;
+        return (S) this;
     }
 
     /**
@@ -347,9 +348,9 @@ public abstract class AbstractMenu implements InventoryListener {
      * @return This instance, useful for chaining
      */
     @Nonnull
-    public AbstractMenu clear() {
+    public S clear() {
         this.getInventory().clear();
-        return this;
+        return (S) this;
     }
 
     /**
@@ -388,13 +389,13 @@ public abstract class AbstractMenu implements InventoryListener {
      * @return This instance, useful for chaining
      */
     @Nonnull
-    public AbstractMenu setBukkitTask(@Nullable BukkitTask task) {
+    public S setBukkitTask(@Nullable BukkitTask task) {
         if (this.taskID > -1) {
             Bukkit.getScheduler().cancelTask(this.taskID);
         }
 
         this.taskID = task == null ? -1 : task.getTaskId();
-        return this;
+        return (S) this;
     }
 
     /**
