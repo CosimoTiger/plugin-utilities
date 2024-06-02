@@ -4,12 +4,8 @@ import com.cosimo.utilities.menu.manager.MenuManager;
 import com.google.common.base.Preconditions;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
-import org.bukkit.event.inventory.InventoryAction;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
-import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
@@ -37,7 +33,7 @@ import java.util.stream.StreamSupport;
  * @see PropertyMenu
  */
 @SuppressWarnings("unchecked")
-public abstract class AbstractMenu<S extends AbstractMenu<S>> implements InventoryListener {
+public abstract class AbstractMenu<S extends AbstractMenu<S>> implements IMenu {
 
     /**
      * Backing {@link Inventory} that's wrapped and controlled by this class.
@@ -63,44 +59,11 @@ public abstract class AbstractMenu<S extends AbstractMenu<S>> implements Invento
     }
 
     /**
-     * Handles any {@link InventoryClickEvent} related to this inventory.
-     *
-     * <p>By default, {@link InventoryAction#COLLECT_TO_CURSOR} and {@link InventoryAction#MOVE_TO_OTHER_INVENTORY}
-     * and any action on the menu are cancelled, but interaction with one's own inventory is allowed.
-     *
-     * @param event    {@link InventoryClickEvent} event
-     * @param external Whether the clicked inventory is not this one, possibly not any (outside of view)
-     */
-    @Override
-    public void onClick(@Nonnull InventoryClickEvent event, boolean external) {
-        final var action = event.getAction();
-
-        if (action == InventoryAction.COLLECT_TO_CURSOR || action == InventoryAction.MOVE_TO_OTHER_INVENTORY
-                || !external) {
-            event.setCancelled(true);
-        }
-    }
-
-    /**
-     * Handles the {@link PluginDisableEvent} of the {@link MenuManager} this {@link AbstractMenu} is registered in.
-     *
-     * <p>{@link AbstractMenu}s should always close themselves during this event because their {@link MenuManager} gets
-     * unregistered and stops receiving any events that it can pass to its menus, which means that this
-     * {@link AbstractMenu} will stop working and won't be able to control its {@link Inventory}; additionally, a
-     * {@link PluginDisableEvent}'s cause is typically a server reload or stopping.
-     *
-     * @param event {@link PluginDisableEvent} event
-     */
-    public void onDisable(@Nonnull PluginDisableEvent event) {
-        this.close();
-    }
-
-    /**
      * Handles the inventory close events of an inventory.
      *
      * <p>Can open new menus: for the given {@link InventoryCloseEvent} of a
      * {@link HumanEntity}, perform that task on the next tick. For an example, to reopen this menu:
-     * {@code Bukkit.getScheduler().runTask(plugin, () -> open(event.getPlayer()))}.
+     * {@code Bukkit.getScheduler().runTask(plugin, () -> open(manager, event.getPlayer()))}.
      *
      * @param event {@link InventoryCloseEvent} event
      */
@@ -108,23 +71,6 @@ public abstract class AbstractMenu<S extends AbstractMenu<S>> implements Invento
     public void onClose(@Nonnull InventoryCloseEvent event) {
         if (this.getInventory().getViewers().size() < 2) {
             this.setBukkitTask(null);
-        }
-    }
-
-    /**
-     * Acts as an event handler for the inventory item dragging event.
-     *
-     * <p>By default, any item dragging in this {@link AbstractMenu} will be cancelled.
-     *
-     * @param event {@link InventoryDragEvent} event
-     */
-    @Override
-    public void onDrag(@Nonnull InventoryDragEvent event) {
-        if (event.getRawSlots()
-                .stream()
-                .mapToInt(integer -> integer)
-                .anyMatch(rawSlot -> this.getInventory().equals(event.getView().getInventory(rawSlot)))) {
-            event.setCancelled(true);
         }
     }
 
@@ -149,7 +95,7 @@ public abstract class AbstractMenu<S extends AbstractMenu<S>> implements Invento
      * @throws NullPointerException     If a {@link HumanEntity} is null
      */
     @Nonnull
-    public S open(@Nonnull MenuManager<AbstractMenu<S>> menuManager, @Nonnull Iterable<? extends HumanEntity> viewers) {
+    public S open(@Nonnull MenuManager<AbstractMenu<?>> menuManager, @Nonnull Iterable<? extends HumanEntity> viewers) {
         Preconditions.checkArgument(viewers != null,
                 "Iterable<? extends HumanEntity> of viewers argument can't be null");
 
@@ -180,7 +126,7 @@ public abstract class AbstractMenu<S extends AbstractMenu<S>> implements Invento
      * @throws NullPointerException     If a {@link HumanEntity} is null
      */
     @Nonnull
-    public S open(@Nonnull MenuManager<AbstractMenu<S>> menuManager, @Nonnull HumanEntity... viewers) {
+    public S open(@Nonnull MenuManager<AbstractMenu<?>> menuManager, @Nonnull HumanEntity... viewers) {
         return this.open(menuManager, List.of(viewers));
     }
 
@@ -227,7 +173,8 @@ public abstract class AbstractMenu<S extends AbstractMenu<S>> implements Invento
      * @return This instance, useful for chaining
      * @throws IllegalArgumentException If the step argument is 0
      */
-    public S setIf(@Nullable ItemStack item, @Nonnull BiPredicate<ItemStack, Integer> itemSlotPredicate, int start, int end, int step) {
+    public S setIf(@Nullable ItemStack item, @Nonnull BiPredicate<ItemStack, Integer> itemSlotPredicate, int start,
+                   int end, int step) {
         Preconditions.checkArgument(step != 0, "step argument (" + step + ") can't be 0");
 
         for (int slot = start; slot < end; slot += step) {
@@ -240,7 +187,8 @@ public abstract class AbstractMenu<S extends AbstractMenu<S>> implements Invento
     }
 
     @Nonnull
-    public S setIf(@Nullable ItemStack item, @Nonnull BiPredicate<ItemStack, Integer> itemSlotPredicate, int start, int end) {
+    public S setIf(@Nullable ItemStack item, @Nonnull BiPredicate<ItemStack, Integer> itemSlotPredicate, int start,
+                   int end) {
         return this.setIf(item, itemSlotPredicate, start, end, 1);
     }
 
@@ -329,54 +277,6 @@ public abstract class AbstractMenu<S extends AbstractMenu<S>> implements Invento
     }
 
     /**
-     * Closes all {@link AbstractMenu}s of this instance for all viewers who are viewing it.
-     *
-     * <p>Closing an {@link AbstractMenu} for a {@link HumanEntity} might not always work because their {@link
-     * #onClose(InventoryCloseEvent)} can choose to open a new {@link AbstractMenu}, possibly the same one.
-     * <p>Remember to schedule this action for the next tick if you're running it inside an inventory event handler!
-     *
-     * @return This instance, useful for chaining
-     */
-    @Nonnull
-    public S close() {
-        List.copyOf(this.getInventory().getViewers()).forEach(HumanEntity::closeInventory);
-        return (S) this;
-    }
-
-    /**
-     * Clears all of this inventory menu's contents.
-     *
-     * @return This instance, useful for chaining
-     */
-    @Nonnull
-    public S clear() {
-        this.getInventory().clear();
-        return (S) this;
-    }
-
-    /**
-     * Returns an ItemStack at the given slot of this inventory menu or null if it doesn't exist.
-     *
-     * @param slot Slot index location of the item in the inventory
-     * @return {@link Optional} of a nullable {@link ItemStack}
-     * @throws IndexOutOfBoundsException If the given slot argument is out of the inventory's bounds
-     */
-    @Nonnull
-    public Optional<ItemStack> getItem(int slot) {
-        return Optional.ofNullable(this.getInventory().getItem(slot));
-    }
-
-    /**
-     * Returns the {@link Inventory} that's wrapped and controlled by this {@link AbstractMenu}.
-     *
-     * @return Always the same {@link Inventory}
-     */
-    @Nonnull
-    public final Inventory getInventory() {
-        return this.inventory;
-    }
-
-    /**
      * Assigns a {@link BukkitTask} that will run until the inventory is closed or a new {@link BukkitTask} is set, and
      * cancels the currently assigned {@link #getBukkitTask()}.
      *
@@ -397,6 +297,54 @@ public abstract class AbstractMenu<S extends AbstractMenu<S>> implements Invento
 
         this.taskID = task == null ? -1 : task.getTaskId();
         return (S) this;
+    }
+
+    /**
+     * Closes all {@link Inventory} of this instance for all viewers who are viewing it.
+     *
+     * <p>Remember to schedule this action for the next tick if you're running it inside an inventory event handler!
+     *
+     * @return This instance, useful for chaining
+     */
+    @Nonnull
+    public S close() {
+        return (S) IMenu.super.close();
+    }
+
+    /**
+     * Clears all of this inventory menu's contents.
+     *
+     * <p>Some subclasses may implement additional contents that can be cleared, such as properties.</p>
+     *
+     * @return This instance, useful for chaining
+     * @see PropertyMenu#clearProperties()
+     */
+    @Nonnull
+    public S clear() {
+        this.getInventory().clear();
+        return (S) this;
+    }
+
+    /**
+     * Returns an {@link Optional} of {@link ItemStack} at the given slot of this inventory menu.
+     *
+     * @param slot Slot index location of the item in the inventory
+     * @return {@link Optional} of a nullable {@link ItemStack}
+     * @throws IndexOutOfBoundsException If the given slot argument is out of the inventory's bounds
+     */
+    @Nonnull
+    public Optional<ItemStack> getItem(int slot) {
+        return Optional.ofNullable(this.getInventory().getItem(slot));
+    }
+
+    /**
+     * Returns the {@link Inventory} that's wrapped and controlled by this {@link AbstractMenu}.
+     *
+     * @return Always the same {@link Inventory}
+     */
+    @Nonnull
+    public final Inventory getInventory() {
+        return this.inventory;
     }
 
     /**

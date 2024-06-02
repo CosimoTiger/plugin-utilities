@@ -14,6 +14,9 @@ import java.util.function.Consumer;
 /**
  * Implementation of {@link Menu} with an {@link Object} array of the same size as the inventory, with many methods for
  * working with these properties.
+ * <p>
+ * Example:
+ * {@code var menu = new PropertyMenu<DyeColor>(Bukkit.createInventory(null, InventoryType.CHEST, "Color picker"));}
  *
  * @param <E> Expected object type to be stored in each slot
  * @author CosimoTiger
@@ -37,7 +40,8 @@ public class PropertyMenu<E> extends AbstractMenu<PropertyMenu<E>> implements It
         super(inventory);
     }
 
-    public PropertyMenu<E> setIf(@Nullable E property, @Nonnull BiPredicate<E, Integer> propertySlotPredicate, int start, int end, int step) {
+    public PropertyMenu<E> setIf(@Nullable E property, @Nonnull BiPredicate<E, Integer> propertySlotPredicate,
+                                 int start, int end, int step) {
         Preconditions.checkArgument(step != 0, "step argument (" + step + ") can't be 0");
 
         for (int slot = start; slot < end; slot += step) {
@@ -54,12 +58,14 @@ public class PropertyMenu<E> extends AbstractMenu<PropertyMenu<E>> implements It
     }
 
     @Nonnull
-    public PropertyMenu<E> setIf(@Nullable E property, @Nonnull BiPredicate<E, Integer> propertySlotPredicate, int start, int end) {
+    public PropertyMenu<E> setIf(@Nullable E property, @Nonnull BiPredicate<E, Integer> propertySlotPredicate,
+                                 int start, int end) {
         return this.setIf(property, propertySlotPredicate, start, end, 1);
     }
 
     @Nonnull
-    public PropertyMenu<E> setIf(@Nullable E property, @Nonnull BiPredicate<E, Integer> propertySlotPredicate, int start) {
+    public PropertyMenu<E> setIf(@Nullable E property, @Nonnull BiPredicate<E, Integer> propertySlotPredicate,
+                                 int start) {
         return this.setIf(property, propertySlotPredicate, start, this.getInventory().getSize());
     }
 
@@ -87,23 +93,6 @@ public class PropertyMenu<E> extends AbstractMenu<PropertyMenu<E>> implements It
     @Nonnull
     public PropertyMenu<E> setRange(@Nullable E property, int start) {
         return this.setRange(property, start, this.getInventory().getSize());
-    }
-
-    /**
-     * Modifies a property located at a given slot with given operations to perform.
-     *
-     * @param applyProperty Lambda method that'll take a slot property object as an argument and perform operations on
-     *                      it
-     * @param slot          Slot at which a property that is being modified is located at
-     * @return This instance, useful for chaining
-     * @throws IndexOutOfBoundsException If the slot argument is out of this inventory's array boundaries
-     * @throws IllegalArgumentException  If the {@link Consumer} argument is null
-     */
-    @Nonnull
-    public PropertyMenu<E> changeProperty(@Nonnull Consumer<E> applyProperty, int slot) {
-        Preconditions.checkArgument(applyProperty != null, "Consumer<E> argument can't be null");
-        this.getProperty(slot).ifPresent(applyProperty);
-        return this;
     }
 
     /**
@@ -139,6 +128,23 @@ public class PropertyMenu<E> extends AbstractMenu<PropertyMenu<E>> implements It
             this.properties[slot] = property;
         }
 
+        return this;
+    }
+
+    /**
+     * Modifies a property located at a given slot with given operations to perform.
+     *
+     * @param applyProperty Lambda method that'll take a slot property object as an argument and perform operations on
+     *                      it
+     * @param slot          Slot at which a property that is being modified is located at
+     * @return This instance, useful for chaining
+     * @throws IndexOutOfBoundsException If the slot argument is out of this inventory's array boundaries
+     * @throws IllegalArgumentException  If the {@link Consumer} argument is null
+     */
+    @Nonnull
+    public PropertyMenu<E> changeProperty(@Nonnull Consumer<E> applyProperty, int slot) {
+        Preconditions.checkArgument(applyProperty != null, "Consumer<E> argument can't be null");
+        this.getProperty(slot).ifPresent(applyProperty);
         return this;
     }
 

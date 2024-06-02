@@ -1,6 +1,6 @@
 package com.cosimo.utilities.menu.manager;
 
-import com.cosimo.utilities.menu.AbstractMenu;
+import com.cosimo.utilities.menu.IMenu;
 import com.google.common.base.Preconditions;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
@@ -23,31 +23,39 @@ import java.util.Optional;
 
 /**
  * A {@link Listener} that filters {@link org.bukkit.event.inventory.InventoryEvent}s to registered {@link Inventory}
- * {@link AbstractMenu}s. Menu inventory listening is delegated and centralised in one {@link MenuManager} because of
- * the assumption that constantly registering and unregistering new {@link Listener}s for each {@link AbstractMenu} is
- * slow, especially because of the use of Reflection.
+ * {@link IMenu}s. Menu inventory listening is delegated and centralised in one {@link MenuManager} because of the
+ * assumption that constantly registering and unregistering new {@link Listener}s for each {@link IMenu} is slow,
+ * especially because of the use of Reflection.
  *
- * <p><strong>Note:</strong> {@link AbstractMenu}s should be unregistered from their {@link MenuManager} when they're
- * not in use anymore, such as when the last viewer closes an {@link AbstractMenu}. The unfollowing of this rule will
- * cause a memory leak because the {@link AbstractMenu} reference(s) won't be removed from a {@link MenuManager}'s
- * {@link Map}.
+ * <p><strong>Note:</strong> {@link IMenu}s should be unregistered from their {@link MenuManager} when they're
+ * not in use anymore, such as when the last viewer closes an {@link IMenu}. The unfollowing of this rule will cause a
+ * memory leak because the {@link IMenu} reference(s) won't be removed from a {@link MenuManager}'s {@link Map}.
  *
- * <p><strong>Warning:</strong> {@link AbstractMenu}s in multiple instances of {@link MenuManager}s might cause
- * multiple event handler calls.
+ * <p><strong>Warning:</strong> {@link IMenu}s in multiple {@link MenuManager} instances may cause
+ * duplicate event handler calls.
  *
+ * @param <E> {@link IMenu} subclass restriction that's always expected to be received or added to this
+ *            {@link MenuManager}
  * @author CosimoTiger
  */
-public class MenuManager<E extends AbstractMenu<?>> implements Listener {
+public class MenuManager<E extends IMenu> implements Listener {
 
     // TODO: WeakHashMap? Inventories might be referenced only by their Bukkit viewers.
-    //  WeakHashMap<Inventory, WeakReference<AbstractMenu>> = new WeakHashMap<>(4);
+    //  WeakHashMap<Inventory, WeakReference<IMenu>> = new WeakHashMap<>(4);
     /**
-     * <strong>Multiple {@link AbstractMenu}s of a single {@link Inventory} won't work in one {@link MenuManager}
-     * due to unique keys.</strong>
+     * Stores {@link IMenu} associations to their {@link Inventory} instances for quick access.
      */
     private final Map<Inventory, E> menus;
     private final Plugin provider;
 
+    /**
+     * Creates a new instance that registers itself with the enabled {@link Listener} provider {@link Plugin}.
+     *
+     * @param provider Not null enabled {@link Plugin} for registering this {@link Listener} instance's event handlers
+     * @param mapImpl  Customizable {@link Map} implementation
+     * @throws IllegalArgumentException If the {@link Plugin} argument is null
+     * @throws IllegalStateException    If the {@link Plugin} argument is not enabled
+     */
     protected MenuManager(@Nonnull Plugin provider, @Nonnull Map<Inventory, E> mapImpl) {
         Preconditions.checkArgument(provider != null, "Plugin provider argument can't be null");
         Preconditions.checkState(provider.isEnabled(), "Plugin provider argument can't be disabled");
@@ -68,11 +76,10 @@ public class MenuManager<E extends AbstractMenu<?>> implements Listener {
     }
 
     /**
-     * Removes an {@link AbstractMenu} that matches a given {@link Inventory} from this {@link MenuManager}'s
-     * {@link HashMap}.
+     * Removes an {@link IMenu} that matches a given {@link Inventory} from this {@link MenuManager}'s {@link HashMap}.
      *
-     * @param inventory Not null {@link Inventory} whose {@link AbstractMenu} will be unregistered
-     * @return {@link AbstractMenu} that was a value to the given {@link Inventory}'s {@link AbstractMenu}
+     * @param inventory Not null {@link Inventory} whose {@link IMenu} will be unregistered
+     * @return {@link IMenu} that was a value to the given {@link Inventory}'s {@link IMenu}
      * @throws IllegalArgumentException If the {@link Inventory} argument is null
      */
     @Nonnull
@@ -81,11 +88,11 @@ public class MenuManager<E extends AbstractMenu<?>> implements Listener {
     }
 
     /**
-     * Removes a given {@link AbstractMenu} from this {@link MenuManager}'s {@link HashMap}.
+     * Removes a given {@link IMenu} from this {@link MenuManager}'s {@link HashMap}.
      *
-     * @param menu Not null {@link AbstractMenu} that'll be unregistered
-     * @return {@link AbstractMenu} that was a value to the given {@link AbstractMenu}'s {@link Inventory}
-     * @throws IllegalArgumentException If the {@link AbstractMenu} argument is null
+     * @param menu Not null {@link IMenu} that'll be unregistered
+     * @return {@link IMenu} that was a value to the given {@link IMenu}'s {@link Inventory}
+     * @throws IllegalArgumentException If the {@link IMenu} argument is null
      */
     @Nonnull
     public Optional<E> unregisterMenu(@Nonnull E menu) {
@@ -93,12 +100,12 @@ public class MenuManager<E extends AbstractMenu<?>> implements Listener {
     }
 
     /**
-     * Puts a given {@link AbstractMenu} into this {@link MenuManager}'s {@link HashMap}, causing any next events to be
-     * handled to the {@link AbstractMenu} until it's unregistered.
+     * Puts a given {@link IMenu} into this {@link MenuManager}'s {@link HashMap}, causing any next events to be handled
+     * to the {@link IMenu} until it's unregistered.
      *
-     * @param menu Not null {@link AbstractMenu} that'll be registered
-     * @return Previous {@link AbstractMenu} that was a value to the given {@link AbstractMenu}'s {@link Inventory}
-     * @throws IllegalArgumentException If the {@link AbstractMenu} argument is null
+     * @param menu Not null {@link IMenu} that'll be registered
+     * @return Previous {@link IMenu} that was a value to the given {@link IMenu}'s {@link Inventory}
+     * @throws IllegalArgumentException If the {@link IMenu} argument is null
      */
     @Nonnull
     public Optional<E> registerMenu(@Nonnull E menu) {
@@ -108,8 +115,8 @@ public class MenuManager<E extends AbstractMenu<?>> implements Listener {
     /**
      * Closes all inventory menus that are currently registered.
      *
-     * <p>Closing an {@link AbstractMenu} for a {@link HumanEntity} might not always work because their {@link
-     * AbstractMenu#onClose(InventoryCloseEvent)} can choose to open a new {@link AbstractMenu}, possibly the same one.
+     * <p>Closing an {@link IMenu} for a {@link HumanEntity} might not always work because their {@link
+     * IMenu#onClose(InventoryCloseEvent)} can choose to open a new {@link IMenu}, possibly the same one.
      *
      * @return This instance, useful for chaining
      */
@@ -117,9 +124,8 @@ public class MenuManager<E extends AbstractMenu<?>> implements Listener {
     public MenuManager<E> closeMenus() {
         // Closing each menu calls an InventoryCloseEvent which may unregister a menu from the MenuManager Map of menus.
         // Therefore, a ConcurrentModificationException needs to be avoided using an Iterator.
-
         //noinspection ForLoopReplaceableByForEach
-        for (var iterator = this.menus.entrySet().iterator(); iterator.hasNext(); ) {
+        for (final var iterator = this.menus.entrySet().iterator(); iterator.hasNext(); ) {
             iterator.next().getValue().close();
         }
 
@@ -127,10 +133,10 @@ public class MenuManager<E extends AbstractMenu<?>> implements Listener {
     }
 
     /**
-     * Returns the {@link AbstractMenu} that matches a given {@link Inventory} argument.
+     * Returns the {@link IMenu} that matches a given {@link Inventory} argument.
      *
-     * @param inventory Inventory that possibly belongs to an {@link AbstractMenu}
-     * @return Optional of nullable {@link AbstractMenu} that matches the given inventory
+     * @param inventory Inventory that possibly belongs to an {@link IMenu}
+     * @return Optional of nullable {@link IMenu} that matches the given inventory
      * @throws IllegalArgumentException If the {@link Inventory} argument is null
      */
     @Nonnull
@@ -139,11 +145,11 @@ public class MenuManager<E extends AbstractMenu<?>> implements Listener {
     }
 
     /**
-     * Returns the current inventory {@link AbstractMenu} that a given player is viewing, assuming it's the top
-     * inventory of their {@link org.bukkit.inventory.InventoryView}.
+     * Returns the current inventory {@link IMenu} that a given player is viewing, assuming it's the top inventory of
+     * their {@link org.bukkit.inventory.InventoryView}.
      *
      * @param viewer {@link HumanEntity} that's viewing an inventory
-     * @return Optional of nullable {@link AbstractMenu} of the given viewer's top inventory
+     * @return Optional of nullable {@link IMenu} of the given viewer's top inventory
      * @throws IllegalArgumentException If the viewer argument is null
      */
     @Nonnull
@@ -153,7 +159,7 @@ public class MenuManager<E extends AbstractMenu<?>> implements Listener {
 
     /**
      * Returns the unmodifiable map ({@link Collections#unmodifiableMap(Map)}) view of this {@link MenuManager}'s menu
-     * {@link HashMap} of {@link Inventory} keys to {@link AbstractMenu} values.
+     * {@link HashMap} of {@link Inventory} keys to {@link IMenu} values.
      *
      * @return Unmodifiable view of this {@link MenuManager}'s {@link HashMap}
      */
@@ -172,22 +178,22 @@ public class MenuManager<E extends AbstractMenu<?>> implements Listener {
     }
 
     /**
-     * Passes any {@link InventoryClickEvent} to the {@link AbstractMenu} it happened on.
+     * Passes any {@link InventoryClickEvent} to the {@link IMenu} it happened on.
      *
      * @param event InventoryClickEvent event
-     * @see AbstractMenu#onClick(InventoryClickEvent, boolean)
+     * @see IMenu#onClick(InventoryClickEvent, boolean)
      */
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGH)
     public void onInventoryClick(@Nonnull InventoryClickEvent event) {
         this.getMenu(event.getInventory())
                 .ifPresent(menu -> menu.onClick(event, !menu.getInventory().equals(event.getClickedInventory())));
     }
 
     /**
-     * Passes the {@link InventoryCloseEvent} to the {@link AbstractMenu} it happened on.
+     * Passes the {@link InventoryCloseEvent} to the {@link IMenu} it happened on.
      *
      * @param event InventoryCloseEvent event
-     * @see AbstractMenu#onClose(InventoryCloseEvent)
+     * @see IMenu#onClose(InventoryCloseEvent)
      */
     @EventHandler(priority = EventPriority.MONITOR)
     public void onInventoryClose(@Nonnull InventoryCloseEvent event) {
@@ -201,23 +207,23 @@ public class MenuManager<E extends AbstractMenu<?>> implements Listener {
     }
 
     /**
-     * Passes any {@link InventoryOpenEvent} to the {@link AbstractMenu} it happened on.
+     * Passes any {@link InventoryOpenEvent} to the {@link IMenu} it happened on.
      *
      * @param event InventoryOpenEvent event object
-     * @see AbstractMenu#onOpen(InventoryOpenEvent)
+     * @see IMenu#onOpen(InventoryOpenEvent)
      */
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGH)
     public void onInventoryOpen(@Nonnull InventoryOpenEvent event) {
         this.getMenu(event.getInventory()).ifPresent(menu -> menu.onOpen(event));
     }
 
     /**
-     * Passes any {@link InventoryDragEvent} to the {@link AbstractMenu} it happened on.
+     * Passes any {@link InventoryDragEvent} to the {@link IMenu} it happened on.
      *
      * @param event InventoryDragEvent event object
-     * @see AbstractMenu#onDrag(InventoryDragEvent)
+     * @see IMenu#onDrag(InventoryDragEvent)
      */
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGH)
     public void onInventoryDrag(@Nonnull InventoryDragEvent event) {
         this.getMenu(event.getInventory()).ifPresent(menu -> menu.onDrag(event));
     }
@@ -230,12 +236,12 @@ public class MenuManager<E extends AbstractMenu<?>> implements Listener {
      * inventory menus.
      *
      * @param event PluginDisableEvent event
-     * @see AbstractMenu#onDisable(PluginDisableEvent)
+     * @see IMenu#onDisable(PluginDisableEvent)
      */
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPluginDisable(@Nonnull PluginDisableEvent event) {
         if (this.getPlugin().equals(event.getPlugin())) {
-            for (var iterator = this.menus.entrySet().iterator(); iterator.hasNext(); ) {
+            for (final var iterator = this.menus.entrySet().iterator(); iterator.hasNext(); ) {
                 try {
                     iterator.next().getValue().onDisable(event);
                 } catch (Exception e) {

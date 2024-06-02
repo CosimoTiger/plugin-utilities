@@ -12,12 +12,37 @@ import javax.annotation.Nonnull;
  * {@link org.bukkit.event.Listener} handler methods.
  */
 public interface InventoryListener {
-
+    /**
+     * Event handler for the {@link InventoryClickEvent}. Useful for reacting to slot button clicks and cancelling
+     * such.
+     *
+     * @param event    {@link InventoryClickEvent}
+     * @param external Whether the clicked slot is outside the inventory menu detected by
+     *                 {@link com.cosimo.utilities.menu.manager.MenuManager}
+     */
     void onClick(@Nonnull InventoryClickEvent event, boolean external);
 
+    /**
+     * Event handler for the {@link InventoryDragEvent}. Useful for handling dragged items
+     * {@link org.bukkit.inventory.ItemStack} input.
+     *
+     * @param event {@link InventoryDragEvent}
+     */
     void onDrag(@Nonnull InventoryDragEvent event);
 
+    /**
+     * Event handler for the {@link InventoryCloseEvent}. Useful for deleting objects, reopening menus etc.
+     *
+     * @param event {@link InventoryCloseEvent}
+     */
     void onClose(@Nonnull InventoryCloseEvent event);
 
+    /**
+     * Event handler for the {@link InventoryOpenEvent}. Useful for initializing some menu components, starting tracking
+     * of viewers, starting up {@link org.bukkit.scheduler.BukkitTask}s etc., generally a verification that someone
+     * began a "menu session" (a concept that can be seen in other menu libraries).
+     *
+     * @param event {@link InventoryOpenEvent}
+     */
     void onOpen(@Nonnull InventoryOpenEvent event);
 }
