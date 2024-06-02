@@ -1,6 +1,6 @@
 package com.cosimo.utilities.utility;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 public class NumberUtil {
 
@@ -12,9 +12,9 @@ public class NumberUtil {
      * @return Greatest integer from the given array
      * @throws IllegalArgumentException If the numbers argument is null
      */
-    public static int max(@Nonnull Iterable<Integer> numbers) {
+    public static int max(@NotNull Iterable<Integer> numbers) {
         int max = Integer.MIN_VALUE;
-        for(int number : numbers) {
+        for (int number : numbers) {
             max = Math.max(number, max);
         }
         return max;
@@ -27,9 +27,9 @@ public class NumberUtil {
      * @return Greatest integer from the given array
      * @throws IllegalArgumentException If the numbers argument is null
      */
-    public static int max(int... numbers) {
+    public static int max(int @NotNull ... numbers) {
         int max = Integer.MIN_VALUE;
-        for(int number : numbers) {
+        for (int number : numbers) {
             max = Math.max(number, max);
         }
         return max;
@@ -43,9 +43,9 @@ public class NumberUtil {
      * @return Smallest integer from the given array
      * @throws IllegalArgumentException If the numbers argument is null
      */
-    public static int min(@Nonnull Iterable<Integer> numbers) {
+    public static int min(@NotNull Iterable<Integer> numbers) {
         int min = Integer.MAX_VALUE;
-        for(int number : numbers) {
+        for (int number : numbers) {
             min = Math.min(number, min);
         }
         return min;
@@ -58,9 +58,9 @@ public class NumberUtil {
      * @return Smallest integer from the given array
      * @throws IllegalArgumentException If the numbers argument is null
      */
-    public static int min(int... numbers) {
+    public static int min(int @NotNull ... numbers) {
         int min = Integer.MAX_VALUE;
-        for(int number : numbers) {
+        for (int number : numbers) {
             min = Math.min(number, min);
         }
         return min;

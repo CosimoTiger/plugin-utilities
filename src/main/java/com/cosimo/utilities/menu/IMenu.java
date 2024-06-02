@@ -7,8 +7,8 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.Inventory;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 
 /**
@@ -23,7 +23,7 @@ public interface IMenu extends InventoryListener {
      * and any action on the menu are cancelled, but interaction with one's own inventory is allowed.
      */
     @Override
-    default void onClick(@Nonnull InventoryClickEvent event, boolean external) {
+    default void onClick(@NotNull InventoryClickEvent event, boolean external) {
         final var action = event.getAction();
 
         if (action == InventoryAction.COLLECT_TO_CURSOR || action == InventoryAction.MOVE_TO_OTHER_INVENTORY
@@ -40,7 +40,7 @@ public interface IMenu extends InventoryListener {
      * @param event {@link InventoryDragEvent} event
      */
     @Override
-    default void onDrag(@Nonnull InventoryDragEvent event) {
+    default void onDrag(@NotNull InventoryDragEvent event) {
         if (event.getRawSlots()
                 .stream()
                 .mapToInt(integer -> integer)
@@ -59,7 +59,7 @@ public interface IMenu extends InventoryListener {
      *
      * @param event {@link PluginDisableEvent} event
      */
-    default void onDisable(@Nonnull PluginDisableEvent event) {
+    default void onDisable(@NotNull PluginDisableEvent event) {
         this.close();
     }
 
@@ -71,12 +71,12 @@ public interface IMenu extends InventoryListener {
      *
      * @return This instance, useful for chaining
      */
-    @Nonnull
+    @NotNull
     default IMenu close() {
         List.copyOf(this.getInventory().getViewers()).forEach(HumanEntity::closeInventory);
         return this;
     }
 
-    @Nonnull
+    @NotNull
     Inventory getInventory();
 }

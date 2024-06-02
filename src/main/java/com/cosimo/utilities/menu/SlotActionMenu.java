@@ -2,8 +2,8 @@ package com.cosimo.utilities.menu;
 
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.function.BiConsumer;
 
 /**
@@ -11,7 +11,7 @@ import java.util.function.BiConsumer;
  */
 public class SlotActionMenu extends PropertyMenu<BiConsumer<InventoryClickEvent, SlotActionMenu>> {
 
-    public SlotActionMenu(@Nonnull Inventory inventory) {
+    public SlotActionMenu(@NotNull Inventory inventory) {
         super(inventory);
     }
 
@@ -20,7 +20,7 @@ public class SlotActionMenu extends PropertyMenu<BiConsumer<InventoryClickEvent,
      * it exists, and can freely change the outcome of the same event.
      */
     @Override
-    public void onClick(@Nonnull InventoryClickEvent event, boolean external) {
+    public void onClick(@NotNull InventoryClickEvent event, boolean external) {
         super.onClick(event, external);
         this.getProperty(event.getSlot()).ifPresent(property -> property.accept(event, this));
     }

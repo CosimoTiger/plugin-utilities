@@ -1,9 +1,9 @@
 package com.cosimo.utilities.utility;
 
 import org.bukkit.ChatColor;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,13 +27,13 @@ public class StringUtil {
     /**
      * Returns the possessive form of the input {@link String}
      *
-     * @param input Nullable {@link String} to make possessive
-     * @param sCase {@link String} to append to the input in the case the input does not end in {@code s}
+     * @param input    Nullable {@link String} to make possessive
+     * @param sCase    {@link String} to append to the input in the case the input does not end in {@code s}
      * @param noneCase {@link String} to append to the input in the case the input does end in {@code s}
      * @return Input {@link String} argument's possessive form
      */
     @Nullable
-    public static String possessive(@Nullable String input, @Nonnull String sCase, @Nonnull String noneCase) {
+    public static String possessive(@Nullable String input, @NotNull String sCase, @NotNull String noneCase) {
         return input == null ? null : input.concat(input.endsWith("s") ? noneCase : sCase);
     }
 
@@ -77,7 +77,7 @@ public class StringUtil {
      * Returns a translated input {@link String} for use with {@code &} to represent colors
      *
      * @param input Nullable {@link String} to translate
-     * @param args Nullable {@link Object} array to format the input {@link String}
+     * @param args  Nullable {@link Object} array to format the input {@link String}
      * @return Translated input {@link String} argument
      */
     @Nullable
@@ -100,7 +100,7 @@ public class StringUtil {
     /**
      * Returns a {@link List} from the input {@link String} using the delimiter provided
      *
-     * @param input Nullable {@link String} to transform
+     * @param input     Nullable {@link String} to transform
      * @param delimiter {@link Character} to split on
      * @return {@link List} from the input {@link String} argument
      */
@@ -112,7 +112,7 @@ public class StringUtil {
     /**
      * Returns a {@link List} from the input {@link String} using the delimiter provided
      *
-     * @param input Nullable {@link String} to transform
+     * @param input     Nullable {@link String} to transform
      * @param delimiter {@link String} to split on
      * @return {@link List} from the input {@link String} argument
      */
@@ -120,5 +120,4 @@ public class StringUtil {
     public static List<String> toList(@Nullable String input, String delimiter) {
         return input == null ? null : Arrays.stream(input.split(delimiter)).collect(Collectors.toList());
     }
-
 }

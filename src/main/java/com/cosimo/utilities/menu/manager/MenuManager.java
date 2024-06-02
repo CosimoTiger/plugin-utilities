@@ -14,8 +14,8 @@ import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -56,7 +56,7 @@ public class MenuManager<E extends IMenu> implements Listener {
      * @throws IllegalArgumentException If the {@link Plugin} argument is null
      * @throws IllegalStateException    If the {@link Plugin} argument is not enabled
      */
-    protected MenuManager(@Nonnull Plugin provider, @Nonnull Map<Inventory, E> mapImpl) {
+    protected MenuManager(@NotNull Plugin provider, @NotNull Map<Inventory, E> mapImpl) {
         Preconditions.checkArgument(provider != null, "Plugin provider argument can't be null");
         Preconditions.checkState(provider.isEnabled(), "Plugin provider argument can't be disabled");
 
@@ -71,7 +71,7 @@ public class MenuManager<E extends IMenu> implements Listener {
      * @throws IllegalArgumentException If the {@link Plugin} argument is null
      * @throws IllegalStateException    If the {@link Plugin} argument is not enabled
      */
-    public MenuManager(@Nonnull Plugin provider) {
+    public MenuManager(@NotNull Plugin provider) {
         this(provider, new HashMap<>(4));
     }
 
@@ -82,8 +82,8 @@ public class MenuManager<E extends IMenu> implements Listener {
      * @return {@link IMenu} that was a value to the given {@link Inventory}'s {@link IMenu}
      * @throws IllegalArgumentException If the {@link Inventory} argument is null
      */
-    @Nonnull
-    public Optional<E> unregisterMenu(@Nonnull Inventory inventory) {
+    @NotNull
+    public Optional<E> unregisterMenu(@NotNull Inventory inventory) {
         return Optional.ofNullable(this.menus.remove(inventory));
     }
 
@@ -94,8 +94,8 @@ public class MenuManager<E extends IMenu> implements Listener {
      * @return {@link IMenu} that was a value to the given {@link IMenu}'s {@link Inventory}
      * @throws IllegalArgumentException If the {@link IMenu} argument is null
      */
-    @Nonnull
-    public Optional<E> unregisterMenu(@Nonnull E menu) {
+    @NotNull
+    public Optional<E> unregisterMenu(@NotNull E menu) {
         return Optional.ofNullable(this.menus.remove(menu.getInventory()));
     }
 
@@ -107,8 +107,8 @@ public class MenuManager<E extends IMenu> implements Listener {
      * @return Previous {@link IMenu} that was a value to the given {@link IMenu}'s {@link Inventory}
      * @throws IllegalArgumentException If the {@link IMenu} argument is null
      */
-    @Nonnull
-    public Optional<E> registerMenu(@Nonnull E menu) {
+    @NotNull
+    public Optional<E> registerMenu(@NotNull E menu) {
         return Optional.ofNullable(this.menus.put(menu.getInventory(), menu));
     }
 
@@ -120,7 +120,7 @@ public class MenuManager<E extends IMenu> implements Listener {
      *
      * @return This instance, useful for chaining
      */
-    @Nonnull
+    @NotNull
     public MenuManager<E> closeMenus() {
         // Closing each menu calls an InventoryCloseEvent which may unregister a menu from the MenuManager Map of menus.
         // Therefore, a ConcurrentModificationException needs to be avoided using an Iterator.
@@ -139,8 +139,8 @@ public class MenuManager<E extends IMenu> implements Listener {
      * @return Optional of nullable {@link IMenu} that matches the given inventory
      * @throws IllegalArgumentException If the {@link Inventory} argument is null
      */
-    @Nonnull
-    public Optional<E> getMenu(@Nonnull Inventory inventory) {
+    @NotNull
+    public Optional<E> getMenu(@NotNull Inventory inventory) {
         return Optional.ofNullable(this.menus.get(inventory));
     }
 
@@ -152,8 +152,8 @@ public class MenuManager<E extends IMenu> implements Listener {
      * @return Optional of nullable {@link IMenu} of the given viewer's top inventory
      * @throws IllegalArgumentException If the viewer argument is null
      */
-    @Nonnull
-    public Optional<E> getMenu(@Nonnull HumanEntity viewer) {
+    @NotNull
+    public Optional<E> getMenu(@NotNull HumanEntity viewer) {
         return this.getMenu(viewer.getOpenInventory().getTopInventory());
     }
 
@@ -172,7 +172,7 @@ public class MenuManager<E extends IMenu> implements Listener {
      *
      * @return {@link Plugin} of this {@link MenuManager}
      */
-    @Nonnull
+    @NotNull
     public Plugin getPlugin() {
         return this.provider;
     }
@@ -184,7 +184,7 @@ public class MenuManager<E extends IMenu> implements Listener {
      * @see IMenu#onClick(InventoryClickEvent, boolean)
      */
     @EventHandler(priority = EventPriority.HIGH)
-    public void onInventoryClick(@Nonnull InventoryClickEvent event) {
+    public void onInventoryClick(@NotNull InventoryClickEvent event) {
         this.getMenu(event.getInventory())
                 .ifPresent(menu -> menu.onClick(event, !menu.getInventory().equals(event.getClickedInventory())));
     }
@@ -196,7 +196,7 @@ public class MenuManager<E extends IMenu> implements Listener {
      * @see IMenu#onClose(InventoryCloseEvent)
      */
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onInventoryClose(@Nonnull InventoryCloseEvent event) {
+    public void onInventoryClose(@NotNull InventoryCloseEvent event) {
         this.getMenu(event.getInventory()).ifPresent(menu -> {
             if (menu.getInventory().getViewers().size() < 2) {
                 this.unregisterMenu(menu);
@@ -213,7 +213,7 @@ public class MenuManager<E extends IMenu> implements Listener {
      * @see IMenu#onOpen(InventoryOpenEvent)
      */
     @EventHandler(priority = EventPriority.HIGH)
-    public void onInventoryOpen(@Nonnull InventoryOpenEvent event) {
+    public void onInventoryOpen(@NotNull InventoryOpenEvent event) {
         this.getMenu(event.getInventory()).ifPresent(menu -> menu.onOpen(event));
     }
 
@@ -224,7 +224,7 @@ public class MenuManager<E extends IMenu> implements Listener {
      * @see IMenu#onDrag(InventoryDragEvent)
      */
     @EventHandler(priority = EventPriority.HIGH)
-    public void onInventoryDrag(@Nonnull InventoryDragEvent event) {
+    public void onInventoryDrag(@NotNull InventoryDragEvent event) {
         this.getMenu(event.getInventory()).ifPresent(menu -> menu.onDrag(event));
     }
 
@@ -239,7 +239,7 @@ public class MenuManager<E extends IMenu> implements Listener {
      * @see IMenu#onDisable(PluginDisableEvent)
      */
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onPluginDisable(@Nonnull PluginDisableEvent event) {
+    public void onPluginDisable(@NotNull PluginDisableEvent event) {
         if (this.getPlugin().equals(event.getPlugin())) {
             for (final var iterator = this.menus.entrySet().iterator(); iterator.hasNext(); ) {
                 try {

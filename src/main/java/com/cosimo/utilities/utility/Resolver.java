@@ -1,18 +1,19 @@
 package com.cosimo.utilities.utility;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
+
 import java.lang.reflect.Field;
 import java.util.Optional;
 
 /**
  * Reflection utility.
  */
-public record Resolver(@Nonnull Class<?> clazz) {
+public record Resolver(@NotNull Class<?> clazz) {
 
-    @Nonnull
-    public Optional<Field> resolveField(@Nonnull String name) {
+    @NotNull
+    public Optional<Field> resolveField(@NotNull String name) {
         try {
-            Field field = this.clazz.getDeclaredField(name);
+            final Field field = this.clazz.getDeclaredField(name);
             field.setAccessible(true);
 
             return Optional.of(field);

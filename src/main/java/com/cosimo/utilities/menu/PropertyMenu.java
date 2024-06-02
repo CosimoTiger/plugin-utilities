@@ -2,9 +2,9 @@ package com.cosimo.utilities.menu;
 
 import com.google.common.base.Preconditions;
 import org.bukkit.inventory.Inventory;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Optional;
@@ -36,11 +36,11 @@ public class PropertyMenu<E> extends AbstractMenu<PropertyMenu<E>> implements It
      *
      * @param inventory Not null {@link Inventory} that will be wrapped and controlled by an {@link AbstractMenu}
      */
-    public PropertyMenu(@Nonnull Inventory inventory) {
+    public PropertyMenu(@NotNull Inventory inventory) {
         super(inventory);
     }
 
-    public PropertyMenu<E> setIf(@Nullable E property, @Nonnull BiPredicate<E, Integer> propertySlotPredicate,
+    public PropertyMenu<E> setIf(@Nullable E property, @NotNull BiPredicate<E, Integer> propertySlotPredicate,
                                  int start, int end, int step) {
         Preconditions.checkArgument(step != 0, "step argument (" + step + ") can't be 0");
 
@@ -57,24 +57,24 @@ public class PropertyMenu<E> extends AbstractMenu<PropertyMenu<E>> implements It
         return this;
     }
 
-    @Nonnull
-    public PropertyMenu<E> setIf(@Nullable E property, @Nonnull BiPredicate<E, Integer> propertySlotPredicate,
+    @NotNull
+    public PropertyMenu<E> setIf(@Nullable E property, @NotNull BiPredicate<E, Integer> propertySlotPredicate,
                                  int start, int end) {
         return this.setIf(property, propertySlotPredicate, start, end, 1);
     }
 
-    @Nonnull
-    public PropertyMenu<E> setIf(@Nullable E property, @Nonnull BiPredicate<E, Integer> propertySlotPredicate,
+    @NotNull
+    public PropertyMenu<E> setIf(@Nullable E property, @NotNull BiPredicate<E, Integer> propertySlotPredicate,
                                  int start) {
         return this.setIf(property, propertySlotPredicate, start, this.getInventory().getSize());
     }
 
-    @Nonnull
-    public PropertyMenu<E> setIf(@Nullable E property, @Nonnull BiPredicate<E, Integer> propertySlotPredicate) {
+    @NotNull
+    public PropertyMenu<E> setIf(@Nullable E property, @NotNull BiPredicate<E, Integer> propertySlotPredicate) {
         return this.setIf(property, propertySlotPredicate, 0);
     }
 
-    @Nonnull
+    @NotNull
     public PropertyMenu<E> setRange(@Nullable E property, int start, int end, int step) {
         Preconditions.checkArgument(step != 0, "step argument (" + step + ") can't be 0");
 
@@ -85,12 +85,12 @@ public class PropertyMenu<E> extends AbstractMenu<PropertyMenu<E>> implements It
         return this;
     }
 
-    @Nonnull
+    @NotNull
     public PropertyMenu<E> setRange(@Nullable E property, int start, int end) {
         return this.setRange(property, start, end, 1);
     }
 
-    @Nonnull
+    @NotNull
     public PropertyMenu<E> setRange(@Nullable E property, int start) {
         return this.setRange(property, start, this.getInventory().getSize());
     }
@@ -104,8 +104,8 @@ public class PropertyMenu<E> extends AbstractMenu<PropertyMenu<E>> implements It
      * @throws IllegalArgumentException  If the array of slots is null
      * @throws IndexOutOfBoundsException If a slot in the slot array argument is out of this inventory's boundaries
      */
-    @Nonnull
-    public PropertyMenu<E> set(@Nullable E property, @Nonnull Iterable<Integer> slots) {
+    @NotNull
+    public PropertyMenu<E> set(@Nullable E property, @NotNull Iterable<Integer> slots) {
         Preconditions.checkArgument(slots != null, "Array of slots can't be null");
         slots.forEach(slot -> this.properties[slot] = property);
         return this;
@@ -120,8 +120,8 @@ public class PropertyMenu<E> extends AbstractMenu<PropertyMenu<E>> implements It
      * @throws IllegalArgumentException  If the array of slots is null
      * @throws IndexOutOfBoundsException If a slot in the slot array argument is out of this inventory's boundaries
      */
-    @Nonnull
-    public PropertyMenu<E> set(@Nullable E property, @Nonnull int... slots) {
+    @NotNull
+    public PropertyMenu<E> set(@Nullable E property, int @NotNull ... slots) {
         Preconditions.checkArgument(slots != null, "Array of slots can't be null");
 
         for (int slot : slots) {
@@ -141,8 +141,8 @@ public class PropertyMenu<E> extends AbstractMenu<PropertyMenu<E>> implements It
      * @throws IndexOutOfBoundsException If the slot argument is out of this inventory's array boundaries
      * @throws IllegalArgumentException  If the {@link Consumer} argument is null
      */
-    @Nonnull
-    public PropertyMenu<E> changeProperty(@Nonnull Consumer<E> applyProperty, int slot) {
+    @NotNull
+    public PropertyMenu<E> changeProperty(@NotNull Consumer<E> applyProperty, int slot) {
         Preconditions.checkArgument(applyProperty != null, "Consumer<E> argument can't be null");
         this.getProperty(slot).ifPresent(applyProperty);
         return this;
@@ -153,7 +153,7 @@ public class PropertyMenu<E> extends AbstractMenu<PropertyMenu<E>> implements It
      *
      * @return This instance, useful for chaining
      */
-    @Nonnull
+    @NotNull
     public PropertyMenu<E> clearProperties() {
         this.properties = (E[]) new Object[this.getInventory().getSize()];
         return this;
@@ -164,7 +164,7 @@ public class PropertyMenu<E> extends AbstractMenu<PropertyMenu<E>> implements It
      *
      * @return This instance, useful for chaining
      */
-    @Nonnull
+    @NotNull
     @Override
     public PropertyMenu<E> clear() {
         super.clear();
@@ -178,12 +178,12 @@ public class PropertyMenu<E> extends AbstractMenu<PropertyMenu<E>> implements It
      * @return {@link Optional} of nullable Object
      * @throws IndexOutOfBoundsException If the given slot argument is out of this inventory's boundaries
      */
-    @Nonnull
+    @NotNull
     public Optional<E> getProperty(int slot) {
         return Optional.ofNullable(this.properties[slot]);
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public Iterator<E> iterator() {
         return Arrays.stream(this.properties).iterator();

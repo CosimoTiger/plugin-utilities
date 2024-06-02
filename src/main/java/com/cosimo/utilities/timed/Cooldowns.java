@@ -1,6 +1,7 @@
 package com.cosimo.utilities.timed;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,7 +29,7 @@ public class Cooldowns<K> implements ITimed {
      *
      * @param toCopy The original {@link Cooldowns} whose contents will be transferred into this new one
      */
-    public Cooldowns(@Nonnull Cooldowns<K> toCopy) {
+    public Cooldowns(@NotNull Cooldowns<K> toCopy) {
         this.cooldowns = new HashMap<>(toCopy.cooldowns);
     }
 
@@ -37,7 +38,7 @@ public class Cooldowns<K> implements ITimed {
      *
      * @param mapImpl {@link Map} instance of any subclass
      */
-    public Cooldowns(@Nonnull Map<K, Long> mapImpl) {
+    public Cooldowns(@NotNull Map<K, Long> mapImpl) {
         this.cooldowns = mapImpl;
     }
 
@@ -57,7 +58,7 @@ public class Cooldowns<K> implements ITimed {
      * @param unit     {@link TimeUnit} of the given time parameter
      * @return {@link #getCurrentTime()} ending time of the given cooldown or the current one that wasn't replaced
      */
-    public long putIfAbsent(@Nonnull K newKey, long duration, @Nonnull TimeUnit unit) {
+    public long putIfAbsent(@NotNull K newKey, long duration, @NotNull TimeUnit unit) {
         return this.putIfAbsent(newKey, this.toEquivalentTime(duration, unit));
     }
 
@@ -70,7 +71,7 @@ public class Cooldowns<K> implements ITimed {
      * @param unit     {@link TimeUnit} of the given time parameter
      * @return Calculated {@link #getCurrentTime()} ending time of this cooldown
      */
-    public long put(@Nonnull K newKey, long duration, @Nonnull TimeUnit unit) {
+    public long put(@NotNull K newKey, long duration, @NotNull TimeUnit unit) {
         return this.put(newKey, this.toEquivalentTime(duration, unit));
     }
 
@@ -82,7 +83,7 @@ public class Cooldowns<K> implements ITimed {
      * @param unit     {@link TimeUnit} that the given duration argument is in
      * @return New ending time of the specified cooldown, e.g. it can be nonexistent
      */
-    public long extend(@Nonnull K key, long duration, @Nonnull TimeUnit unit) {
+    public long extend(@NotNull K key, long duration, @NotNull TimeUnit unit) {
         return this.extend(key, this.toEquivalentTime(duration, unit));
     }
 
@@ -93,7 +94,7 @@ public class Cooldowns<K> implements ITimed {
      * @param duration Time in milliseconds for how long the cooldown will last for
      * @return {@link #getCurrentTime()} ending time of the given cooldown or the current one that wasn't replaced
      */
-    public long putIfAbsent(@Nonnull K newKey, long duration) {
+    public long putIfAbsent(@NotNull K newKey, long duration) {
         final long current = this.getCurrentTime();
         return this.cooldowns.compute(newKey, (currentKey, value) -> value == null || value <= current ? current + duration : value);
     }
@@ -105,7 +106,7 @@ public class Cooldowns<K> implements ITimed {
      * @param duration Time in {@link TimeUnit#MILLISECONDS} for how long the cooldown will last for
      * @return Calculated {@link System#currentTimeMillis()} ending time of this cooldown
      */
-    public long put(@Nonnull K newKey, long duration) {
+    public long put(@NotNull K newKey, long duration) {
         final long newValue = this.getCurrentTime() + duration;
         this.cooldowns.put(newKey, newValue);
         return newValue;
@@ -118,7 +119,7 @@ public class Cooldowns<K> implements ITimed {
      * @param duration Duration to add to the specified cooldown
      * @return New ending time of the specified cooldown, e.g. it can be nonexistent
      */
-    public long extend(@Nonnull K key, long duration) {
+    public long extend(@NotNull K key, long duration) {
         final long current = this.getCurrentTime();
         return this.cooldowns.compute(key, (currentKey, value) -> value == null ? current + duration : value + duration);
     }
@@ -128,7 +129,7 @@ public class Cooldowns<K> implements ITimed {
      *
      * @return This instance, useful for chaining
      */
-    @Nonnull
+    @NotNull
     public Cooldowns<K> cleanup() {
         final long end = this.getCurrentTime();
         this.cooldowns.entrySet().removeIf(entry -> entry.getValue() <= end);
@@ -140,7 +141,7 @@ public class Cooldowns<K> implements ITimed {
      *
      * @return This instance, useful for chaining
      */
-    @Nonnull
+    @NotNull
     public Cooldowns<K> clear() {
         this.cooldowns.clear();
         return this;
@@ -153,7 +154,7 @@ public class Cooldowns<K> implements ITimed {
      * @return Ending time of cooldown or {@link #getCurrentTime()} if nonexistent
      * @throws IllegalArgumentException If the cooldowns key argument is null
      */
-    public long remove(@Nonnull K key) {
+    public long remove(@NotNull K key) {
         final Long value = this.cooldowns.remove(key);
         return value == null ? this.getCurrentTime() : value;
     }
@@ -165,7 +166,7 @@ public class Cooldowns<K> implements ITimed {
      * @param key Unique key that a cooldown is stored under
      * @return Whether the cooldown expired
      */
-    public boolean hasExpired(@Nonnull K key) {
+    public boolean hasExpired(@NotNull K key) {
         final Long time = this.cooldowns.get(key);
         return time == null || this.getCurrentTime() - time > 0;
     }
@@ -176,7 +177,7 @@ public class Cooldowns<K> implements ITimed {
      * @param key Unique key that a cooldown is stored under
      * @return New {@link Cooldown} object for this query
      */
-    public long get(@Nonnull K key) {
+    public long get(@NotNull K key) {
         final Long time = this.cooldowns.get(key);
         return time == null ? this.getCurrentTime() : (time <= this.getCurrentTime() ? this.cooldowns.remove(key) : time);
     }
@@ -187,7 +188,7 @@ public class Cooldowns<K> implements ITimed {
      *
      * @return Unmodifiable {@link Map} view of this instance
      */
-    @Nonnull
+    @NotNull
     public Map<K, Long> getMap() {
         return Collections.unmodifiableMap(this.cooldowns);
     }

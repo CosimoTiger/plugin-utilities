@@ -1,6 +1,7 @@
 package com.cosimo.utilities.timed;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -27,7 +28,7 @@ public interface ITimed {
      * @param duration Time duration to be converted
      * @return Time duration in a unit equivalent to {@link #getCurrentTime()}'s
      */
-    default long toEquivalentTime(long duration, @Nonnull TimeUnit unit) {
+    default long toEquivalentTime(long duration, @NotNull TimeUnit unit) {
         return unit.toMillis(duration);
     }
 
@@ -39,7 +40,7 @@ public interface ITimed {
      * @param duration Time duration to be converted
      * @return Time duration in a unit equivalent to {@link #getCurrentTime()}'s
      */
-    default long fromEquivalentTime(long duration, @Nonnull TimeUnit unit) {
+    default long fromEquivalentTime(long duration, @NotNull TimeUnit unit) {
         return TimeUnit.MILLISECONDS.convert(duration, unit);
     }
 }
