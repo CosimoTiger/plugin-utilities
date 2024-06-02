@@ -8,6 +8,7 @@
     <artifactId>plugin-utilities</artifactId>
     <version>1.0.0</version>
     <name>PluginUtilities</name>
+    <url>https://github.com/CosimoTiger/plugin-utilities</url>
     <description>A library with many utilities that help with developing Spigot plugins.</description>
 
     <packaging>jar</packaging>
@@ -45,6 +46,12 @@
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
             <version>1.20.6-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>24.1.0</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
