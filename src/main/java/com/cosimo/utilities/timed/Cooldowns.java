@@ -1,7 +1,5 @@
 package com.cosimo.utilities.timed;
 
-import com.google.common.base.Preconditions;
-
 import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.HashMap;
@@ -16,9 +14,8 @@ import java.util.concurrent.TimeUnit;
  * @param <K> Key type of this class's {@link Map}, {@link String} is suggested as it provides many variations for
  *            unique keys
  */
-public abstract class Cooldowns<K> implements ITimed {
+public class Cooldowns<K> implements ITimed {
 
-    // TODO: consider <V extends Cooldown> Map<K, V>
     /**
      * Contains cooldown entries consisting of unique name keys and a {@link System#currentTimeMillis()} end time
      * value.
@@ -32,15 +29,23 @@ public abstract class Cooldowns<K> implements ITimed {
      * @param toCopy The original {@link Cooldowns} whose contents will be transferred into this new one
      */
     public Cooldowns(@Nonnull Cooldowns<K> toCopy) {
-        Preconditions.checkArgument(toCopy != null, "Initial Cooldowns object can't be null");
         this.cooldowns = new HashMap<>(toCopy.cooldowns);
     }
 
     /**
-     * Creates a new {@link Cooldowns} holder by creating a new {@link HashMap} with initialCapacity of 8.
+     * Creates a new {@link Cooldowns} holder that'll use the given {@link Map} implementation.
+     *
+     * @param mapImpl {@link Map} instance of any subclass
+     */
+    public Cooldowns(@Nonnull Map<K, Long> mapImpl) {
+        this.cooldowns = mapImpl;
+    }
+
+    /**
+     * Creates a new default {@link Cooldowns} holder with a {@link HashMap} with initialCapacity of 8.
      */
     public Cooldowns() {
-        this.cooldowns = new HashMap<>(8);
+        this(new HashMap<>(8));
     }
 
     /**
@@ -51,10 +56,8 @@ public abstract class Cooldowns<K> implements ITimed {
      * @param duration Time in the given time unit for how long the cooldown will last for
      * @param unit     {@link TimeUnit} of the given time parameter
      * @return {@link #getCurrentTime()} ending time of the given cooldown or the current one that wasn't replaced
-     * @throws IllegalArgumentException If the cooldowns name or TimeUnit argument is null
      */
     public long putIfAbsent(@Nonnull K newKey, long duration, @Nonnull TimeUnit unit) {
-        Preconditions.checkArgument(unit != null, "TimeUnit argument can't be null");
         return this.putIfAbsent(newKey, this.toEquivalentTime(duration, unit));
     }
 
@@ -66,10 +69,8 @@ public abstract class Cooldowns<K> implements ITimed {
      * @param duration Time in the given {@link TimeUnit} for how long the cooldown will last for
      * @param unit     {@link TimeUnit} of the given time parameter
      * @return Calculated {@link #getCurrentTime()} ending time of this cooldown
-     * @throws IllegalArgumentException If the cooldowns key or {@link TimeUnit} argument is null
      */
     public long put(@Nonnull K newKey, long duration, @Nonnull TimeUnit unit) {
-        Preconditions.checkArgument(unit != null, "TimeUnit argument can't be null");
         return this.put(newKey, this.toEquivalentTime(duration, unit));
     }
 
@@ -82,7 +83,6 @@ public abstract class Cooldowns<K> implements ITimed {
      * @return New ending time of the specified cooldown, e.g. it can be nonexistent
      */
     public long extend(@Nonnull K key, long duration, @Nonnull TimeUnit unit) {
-        Preconditions.checkArgument(unit != null, "TimeUnit argument can't be null");
         return this.extend(key, this.toEquivalentTime(duration, unit));
     }
 
@@ -92,13 +92,9 @@ public abstract class Cooldowns<K> implements ITimed {
      * @param newKey   Unique key that the cooldown will be stored under
      * @param duration Time in milliseconds for how long the cooldown will last for
      * @return {@link #getCurrentTime()} ending time of the given cooldown or the current one that wasn't replaced
-     * @throws IllegalArgumentException If the cooldowns key is null
      */
     public long putIfAbsent(@Nonnull K newKey, long duration) {
-        Preconditions.checkArgument(newKey != null, "Cooldowns key can't be null");
-
         final long current = this.getCurrentTime();
-
         return this.cooldowns.compute(newKey, (currentKey, value) -> value == null || value <= current ? current + duration : value);
     }
 
@@ -108,14 +104,10 @@ public abstract class Cooldowns<K> implements ITimed {
      * @param newKey   Unique key that the cooldown is going to be stored under
      * @param duration Time in {@link TimeUnit#MILLISECONDS} for how long the cooldown will last for
      * @return Calculated {@link System#currentTimeMillis()} ending time of this cooldown
-     * @throws IllegalArgumentException If the cooldowns key argument is null
      */
     public long put(@Nonnull K newKey, long duration) {
-        Preconditions.checkArgument(newKey != null, "Cooldowns key can't be null");
-
-        long newValue = this.getCurrentTime() + duration;
+        final long newValue = this.getCurrentTime() + duration;
         this.cooldowns.put(newKey, newValue);
-
         return newValue;
     }
 
@@ -127,10 +119,7 @@ public abstract class Cooldowns<K> implements ITimed {
      * @return New ending time of the specified cooldown, e.g. it can be nonexistent
      */
     public long extend(@Nonnull K key, long duration) {
-        Preconditions.checkArgument(key != null, "Cooldowns key can't be null");
-
         final long current = this.getCurrentTime();
-
         return this.cooldowns.compute(key, (currentKey, value) -> value == null ? current + duration : value + duration);
     }
 
@@ -165,10 +154,7 @@ public abstract class Cooldowns<K> implements ITimed {
      * @throws IllegalArgumentException If the cooldowns key argument is null
      */
     public long remove(@Nonnull K key) {
-        Preconditions.checkArgument(key != null, "Cooldowns key can't be null");
-
-        Long value = this.cooldowns.remove(key);
-
+        final Long value = this.cooldowns.remove(key);
         return value == null ? this.getCurrentTime() : value;
     }
 
@@ -180,9 +166,7 @@ public abstract class Cooldowns<K> implements ITimed {
      * @return Whether the cooldown expired
      */
     public boolean hasExpired(@Nonnull K key) {
-        Preconditions.checkArgument(key != null, "Cooldowns key can't be null");
-        Long time = this.cooldowns.get(key);
-
+        final Long time = this.cooldowns.get(key);
         return time == null || this.getCurrentTime() - time > 0;
     }
 
@@ -191,12 +175,9 @@ public abstract class Cooldowns<K> implements ITimed {
      *
      * @param key Unique key that a cooldown is stored under
      * @return New {@link Cooldown} object for this query
-     * @throws IllegalArgumentException If the cooldowns key argument is null
      */
     public long get(@Nonnull K key) {
-        Preconditions.checkArgument(key != null, "Cooldowns key can't be null");
-        Long time = this.cooldowns.get(key);
-
+        final Long time = this.cooldowns.get(key);
         return time == null ? this.getCurrentTime() : (time <= this.getCurrentTime() ? this.cooldowns.remove(key) : time);
     }
 
@@ -204,7 +185,7 @@ public abstract class Cooldowns<K> implements ITimed {
      * Returns the unmodifiable ({@link Collections#unmodifiableMap(Map)}) {@link Map}&lt;{@code K}, {@link Long}&gt;
      * view of this instance.
      *
-     * @return Unmodifiable {@link Map}&lt;{@code K}, {@link Long}&gt; view of this instance
+     * @return Unmodifiable {@link Map} view of this instance
      */
     @Nonnull
     public Map<K, Long> getMap() {

@@ -53,7 +53,7 @@ public class Cooldown implements ITimed {
      * @return Previous ending time of this {@link Cooldown}
      */
     public long extend(long duration) {
-        long previous = this.end;
+        final long previous = this.getExpiration();
         this.end += duration;
 
         return previous;
@@ -76,7 +76,7 @@ public class Cooldown implements ITimed {
      * @return Whether this cooldown has expired
      */
     public boolean hasExpired() {
-        return this.end <= this.getCurrentTime();
+        return this.getExpiration() <= this.getCurrentTime();
     }
 
     /**
@@ -94,6 +94,6 @@ public class Cooldown implements ITimed {
      * @return Positive, negative or 0 remaining time
      */
     public long getRemaining() {
-        return this.end - this.getCurrentTime();
+        return this.getExpiration() - this.getCurrentTime();
     }
 }

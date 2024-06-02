@@ -23,7 +23,7 @@ public interface ITimed {
      * Converts the given time from the given {@link TimeUnit} into a duration in the unit equivalent to
      * {@link #getCurrentTime()}'s unit.
      *
-     * @param unit {@link TimeUnit} of the given duration argument
+     * @param unit     {@link TimeUnit} of the given duration argument
      * @param duration Time duration to be converted
      * @return Time duration in a unit equivalent to {@link #getCurrentTime()}'s
      */
@@ -35,7 +35,7 @@ public interface ITimed {
      * Converts the given time in the unit equivalent to {@link #getCurrentTime()}'s unit to the duration in the given
      * {@link TimeUnit}.
      *
-     * @param unit {@link TimeUnit} of the given duration argument
+     * @param unit     {@link TimeUnit} of the given duration argument
      * @param duration Time duration to be converted
      * @return Time duration in a unit equivalent to {@link #getCurrentTime()}'s
      */
