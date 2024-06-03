@@ -11,6 +11,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Range;
 
 import java.util.Collection;
 import java.util.List;
@@ -153,7 +154,7 @@ public abstract class AbstractMenu<S extends AbstractMenu<S>> implements IMenu {
      * @throws IllegalArgumentException  If the {@link Consumer}&lt;{@link ItemStack}&gt; argument is null
      */
     @NotNull
-    public S change(@NotNull Consumer<ItemStack> consumer, int slot) {
+    public S change(@NotNull Consumer<ItemStack> consumer, @Range(from = 0, to = Integer.MAX_VALUE) int slot) {
         this.getItem(slot).ifPresent(consumer);
         return (S) this;
     }
@@ -173,8 +174,11 @@ public abstract class AbstractMenu<S extends AbstractMenu<S>> implements IMenu {
      * @return This instance, useful for chaining
      * @throws IllegalArgumentException If the step argument is 0
      */
-    public S setIf(@Nullable ItemStack item, @NotNull BiPredicate<ItemStack, Integer> itemSlotPredicate, int start,
-                   int end, int step) {
+    public S setIf(@Nullable ItemStack item,
+                   @NotNull BiPredicate<ItemStack, @Range(from = 0, to = Integer.MAX_VALUE) Integer> itemSlotPredicate,
+                   @Range(from = 0, to = Integer.MAX_VALUE) int start,
+                   @Range(from = 0, to = Integer.MAX_VALUE) int end,
+                   @Range(from = Integer.MIN_VALUE, to = Integer.MAX_VALUE) int step) {
         Preconditions.checkArgument(step != 0, "step argument (" + step + ") can't be 0");
 
         for (int slot = start; slot < end; slot += step) {
@@ -187,18 +191,23 @@ public abstract class AbstractMenu<S extends AbstractMenu<S>> implements IMenu {
     }
 
     @NotNull
-    public S setIf(@Nullable ItemStack item, @NotNull BiPredicate<ItemStack, Integer> itemSlotPredicate, int start,
-                   int end) {
+    public S setIf(@Nullable ItemStack item,
+                   @NotNull BiPredicate<ItemStack, @Range(from = 0, to = Integer.MAX_VALUE) Integer> itemSlotPredicate,
+                   @Range(from = 0, to = Integer.MAX_VALUE) int start,
+                   @Range(from = 0, to = Integer.MAX_VALUE) int end) {
         return this.setIf(item, itemSlotPredicate, start, end, 1);
     }
 
     @NotNull
-    public S setIf(@Nullable ItemStack item, @NotNull BiPredicate<ItemStack, Integer> itemSlotPredicate, int start) {
+    public S setIf(@Nullable ItemStack item,
+                   @NotNull BiPredicate<ItemStack, @Range(from = 0, to = Integer.MAX_VALUE) Integer> itemSlotPredicate,
+                   @Range(from = 0, to = Integer.MAX_VALUE) int start) {
         return this.setIf(item, itemSlotPredicate, start, this.getInventory().getSize());
     }
 
     @NotNull
-    public S setIf(@Nullable ItemStack item, @NotNull BiPredicate<ItemStack, Integer> itemSlotPredicate) {
+    public S setIf(@Nullable ItemStack item, @NotNull BiPredicate<ItemStack, @Range(from = 0,
+            to = Integer.MAX_VALUE) Integer> itemSlotPredicate) {
         return this.setIf(item, itemSlotPredicate, 0);
     }
 
@@ -213,7 +222,10 @@ public abstract class AbstractMenu<S extends AbstractMenu<S>> implements IMenu {
      * @throws IllegalArgumentException If step argument is lower than 1
      */
     @NotNull
-    public S setRange(@Nullable ItemStack item, int start, int end, int step) {
+    public S setRange(@Nullable ItemStack item,
+                      @Range(from = 0, to = Integer.MAX_VALUE) int start,
+                      @Range(from = 0, to = Integer.MAX_VALUE) int end,
+                      @Range(from = Integer.MIN_VALUE, to = Integer.MAX_VALUE) int step) {
         Preconditions.checkArgument(step != 0, "step argument (" + step + ") can't be 0");
 
         for (int slot = start; slot < end; slot += step) {
@@ -224,7 +236,9 @@ public abstract class AbstractMenu<S extends AbstractMenu<S>> implements IMenu {
     }
 
     @NotNull
-    public S setRange(@Nullable ItemStack item, int start, int end) {
+    public S setRange(@Nullable ItemStack item,
+                      @Range(from = 0, to = Integer.MAX_VALUE) int start,
+                      @Range(from = 0, to = Integer.MAX_VALUE) int end) {
         return this.setRange(item, start, end, 1);
     }
 
@@ -236,7 +250,7 @@ public abstract class AbstractMenu<S extends AbstractMenu<S>> implements IMenu {
      * @return This instance, useful for chaining
      */
     @NotNull
-    public S setRange(@Nullable ItemStack item, int start) {
+    public S setRange(@Nullable ItemStack item, @Range(from = 0, to = Integer.MAX_VALUE) int start) {
         return this.setRange(item, start, this.getInventory().getSize());
     }
 
@@ -250,7 +264,7 @@ public abstract class AbstractMenu<S extends AbstractMenu<S>> implements IMenu {
      * @throws IllegalArgumentException  If the slot array argument is null
      */
     @NotNull
-    public S set(@Nullable ItemStack item, @NotNull Iterable<Integer> slots) {
+    public S set(@Nullable ItemStack item, @NotNull Iterable<@Range(from = 0, to = Integer.MAX_VALUE) Integer> slots) {
         Preconditions.checkArgument(slots != null, "Array of slots can't be null");
         slots.forEach(slot -> this.getInventory().setItem(slot, item));
         return (S) this;
@@ -266,7 +280,7 @@ public abstract class AbstractMenu<S extends AbstractMenu<S>> implements IMenu {
      * @throws IllegalArgumentException  If the slot array argument is null
      */
     @NotNull
-    public S set(@Nullable ItemStack item, int @NotNull ... slots) {
+    public S set(@Nullable ItemStack item, @Range(from = 0, to = Integer.MAX_VALUE) int @NotNull ... slots) {
         Preconditions.checkArgument(slots != null, "Array of slots can't be null");
 
         for (int slot : slots) {
@@ -333,7 +347,7 @@ public abstract class AbstractMenu<S extends AbstractMenu<S>> implements IMenu {
      * @throws IndexOutOfBoundsException If the given slot argument is out of the inventory's bounds
      */
     @NotNull
-    public Optional<ItemStack> getItem(int slot) {
+    public Optional<ItemStack> getItem(@Range(from = 0, to = Integer.MAX_VALUE) int slot) {
         return Optional.ofNullable(this.getInventory().getItem(slot));
     }
 
@@ -353,6 +367,7 @@ public abstract class AbstractMenu<S extends AbstractMenu<S>> implements IMenu {
      *
      * @return {@link BukkitTask} identifier number or -1 if none is assigned
      */
+    @Range(from = -1, to = Integer.MAX_VALUE)
     public int getBukkitTask() {
         return this.taskID;
     }

@@ -14,9 +14,11 @@ public class NumberUtil {
      */
     public static int max(@NotNull Iterable<Integer> numbers) {
         int max = Integer.MIN_VALUE;
+
         for (int number : numbers) {
             max = Math.max(number, max);
         }
+
         return max;
     }
 
@@ -29,9 +31,11 @@ public class NumberUtil {
      */
     public static int max(int @NotNull ... numbers) {
         int max = Integer.MIN_VALUE;
+
         for (int number : numbers) {
             max = Math.max(number, max);
         }
+
         return max;
     }
 
@@ -45,9 +49,11 @@ public class NumberUtil {
      */
     public static int min(@NotNull Iterable<Integer> numbers) {
         int min = Integer.MAX_VALUE;
+
         for (int number : numbers) {
             min = Math.min(number, min);
         }
+
         return min;
     }
 
@@ -60,9 +66,11 @@ public class NumberUtil {
      */
     public static int min(int @NotNull ... numbers) {
         int min = Integer.MAX_VALUE;
+
         for (int number : numbers) {
             min = Math.min(number, min);
         }
+
         return min;
     }
 

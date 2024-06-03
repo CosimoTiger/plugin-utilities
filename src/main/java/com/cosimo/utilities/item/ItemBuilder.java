@@ -501,7 +501,7 @@ public class ItemBuilder implements Cloneable {
      */
     @NotNull
     public List<String> getLore() {
-        return this.getItemMeta().map(ItemMeta::getLore).orElse(new ArrayList<>());
+        return this.getItemMeta().map(ItemMeta::getLore).orElseGet(ArrayList::new);
     }
 
     /**

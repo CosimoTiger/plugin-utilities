@@ -1,6 +1,7 @@
 package com.cosimo.utilities.timed;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -189,6 +190,7 @@ public class Cooldowns<K> implements ITimed {
      * @return Unmodifiable {@link Map} view of this instance
      */
     @NotNull
+    @UnmodifiableView
     public Map<K, Long> getMap() {
         return Collections.unmodifiableMap(this.cooldowns);
     }

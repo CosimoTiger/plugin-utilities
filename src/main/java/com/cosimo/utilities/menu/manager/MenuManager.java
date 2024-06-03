@@ -15,6 +15,7 @@ import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -158,11 +159,13 @@ public class MenuManager<E extends IMenu> implements Listener {
     }
 
     /**
-     * Returns the unmodifiable map ({@link Collections#unmodifiableMap(Map)}) view of this {@link MenuManager}'s menu
-     * {@link HashMap} of {@link Inventory} keys to {@link IMenu} values.
+     * Returns the ({@link Collections#unmodifiableMap(Map)}) view of this {@link MenuManager}'s menu {@link HashMap} of
+     * {@link Inventory} keys to {@link IMenu} values.
      *
      * @return Unmodifiable view of this {@link MenuManager}'s {@link HashMap}
      */
+    @NotNull
+    @UnmodifiableView
     public Map<Inventory, E> getMap() {
         return Collections.unmodifiableMap(this.menus);
     }
