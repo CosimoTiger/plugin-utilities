@@ -1,77 +1,62 @@
 package com.cosimo.utilities.file;
 
+import lombok.Getter;
+import lombok.NonNull;
 import org.bukkit.plugin.Plugin;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
 import java.nio.file.Files;
 import java.util.Objects;
 import java.util.Optional;
 
 /**
- * This class can be extended to create instances that represent a file that belongs to a specific plugin.
+ * Representation and controller of a file owned by a certain plugin, can be subclassed for specific file types and
+ * memory representations. The single goal of this controller is to copy a given original file into the destination
+ * plugin data folder.
+ *
+ * @param <T> Useful memory object type that's a result of this file
  */
-public abstract class PluginFile extends File {
+@Getter
+public abstract class PluginFile<T> extends File {
 
     /**
      * Plugin that this file belongs to.
      */
-    private final Plugin plugin;
+    private final @NonNull Plugin plugin;
+    private final @NonNull String resourcePath;
 
     /**
-     * Creates a new {@link PluginFile} from a given file name in its given file path.
-     * <p>
-     * The File path parameter can be a plugin's data folder which is accessible through the method
-     * Plugin#getDataFolder().
+     * Creates a new instance from a given relative directory path inside the JAR resources folder of the file to copy
+     * to the given relative destination path inside the {@link Plugin#getDataFolder()}.
      *
-     * @param plugin Plugin that this file belongs to
-     * @param path   Folder file or a directory in which this file should be, also called a "parent" file
-     * @param name   File name or path to file, also called a "child" file, ending with a file extension
+     * @param plugin          Plugin that this file belongs to, used for {@link Plugin#getResource(String)}
+     * @param resourcePath    Relative file path of the source file in the resources directory to copy into destination
+     *                        path
+     * @param destinationPath Relative file path for the destination file in the {@link Plugin#getDataFolder()}
      */
-    public PluginFile(@NotNull Plugin plugin, @Nullable File path, @NotNull String name) {
-        super(path, name);
+    public PluginFile(@NonNull Plugin plugin, @NonNull String resourcePath, @NonNull String destinationPath) {
+        super(plugin.getDataFolder(), destinationPath);
+        this.resourcePath = resourcePath;
         this.plugin = plugin;
     }
 
     /**
-     * Creates a new {@link PluginFile} from a given file name in its given file path.
-     * <p>
-     * The File path parameter can be a plugin's data folder which is accessible through the method
-     * Plugin#getDataFolder().
+     * Creates a new instance from a given relative directory path inside the JAR resources folder of the file to copy
+     * to the same relative destination path inside the {@link Plugin#getDataFolder()}.
      *
-     * @param plugin Plugin that this file belongs to
-     * @param path   Folder file or a directory in which this file should be, also called a "parent" file
-     * @param name   File name or path to file, also called a "child" file, ending with a file extension
-     */
-    public PluginFile(@NotNull Plugin plugin, @Nullable String path, @NotNull String name) {
-        super(path, name);
-        this.plugin = plugin;
-    }
-
-    /**
-     * Creates a new {@link PluginFile} from a given file path, ending with it's name and extension.
+     * <p>A more illustrative example would be to imagine that if the developer were to apply this class to each file
+     * in their plugin's resources folder, they'd end up with the same directory structure in the destination directory
+     * {@link Plugin#getDataFolder()}. The other constructor allows for customization of the destination directories and
+     * file names, unlike this constructor.</p>
      *
-     * @param plugin Plugin that this file belongs to
-     * @param path   File path to this file, ending with it's name and an extension
+     * @param plugin       Plugin that this file belongs to, used for {@link Plugin#getResource(String)}
+     * @param resourcePath Relative file path of the source file in the resources directory to copy into destination
+     *                     path
      */
-    public PluginFile(@NotNull Plugin plugin, @NotNull String path) {
-        super(path);
-        this.plugin = plugin;
-    }
-
-    /**
-     * Creates a new {@link PluginFile} from a given URI path pointing to it.
-     *
-     * @param plugin Plugin that this file belongs to
-     * @param uri    URI parameter that is used in the creation of {@link java.io.File}
-     */
-    public PluginFile(@NotNull Plugin plugin, @NotNull URI uri) {
-        super(uri);
-        this.plugin = plugin;
+    public PluginFile(@NonNull Plugin plugin, @NonNull String resourcePath) {
+        this(plugin, resourcePath, resourcePath);
     }
 
     /**
@@ -81,42 +66,52 @@ public abstract class PluginFile extends File {
      * @return Whether this file already existed
      */
     public boolean createFile() {
-        if (!this.exists()) {
+        final var existed = this.exists();
+
+        if (!existed) {
             Optional.ofNullable(this.getParentFile()).ifPresent(File::mkdirs);
 
-            try (InputStream inputStream = this.plugin.getResource(this.getName())) {
-                Objects.requireNonNull(inputStream, "Unable to find plugin " + this.getPlugin()
-                        .getDescription()
-                        .getFullName()
-                        + "'s file /resources/" + this.getName() + "!");
+            try (final var inputStream = this.plugin.getResource(this.getResourcePath())) {
+                Objects.requireNonNull(inputStream, () -> "Plugin %s's resource %s doesn't exist".formatted(
+                        this.getPlugin().getDescription().getFullName(), this.getName()));
                 Files.copy(inputStream, this.toPath());
             } catch (IOException e) {
-                e.printStackTrace();
+                throw new RuntimeException(e);
             }
-
-            return false;
         }
 
-        return true;
+        return existed;
     }
 
     /**
-     * Reads the data from the file again and loads it.
-     */
-    public abstract void reloadFile();
-
-    /**
-     * Saves the file to its file location.
-     */
-    public abstract void saveFile();
-
-    /**
-     * Returns the plugin that this file belongs to.
+     * Returns the data stored in this instance after reading the file usually after {@link #reloadFile()} and being
+     * modified during runtime.
      *
-     * @return Plugin that this file belongs to
+     * @return Whichever object data type is specified by this instance
      */
-    @NotNull
-    public Plugin getPlugin() {
-        return this.plugin;
-    }
+    @Nullable
+    public abstract T getMemory();
+
+    /**
+     * Overwrites the stored memory in this instance, should a custom memory be loaded.
+     *
+     * @param newMemory Not null object
+     * @return This instance, useful for chaining
+     */
+    @NonNull
+    public abstract PluginFile<T> setMemory(@NonNull T newMemory);
+
+    /**
+     * Reads the data from the file, parses it if needed and loads it for {@link #getMemory()}.
+     *
+     * @return This instance, useful for chaining
+     */
+    public abstract PluginFile<T> reloadFile();
+
+    /**
+     * Saves the possibly modified data of this file to its plugin file location.
+     *
+     * @return This instance, useful for chaining
+     */
+    public abstract PluginFile<T> saveFile();
 }
