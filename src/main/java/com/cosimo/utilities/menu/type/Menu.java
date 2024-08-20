@@ -13,7 +13,9 @@ import org.bukkit.inventory.Inventory;
 public class Menu extends AbstractMenu<Menu> {
 
     /**
-     * {@inheritDoc} Creates a new {@link Menu} using the default constructor for {@link AbstractMenu}.
+     * Creates a new {@link Menu} using the default constructor for {@link AbstractMenu}.
+     *
+     * @param inventory Non-null {@link Inventory} to wrap around and control as a menu
      */
     public Menu(@NonNull Inventory inventory) {
         super(inventory);

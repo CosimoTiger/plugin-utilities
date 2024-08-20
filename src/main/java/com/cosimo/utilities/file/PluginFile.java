@@ -16,15 +16,18 @@ import java.util.Optional;
  * memory representations. The single goal of this controller is to copy a given original file into the destination
  * plugin data folder.
  *
- * @param <T> Useful memory object type that's a result of this file
+ * @param <T> Memory representation type that's a result of loading this file
  */
 @Getter
 public abstract class PluginFile<T> extends File {
 
     /**
-     * Plugin that this file belongs to.
+     * Plugin that this file belongs to, used for {@link Plugin#getResource(String)}
      */
     private final @NonNull Plugin plugin;
+    /**
+     * Relative file path of the source file in the resources directory to copy into destination path
+     */
     private final @NonNull String resourcePath;
 
     /**

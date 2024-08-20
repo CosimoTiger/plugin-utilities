@@ -26,8 +26,8 @@ public interface IMenu extends InventoryListener {
     default void onClick(@NonNull InventoryClickEvent event, boolean external) {
         final var action = event.getAction();
 
-        if (action == InventoryAction.COLLECT_TO_CURSOR || action == InventoryAction.MOVE_TO_OTHER_INVENTORY
-            || !external) {
+        if (action == InventoryAction.COLLECT_TO_CURSOR || action == InventoryAction.MOVE_TO_OTHER_INVENTORY ||
+            !external) {
             event.setCancelled(true);
         }
     }
@@ -76,6 +76,10 @@ public interface IMenu extends InventoryListener {
         return this;
     }
 
-    @NonNull
-    Inventory getInventory();
+    /**
+     * Returns the {@link Inventory} that this instance is controlling, should always be the same.
+     *
+     * @return Non-null {@link Inventory}
+     */
+    @NonNull Inventory getInventory();
 }

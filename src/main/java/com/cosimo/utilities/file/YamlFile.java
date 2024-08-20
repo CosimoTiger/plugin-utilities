@@ -18,6 +18,9 @@ import java.io.InputStreamReader;
  */
 public class YamlFile extends PluginFile<FileConfiguration> {
 
+    /**
+     * Data loaded from a YAML file
+     */
     protected FileConfiguration fileConfig;
 
     public YamlFile(@NonNull Plugin plugin, @NonNull String resourcePath, @NonNull String destinationFile) {

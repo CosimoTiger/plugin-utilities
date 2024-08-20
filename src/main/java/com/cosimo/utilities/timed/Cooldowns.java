@@ -11,6 +11,7 @@ import java.util.Map;
  *
  * @param <K> Key type of this class's {@link Map}, {@link String} is suggested as it provides many variations for
  *            unique keys
+ * @param <V> Expected {@link ICooldown} implementation
  */
 public class Cooldowns<K, V extends ICooldown> extends HashMap<K, V> {
     public Cooldowns(int initialCapacity, float loadFactor) {
@@ -25,8 +26,8 @@ public class Cooldowns<K, V extends ICooldown> extends HashMap<K, V> {
         super();
     }
 
-    public Cooldowns(Map<? extends K, ? extends V> m) {
-        super(m);
+    public Cooldowns(@NonNull Map<? extends K, ? extends V> map) {
+        super(map);
     }
 
     /**
