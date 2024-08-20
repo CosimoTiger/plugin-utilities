@@ -1,8 +1,9 @@
-package com.cosimo.utilities.menu;
+package com.cosimo.utilities.menu.type;
 
+import com.cosimo.utilities.menu.AbstractMenu;
 import com.google.common.base.Preconditions;
+import lombok.NonNull;
 import org.bukkit.inventory.Inventory;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 
@@ -37,11 +38,11 @@ public class PropertyMenu<E> extends AbstractMenu<PropertyMenu<E>> implements It
      *
      * @param inventory Not null {@link Inventory} that will be wrapped and controlled by an {@link AbstractMenu}
      */
-    public PropertyMenu(@NotNull Inventory inventory) {
+    public PropertyMenu(@NonNull Inventory inventory) {
         super(inventory);
     }
 
-    public PropertyMenu<E> setIf(@Nullable E property, @NotNull BiPredicate<E, Integer> propertySlotPredicate,
+    public PropertyMenu<E> setIf(@Nullable E property, @NonNull BiPredicate<E, Integer> propertySlotPredicate,
                                  @Range(from = 0, to = Integer.MAX_VALUE) int start,
                                  @Range(from = 0, to = Integer.MAX_VALUE) int end,
                                  @Range(from = Integer.MIN_VALUE, to = Integer.MAX_VALUE) int step) {
@@ -60,25 +61,25 @@ public class PropertyMenu<E> extends AbstractMenu<PropertyMenu<E>> implements It
         return this;
     }
 
-    @NotNull
-    public PropertyMenu<E> setIf(@Nullable E property, @NotNull BiPredicate<E, Integer> propertySlotPredicate,
+    @NonNull
+    public PropertyMenu<E> setIf(@Nullable E property, @NonNull BiPredicate<E, Integer> propertySlotPredicate,
                                  @Range(from = 0, to = Integer.MAX_VALUE) int start,
                                  @Range(from = 0, to = Integer.MAX_VALUE) int end) {
         return this.setIf(property, propertySlotPredicate, start, end, 1);
     }
 
-    @NotNull
-    public PropertyMenu<E> setIf(@Nullable E property, @NotNull BiPredicate<E, Integer> propertySlotPredicate,
+    @NonNull
+    public PropertyMenu<E> setIf(@Nullable E property, @NonNull BiPredicate<E, Integer> propertySlotPredicate,
                                  @Range(from = 0, to = Integer.MAX_VALUE) int start) {
         return this.setIf(property, propertySlotPredicate, start, this.getInventory().getSize());
     }
 
-    @NotNull
-    public PropertyMenu<E> setIf(@Nullable E property, @NotNull BiPredicate<E, Integer> propertySlotPredicate) {
+    @NonNull
+    public PropertyMenu<E> setIf(@Nullable E property, @NonNull BiPredicate<E, Integer> propertySlotPredicate) {
         return this.setIf(property, propertySlotPredicate, 0);
     }
 
-    @NotNull
+    @NonNull
     public PropertyMenu<E> setRange(@Nullable E property,
                                     @Range(from = 0, to = Integer.MAX_VALUE) int start,
                                     @Range(from = 0, to = Integer.MAX_VALUE) int end,
@@ -92,14 +93,14 @@ public class PropertyMenu<E> extends AbstractMenu<PropertyMenu<E>> implements It
         return this;
     }
 
-    @NotNull
+    @NonNull
     public PropertyMenu<E> setRange(@Nullable E property,
                                     @Range(from = 0, to = Integer.MAX_VALUE) int start,
                                     @Range(from = 0, to = Integer.MAX_VALUE) int end) {
         return this.setRange(property, start, end, 1);
     }
 
-    @NotNull
+    @NonNull
     public PropertyMenu<E> setRange(@Nullable E property, @Range(from = 0, to = Integer.MAX_VALUE) int start) {
         return this.setRange(property, start, this.getInventory().getSize());
     }
@@ -113,9 +114,8 @@ public class PropertyMenu<E> extends AbstractMenu<PropertyMenu<E>> implements It
      * @throws IllegalArgumentException  If the array of slots is null
      * @throws IndexOutOfBoundsException If a slot in the slot array argument is out of this inventory's boundaries
      */
-    @NotNull
-    public PropertyMenu<E> set(@Nullable E property, @NotNull Iterable<Integer> slots) {
-        Preconditions.checkArgument(slots != null, "Array of slots can't be null");
+    @NonNull
+    public PropertyMenu<E> set(@Nullable E property, @NonNull Iterable<Integer> slots) {
         slots.forEach(slot -> this.properties[slot] = property);
         return this;
     }
@@ -129,10 +129,8 @@ public class PropertyMenu<E> extends AbstractMenu<PropertyMenu<E>> implements It
      * @throws IllegalArgumentException  If the array of slots is null
      * @throws IndexOutOfBoundsException If a slot in the slot array argument is out of this inventory's boundaries
      */
-    @NotNull
-    public PropertyMenu<E> set(@Nullable E property, @Range(from = 0, to = Integer.MAX_VALUE) int @NotNull ... slots) {
-        Preconditions.checkArgument(slots != null, "Array of slots can't be null");
-
+    @NonNull
+    public PropertyMenu<E> set(@Nullable E property, @Range(from = 0, to = Integer.MAX_VALUE) int @NonNull ... slots) {
         for (int slot : slots) {
             this.properties[slot] = property;
         }
@@ -150,10 +148,9 @@ public class PropertyMenu<E> extends AbstractMenu<PropertyMenu<E>> implements It
      * @throws IndexOutOfBoundsException If the slot argument is out of this inventory's array boundaries
      * @throws IllegalArgumentException  If the {@link Consumer} argument is null
      */
-    @NotNull
-    public PropertyMenu<E> changeProperty(@NotNull Consumer<E> applyProperty,
+    @NonNull
+    public PropertyMenu<E> changeProperty(@NonNull Consumer<E> applyProperty,
                                           @Range(from = 0, to = Integer.MAX_VALUE) int slot) {
-        Preconditions.checkArgument(applyProperty != null, "Consumer<E> argument can't be null");
         this.getProperty(slot).ifPresent(applyProperty);
         return this;
     }
@@ -163,7 +160,7 @@ public class PropertyMenu<E> extends AbstractMenu<PropertyMenu<E>> implements It
      *
      * @return This instance, useful for chaining
      */
-    @NotNull
+    @NonNull
     public PropertyMenu<E> clearProperties() {
         this.properties = (E[]) new Object[this.getInventory().getSize()];
         return this;
@@ -174,7 +171,7 @@ public class PropertyMenu<E> extends AbstractMenu<PropertyMenu<E>> implements It
      *
      * @return This instance, useful for chaining
      */
-    @NotNull
+    @NonNull
     @Override
     public PropertyMenu<E> clear() {
         super.clear();
@@ -188,12 +185,12 @@ public class PropertyMenu<E> extends AbstractMenu<PropertyMenu<E>> implements It
      * @return {@link Optional} of nullable Object
      * @throws IndexOutOfBoundsException If the given slot argument is out of this inventory's boundaries
      */
-    @NotNull
+    @NonNull
     public Optional<E> getProperty(@Range(from = 0, to = Integer.MAX_VALUE) int slot) {
         return Optional.ofNullable(this.properties[slot]);
     }
 
-    @NotNull
+    @NonNull
     @Override
     public Iterator<E> iterator() {
         return Arrays.stream(this.properties).iterator();

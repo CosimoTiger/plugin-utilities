@@ -1,13 +1,13 @@
 package com.cosimo.utilities.menu;
 
 import com.cosimo.utilities.menu.manager.MenuManager;
+import lombok.NonNull;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.Inventory;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -23,11 +23,11 @@ public interface IMenu extends InventoryListener {
      * and any action on the menu are cancelled, but interaction with one's own inventory is allowed.
      */
     @Override
-    default void onClick(@NotNull InventoryClickEvent event, boolean external) {
+    default void onClick(@NonNull InventoryClickEvent event, boolean external) {
         final var action = event.getAction();
 
         if (action == InventoryAction.COLLECT_TO_CURSOR || action == InventoryAction.MOVE_TO_OTHER_INVENTORY
-                || !external) {
+            || !external) {
             event.setCancelled(true);
         }
     }
@@ -40,10 +40,9 @@ public interface IMenu extends InventoryListener {
      * @param event {@link InventoryDragEvent} event
      */
     @Override
-    default void onDrag(@NotNull InventoryDragEvent event) {
+    default void onDrag(@NonNull InventoryDragEvent event) {
         if (event.getRawSlots()
                 .stream()
-                .mapToInt(integer -> integer)
                 .anyMatch(rawSlot -> this.getInventory().equals(event.getView().getInventory(rawSlot)))) {
             event.setCancelled(true);
         }
@@ -59,7 +58,7 @@ public interface IMenu extends InventoryListener {
      *
      * @param event {@link PluginDisableEvent} event
      */
-    default void onDisable(@NotNull PluginDisableEvent event) {
+    default void onDisable(@NonNull PluginDisableEvent event) {
         this.close();
     }
 
@@ -71,12 +70,12 @@ public interface IMenu extends InventoryListener {
      *
      * @return This instance, useful for chaining
      */
-    @NotNull
+    @NonNull
     default IMenu close() {
         List.copyOf(this.getInventory().getViewers()).forEach(HumanEntity::closeInventory);
         return this;
     }
 
-    @NotNull
+    @NonNull
     Inventory getInventory();
 }

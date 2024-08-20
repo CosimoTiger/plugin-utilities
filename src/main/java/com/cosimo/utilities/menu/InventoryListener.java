@@ -1,10 +1,10 @@
 package com.cosimo.utilities.menu;
 
+import lombok.NonNull;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Extracted interface that holds all the common {@link org.bukkit.event.inventory.InventoryEvent}
@@ -19,7 +19,7 @@ public interface InventoryListener {
      * @param external Whether the clicked slot is outside the inventory menu detected by
      *                 {@link com.cosimo.utilities.menu.manager.MenuManager}
      */
-    void onClick(@NotNull InventoryClickEvent event, boolean external);
+    void onClick(@NonNull InventoryClickEvent event, boolean external);
 
     /**
      * Event handler for the {@link InventoryDragEvent}. Useful for handling dragged items
@@ -27,14 +27,14 @@ public interface InventoryListener {
      *
      * @param event {@link InventoryDragEvent}
      */
-    void onDrag(@NotNull InventoryDragEvent event);
+    void onDrag(@NonNull InventoryDragEvent event);
 
     /**
      * Event handler for the {@link InventoryCloseEvent}. Useful for deleting objects, reopening menus etc.
      *
      * @param event {@link InventoryCloseEvent}
      */
-    void onClose(@NotNull InventoryCloseEvent event);
+    void onClose(@NonNull InventoryCloseEvent event);
 
     /**
      * Event handler for the {@link InventoryOpenEvent}. Useful for initializing some menu components, starting tracking
@@ -43,5 +43,5 @@ public interface InventoryListener {
      *
      * @param event {@link InventoryOpenEvent}
      */
-    void onOpen(@NotNull InventoryOpenEvent event);
+    void onOpen(@NonNull InventoryOpenEvent event);
 }

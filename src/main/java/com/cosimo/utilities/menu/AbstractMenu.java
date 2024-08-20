@@ -1,7 +1,10 @@
 package com.cosimo.utilities.menu;
 
 import com.cosimo.utilities.menu.manager.MenuManager;
+import com.cosimo.utilities.menu.type.Menu;
+import com.cosimo.utilities.menu.type.PropertyMenu;
 import com.google.common.base.Preconditions;
+import lombok.NonNull;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -9,7 +12,6 @@ import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 
@@ -28,13 +30,14 @@ import java.util.stream.StreamSupport;
  * <p>A developer can subclass this class, override the methods or add them to customise the ways of processing inputs
  * for inventory menu events or modifying the inventories.
  *
- * @param <S> Menu subclass type of {@link AbstractMenu}
+ * @param <Self> Menu subclass type of {@link AbstractMenu}, which allows method chaining while retaining the same
+ *               subclass instance (see "Curiously Recurring Template Pattern")
  * @author CosimoTiger
  * @see Menu
  * @see PropertyMenu
  */
 @SuppressWarnings("unchecked")
-public abstract class AbstractMenu<S extends AbstractMenu<S>> implements IMenu {
+public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements IMenu {
 
     /**
      * Backing {@link Inventory} that's wrapped and controlled by this class.
@@ -54,8 +57,7 @@ public abstract class AbstractMenu<S extends AbstractMenu<S>> implements IMenu {
      * @param inventory Not null {@link Inventory} that will be wrapped and controlled by an {@link AbstractMenu}
      * @throws IllegalArgumentException If the {@link Inventory} argument is null
      */
-    public AbstractMenu(@NotNull Inventory inventory) {
-        Preconditions.checkArgument(inventory != null, "Inventory argument can't be null");
+    public AbstractMenu(@NonNull Inventory inventory) {
         this.inventory = inventory;
     }
 
@@ -69,7 +71,7 @@ public abstract class AbstractMenu<S extends AbstractMenu<S>> implements IMenu {
      * @param event {@link InventoryCloseEvent} event
      */
     @Override
-    public void onClose(@NotNull InventoryCloseEvent event) {
+    public void onClose(@NonNull InventoryCloseEvent event) {
         if (this.getInventory().getViewers().size() < 2) {
             this.setBukkitTask(null);
         }
@@ -81,7 +83,7 @@ public abstract class AbstractMenu<S extends AbstractMenu<S>> implements IMenu {
      * @param event {@link InventoryOpenEvent} event
      */
     @Override
-    public void onOpen(@NotNull InventoryOpenEvent event) {
+    public void onOpen(@NonNull InventoryOpenEvent event) {
     }
 
     /**
@@ -95,11 +97,9 @@ public abstract class AbstractMenu<S extends AbstractMenu<S>> implements IMenu {
      *                                  events
      * @throws NullPointerException     If a {@link HumanEntity} is null
      */
-    @NotNull
-    public S open(@NotNull MenuManager<AbstractMenu<?>> menuManager, @NotNull Iterable<? extends HumanEntity> viewers) {
-        Preconditions.checkArgument(viewers != null,
-                "Iterable<? extends HumanEntity> of viewers argument can't be null");
-
+    @NonNull
+    public Self open(@NonNull MenuManager<AbstractMenu<?>> menuManager,
+                     @NonNull Iterable<@NonNull ? extends HumanEntity> viewers) {
         menuManager.registerMenu(this);
 
         final long count = StreamSupport.stream(viewers.spliterator(), false)
@@ -113,7 +113,7 @@ public abstract class AbstractMenu<S extends AbstractMenu<S>> implements IMenu {
             throw new IllegalArgumentException("Zero or all null menu viewers provided to open the menu");
         }
 
-        return (S) this;
+        return (Self) this;
     }
 
     /**
@@ -126,8 +126,8 @@ public abstract class AbstractMenu<S extends AbstractMenu<S>> implements IMenu {
      *                                  events
      * @throws NullPointerException     If a {@link HumanEntity} is null
      */
-    @NotNull
-    public S open(@NotNull MenuManager<AbstractMenu<?>> menuManager, @NotNull HumanEntity... viewers) {
+    @NonNull
+    public Self open(@NonNull MenuManager<AbstractMenu<?>> menuManager, @NonNull HumanEntity @NonNull ... viewers) {
         return this.open(menuManager, List.of(viewers));
     }
 
@@ -138,10 +138,10 @@ public abstract class AbstractMenu<S extends AbstractMenu<S>> implements IMenu {
      * @param consumer Lambda function that'll modify this {@link Inventory}
      * @return This instance, useful for chaining
      */
-    @NotNull
-    public S change(@NotNull Consumer<Inventory> consumer) {
+    @NonNull
+    public Self change(@NonNull Consumer<Inventory> consumer) {
         consumer.accept(this.getInventory());
-        return (S) this;
+        return (Self) this;
     }
 
     /**
@@ -153,10 +153,10 @@ public abstract class AbstractMenu<S extends AbstractMenu<S>> implements IMenu {
      * @throws IndexOutOfBoundsException If the slot argument is out of this inventory's boundaries
      * @throws IllegalArgumentException  If the {@link Consumer}&lt;{@link ItemStack}&gt; argument is null
      */
-    @NotNull
-    public S change(@NotNull Consumer<ItemStack> consumer, @Range(from = 0, to = Integer.MAX_VALUE) int slot) {
+    @NonNull
+    public Self change(@NonNull Consumer<ItemStack> consumer, @Range(from = 0, to = Integer.MAX_VALUE) int slot) {
         this.getItem(slot).ifPresent(consumer);
-        return (S) this;
+        return (Self) this;
     }
 
     /**
@@ -174,11 +174,10 @@ public abstract class AbstractMenu<S extends AbstractMenu<S>> implements IMenu {
      * @return This instance, useful for chaining
      * @throws IllegalArgumentException If the step argument is 0
      */
-    public S setIf(@Nullable ItemStack item,
-                   @NotNull BiPredicate<ItemStack, @Range(from = 0, to = Integer.MAX_VALUE) Integer> itemSlotPredicate,
-                   @Range(from = 0, to = Integer.MAX_VALUE) int start,
-                   @Range(from = 0, to = Integer.MAX_VALUE) int end,
-                   @Range(from = Integer.MIN_VALUE, to = Integer.MAX_VALUE) int step) {
+    public Self setIf(@Nullable ItemStack item, @NonNull BiPredicate<ItemStack, @Range(from = 0,
+            to = Integer.MAX_VALUE) Integer> itemSlotPredicate, @Range(from = 0, to = Integer.MAX_VALUE) int start,
+                      @Range(from = 0, to = Integer.MAX_VALUE) int end,
+                      @Range(from = Integer.MIN_VALUE, to = Integer.MAX_VALUE) int step) {
         Preconditions.checkArgument(step != 0, "step argument (" + step + ") can't be 0");
 
         for (int slot = start; slot < end; slot += step) {
@@ -187,26 +186,24 @@ public abstract class AbstractMenu<S extends AbstractMenu<S>> implements IMenu {
             }
         }
 
-        return (S) this;
+        return (Self) this;
     }
 
-    @NotNull
-    public S setIf(@Nullable ItemStack item,
-                   @NotNull BiPredicate<ItemStack, @Range(from = 0, to = Integer.MAX_VALUE) Integer> itemSlotPredicate,
-                   @Range(from = 0, to = Integer.MAX_VALUE) int start,
-                   @Range(from = 0, to = Integer.MAX_VALUE) int end) {
+    @NonNull
+    public Self setIf(@Nullable ItemStack item, @NonNull BiPredicate<ItemStack, @Range(from = 0,
+            to = Integer.MAX_VALUE) Integer> itemSlotPredicate, @Range(from = 0, to = Integer.MAX_VALUE) int start,
+                      @Range(from = 0, to = Integer.MAX_VALUE) int end) {
         return this.setIf(item, itemSlotPredicate, start, end, 1);
     }
 
-    @NotNull
-    public S setIf(@Nullable ItemStack item,
-                   @NotNull BiPredicate<ItemStack, @Range(from = 0, to = Integer.MAX_VALUE) Integer> itemSlotPredicate,
-                   @Range(from = 0, to = Integer.MAX_VALUE) int start) {
+    @NonNull
+    public Self setIf(@Nullable ItemStack item, @NonNull BiPredicate<ItemStack, @Range(from = 0,
+            to = Integer.MAX_VALUE) Integer> itemSlotPredicate, @Range(from = 0, to = Integer.MAX_VALUE) int start) {
         return this.setIf(item, itemSlotPredicate, start, this.getInventory().getSize());
     }
 
-    @NotNull
-    public S setIf(@Nullable ItemStack item, @NotNull BiPredicate<ItemStack, @Range(from = 0,
+    @NonNull
+    public Self setIf(@Nullable ItemStack item, @NonNull BiPredicate<ItemStack, @Range(from = 0,
             to = Integer.MAX_VALUE) Integer> itemSlotPredicate) {
         return this.setIf(item, itemSlotPredicate, 0);
     }
@@ -221,24 +218,22 @@ public abstract class AbstractMenu<S extends AbstractMenu<S>> implements IMenu {
      * @return This instance, useful for chaining
      * @throws IllegalArgumentException If step argument is lower than 1
      */
-    @NotNull
-    public S setRange(@Nullable ItemStack item,
-                      @Range(from = 0, to = Integer.MAX_VALUE) int start,
-                      @Range(from = 0, to = Integer.MAX_VALUE) int end,
-                      @Range(from = Integer.MIN_VALUE, to = Integer.MAX_VALUE) int step) {
+    @NonNull
+    public Self setRange(@Nullable ItemStack item, @Range(from = 0, to = Integer.MAX_VALUE) int start,
+                         @Range(from = 0, to = Integer.MAX_VALUE) int end,
+                         @Range(from = Integer.MIN_VALUE, to = Integer.MAX_VALUE) int step) {
         Preconditions.checkArgument(step != 0, "step argument (" + step + ") can't be 0");
 
         for (int slot = start; slot < end; slot += step) {
             this.getInventory().setItem(slot, item);
         }
 
-        return (S) this;
+        return (Self) this;
     }
 
-    @NotNull
-    public S setRange(@Nullable ItemStack item,
-                      @Range(from = 0, to = Integer.MAX_VALUE) int start,
-                      @Range(from = 0, to = Integer.MAX_VALUE) int end) {
+    @NonNull
+    public Self setRange(@Nullable ItemStack item, @Range(from = 0, to = Integer.MAX_VALUE) int start,
+                         @Range(from = 0, to = Integer.MAX_VALUE) int end) {
         return this.setRange(item, start, end, 1);
     }
 
@@ -249,8 +244,8 @@ public abstract class AbstractMenu<S extends AbstractMenu<S>> implements IMenu {
      * @param start Positive inclusive starting slot index
      * @return This instance, useful for chaining
      */
-    @NotNull
-    public S setRange(@Nullable ItemStack item, @Range(from = 0, to = Integer.MAX_VALUE) int start) {
+    @NonNull
+    public Self setRange(@Nullable ItemStack item, @Range(from = 0, to = Integer.MAX_VALUE) int start) {
         return this.setRange(item, start, this.getInventory().getSize());
     }
 
@@ -263,11 +258,11 @@ public abstract class AbstractMenu<S extends AbstractMenu<S>> implements IMenu {
      * @throws IndexOutOfBoundsException If a slot in the slot array argument is out of this inventory's boundaries
      * @throws IllegalArgumentException  If the slot array argument is null
      */
-    @NotNull
-    public S set(@Nullable ItemStack item, @NotNull Iterable<@Range(from = 0, to = Integer.MAX_VALUE) Integer> slots) {
-        Preconditions.checkArgument(slots != null, "Array of slots can't be null");
+    @NonNull
+    public Self set(@Nullable ItemStack item,
+                    @NonNull Iterable<@Range(from = 0, to = Integer.MAX_VALUE) Integer> slots) {
         slots.forEach(slot -> this.getInventory().setItem(slot, item));
-        return (S) this;
+        return (Self) this;
     }
 
     /**
@@ -279,15 +274,13 @@ public abstract class AbstractMenu<S extends AbstractMenu<S>> implements IMenu {
      * @throws IndexOutOfBoundsException If a slot in the slot array argument is out of this inventory's boundaries
      * @throws IllegalArgumentException  If the slot array argument is null
      */
-    @NotNull
-    public S set(@Nullable ItemStack item, @Range(from = 0, to = Integer.MAX_VALUE) int @NotNull ... slots) {
-        Preconditions.checkArgument(slots != null, "Array of slots can't be null");
-
+    @NonNull
+    public Self set(@Nullable ItemStack item, @Range(from = 0, to = Integer.MAX_VALUE) int @NonNull ... slots) {
         for (int slot : slots) {
             this.getInventory().setItem(slot, item);
         }
 
-        return (S) this;
+        return (Self) this;
     }
 
     /**
@@ -303,14 +296,14 @@ public abstract class AbstractMenu<S extends AbstractMenu<S>> implements IMenu {
      * @param task Nullable {@link BukkitTask} to assign
      * @return This instance, useful for chaining
      */
-    @NotNull
-    public S setBukkitTask(@Nullable BukkitTask task) {
+    @NonNull
+    public Self setBukkitTask(@Nullable BukkitTask task) {
         if (this.taskID > -1) {
             Bukkit.getScheduler().cancelTask(this.taskID);
         }
 
         this.taskID = task == null ? -1 : task.getTaskId();
-        return (S) this;
+        return (Self) this;
     }
 
     /**
@@ -320,9 +313,9 @@ public abstract class AbstractMenu<S extends AbstractMenu<S>> implements IMenu {
      *
      * @return This instance, useful for chaining
      */
-    @NotNull
-    public S close() {
-        return (S) IMenu.super.close();
+    @NonNull
+    public Self close() {
+        return (Self) IMenu.super.close();
     }
 
     /**
@@ -333,10 +326,10 @@ public abstract class AbstractMenu<S extends AbstractMenu<S>> implements IMenu {
      * @return This instance, useful for chaining
      * @see PropertyMenu#clearProperties()
      */
-    @NotNull
-    public S clear() {
+    @NonNull
+    public Self clear() {
         this.getInventory().clear();
-        return (S) this;
+        return (Self) this;
     }
 
     /**
@@ -346,7 +339,7 @@ public abstract class AbstractMenu<S extends AbstractMenu<S>> implements IMenu {
      * @return {@link Optional} of a nullable {@link ItemStack}
      * @throws IndexOutOfBoundsException If the given slot argument is out of the inventory's bounds
      */
-    @NotNull
+    @NonNull
     public Optional<ItemStack> getItem(@Range(from = 0, to = Integer.MAX_VALUE) int slot) {
         return Optional.ofNullable(this.getInventory().getItem(slot));
     }
@@ -356,7 +349,7 @@ public abstract class AbstractMenu<S extends AbstractMenu<S>> implements IMenu {
      *
      * @return Always the same {@link Inventory}
      */
-    @NotNull
+    @NonNull
     public final Inventory getInventory() {
         return this.inventory;
     }
