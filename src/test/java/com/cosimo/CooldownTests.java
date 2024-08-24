@@ -70,7 +70,7 @@ public class CooldownTests {
     }
 
     @Test
-    public void testCooldownConstructorWithDirectDuration() {
+    public void testCooldownExpirationAfterConstructor() {
         final Cooldown cooldown = new Cooldown(60_000);
         assertTrue(cooldown.getExpiration() > System.currentTimeMillis());
     }
@@ -85,7 +85,7 @@ public class CooldownTests {
     }
 
     @Test
-    public void testCooldownExtendWithDirectDuration() {
+    public void testCooldownExtendAfterConstructor() {
         final Cooldown cooldown = new Cooldown(5_000);
         final long previousExpiration = cooldown.getExpiration();
 
