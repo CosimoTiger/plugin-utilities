@@ -1,0 +1,27 @@
+changelog:
+  exclude:
+    labels:
+      - deprecated
+      - invalid
+      - "won't address"
+      - discussion
+      - duplicate
+  categories:
+    - title: 🛠 Breaking changes
+      labels:
+        - "SemVer: major"
+        - "user story"
+        - "epic"
+    - title: 🎉 New features
+      labels:
+        - "SemVer: minor"
+        - "feature"
+    - title: 🐛 Bug fixes
+      labels:
+        - "bug"
+    - title: 💥 Hotfixes
+      labels:
+        - "hotfix"
+    - title: ✨ Miscellaneous
+      labels:
+        - "*"
