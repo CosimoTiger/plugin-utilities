@@ -1,0 +1,88 @@
+name: Release drafter
+
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-draft-release:
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+
+    steps:
+      - name: 📄 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: ☕ Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: maven
+
+      - name: 🪛 Update version in pom.xml
+        run: mvn -B versions:set -DnewVersion=${{ github.ref_name }} -DgenerateBackupPoms=false
+
+      - name: 📦 Build with Maven
+        run: mvn -B clean package -DskipTests=false
+
+      - name: 📝 Verify test results
+        if: ${{ failure() }}
+        run: |
+          echo "Tests failed. Aborting release."
+          exit 1
+
+      - name: 🗂️ Update dependency graph
+        uses: advanced-security/maven-dependency-submission-action@v4
+
+      - name: 📝 Draft a new release
+        if: ${{ success() }}
+        uses: softprops/action-gh-release@v2
+        with:
+          body: |
+            A new version of plugin-utilities is ready. Grab your own via JitPack:
+            
+            #### Maven
+            
+            ```xml
+            <repositories>
+              <repository>
+                <id>jitpack.io</id>
+                <url>https://jitpack.io</url>
+              </repository>
+            </repositories>
+            
+            <dependency>
+              <groupId>com.cosimotiger</groupId>
+              <artifactId>plugin-utilities</artifactId>
+              <version>${{ github.ref_name }}</version>
+            </dependency>
+            ```
+            
+            #### Gradle
+            
+            ```gradle
+            dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+              repositories {
+                mavenCentral()
+                maven { url 'https://jitpack.io' }
+              }
+            }
+            
+            dependencies {
+              implementation 'com.cosimotiger:plugin-utilities:${{ github.ref_name }}'
+            }
+            ```
+            ## Changelog
+          files: target/*.jar
+          tag_name: ${{ github.ref_name }}
+          name: plugin-utilities v${{ github.ref_name }}
+          draft: true
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          generate_release_notes: true
+          token: ${{ secrets.GITHUB_TOKEN }}
