@@ -57,7 +57,7 @@ jobs:
             </repositories>
             
             <dependency>
-              <groupId>com.cosimotiger</groupId>
+              <groupId>com.github.${{ github.repository_owner }}</groupId>
               <artifactId>plugin-utilities</artifactId>
               <version>${{ github.ref_name }}</version>
             </dependency>
@@ -75,7 +75,7 @@ jobs:
             }
             
             dependencies {
-              implementation 'com.cosimotiger:plugin-utilities:${{ github.ref_name }}'
+              implementation 'com.github.${{ github.repository_owner }}:plugin-utilities:${{ github.ref_name }}'
             }
             ```
             ## Changelog
