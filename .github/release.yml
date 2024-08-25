@@ -1,23 +1,27 @@
 changelog:
   exclude:
     labels:
-      - deprecated
-      - invalid
+      - "deprecated"
+      - "invalid"
       - "won't address"
-      - discussion
-      - duplicate
+      - "discussion"
+      - "duplicate"
+      - "CI/CD"
   categories:
     - title: 🛠 Breaking changes
       labels:
         - "SemVer: major"
         - "user story"
         - "epic"
+        - "breaking"
     - title: 🎉 New features
       labels:
         - "SemVer: minor"
         - "feature"
     - title: 🐛 Bug fixes
       labels:
+        - "bug fix"
+        - "bugfix"
         - "bug"
     - title: 💥 Hotfixes
       labels:
