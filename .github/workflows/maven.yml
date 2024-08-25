@@ -3,15 +3,13 @@ name: 'Java CI with Maven'
 on:
   push:
     branches-ignore: [ "main" ]
-  pull_request:
-    branches-ignore: [ "main" ]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
 
     permissions:
