@@ -1,6 +1,5 @@
-package com.cosimo.utilities.menu.manager;
+package com.cosimo.utilities.menu;
 
-import com.cosimo.utilities.menu.IMenu;
 import com.google.common.base.Preconditions;
 import lombok.NonNull;
 import org.bukkit.Bukkit;
@@ -24,9 +23,10 @@ import java.util.Optional;
 import java.util.logging.Level;
 
 /**
- * A {@link Listener} that filters {@link org.bukkit.event.inventory.InventoryEvent}s to registered {@link Inventory}
- * {@link IMenu}s. Menu inventory listening is delegated and centralised in one {@link MenuManager} because of the
- * assumption that constantly registering and unregistering new {@link Listener}s for each {@link IMenu} is slow.
+ * A {@link Listener} that filters and dispatches {@link org.bukkit.event.inventory.InventoryEvent}s to registered
+ * {@link Inventory} {@link IMenu}s. Menu inventory listening is delegated and centralised in one {@link MenuManager}
+ * because of the assumption that constantly registering and unregistering new {@link Listener}s for each {@link IMenu}
+ * is slow.
  *
  * <p><strong>Note:</strong> {@link IMenu}s should be unregistered from their {@link MenuManager} when they're
  * not in use anymore, such as when the last viewer closes an {@link IMenu}. The unfollowing of this rule will cause a
@@ -35,18 +35,16 @@ import java.util.logging.Level;
  * <p><strong>Warning:</strong> {@link IMenu}s in multiple {@link MenuManager} instances may cause
  * duplicate event handler calls.
  *
- * @param <E> {@link IMenu} subclass restriction that's always expected to be received or added to this
- *            {@link MenuManager}
  * @author CosimoTiger
  */
-public class MenuManager<E extends IMenu> implements Listener {
+public class MenuManager implements Listener {
 
     // TODO: WeakHashMap? Inventories might be referenced only by their Bukkit viewers.
     //  WeakHashMap<Inventory, WeakReference<IMenu>> = new WeakHashMap<>(4);
     /**
      * Stores {@link IMenu} associations to their {@link Inventory} instances for quick access.
      */
-    private final Map<Inventory, E> menus;
+    private final Map<Inventory, IMenu> menus;
     private final Plugin provider;
 
     /**
@@ -57,7 +55,7 @@ public class MenuManager<E extends IMenu> implements Listener {
      * @throws IllegalArgumentException If the {@link Plugin} argument is null
      * @throws IllegalStateException    If the {@link Plugin} argument is not enabled
      */
-    protected MenuManager(@NonNull Plugin provider, @NonNull Map<Inventory, E> mapImpl) {
+    protected MenuManager(@NonNull Plugin provider, @NonNull Map<Inventory, IMenu> mapImpl) {
         Preconditions.checkState(provider.isEnabled(), "Plugin provider argument can't be disabled");
         Bukkit.getPluginManager().registerEvents(this, this.provider = provider);
         this.menus = mapImpl;
@@ -82,7 +80,7 @@ public class MenuManager<E extends IMenu> implements Listener {
      * @throws IllegalArgumentException If the {@link Inventory} argument is null
      */
     @NonNull
-    public Optional<E> unregisterMenu(@NonNull Inventory inventory) {
+    public Optional<IMenu> unregisterMenu(@NonNull Inventory inventory) {
         return Optional.ofNullable(this.menus.remove(inventory));
     }
 
@@ -94,7 +92,7 @@ public class MenuManager<E extends IMenu> implements Listener {
      * @throws IllegalArgumentException If the {@link IMenu} argument is null
      */
     @NonNull
-    public Optional<E> unregisterMenu(@NonNull E menu) {
+    public Optional<IMenu> unregisterMenu(@NonNull IMenu menu) {
         return Optional.ofNullable(this.menus.remove(menu.getInventory()));
     }
 
@@ -107,7 +105,7 @@ public class MenuManager<E extends IMenu> implements Listener {
      * @throws IllegalArgumentException If the {@link IMenu} argument is null
      */
     @NonNull
-    public Optional<E> registerMenu(@NonNull E menu) {
+    public Optional<IMenu> registerMenu(@NonNull IMenu menu) {
         return Optional.ofNullable(this.menus.put(menu.getInventory(), menu));
     }
 
@@ -120,7 +118,7 @@ public class MenuManager<E extends IMenu> implements Listener {
      * @return This instance, useful for chaining
      */
     @NonNull
-    public MenuManager<E> closeMenus() {
+    public MenuManager closeMenus() {
         /*
          * Closing each menu calls an InventoryCloseEvent which may unregister a menu from the MenuManager Map of menus.
          * Therefore, a ConcurrentModificationException needs to be avoided using an Iterator.
@@ -141,7 +139,7 @@ public class MenuManager<E extends IMenu> implements Listener {
      * @throws IllegalArgumentException If the {@link Inventory} argument is null
      */
     @NonNull
-    public Optional<E> getMenu(@NonNull Inventory inventory) {
+    public Optional<IMenu> getMenu(@NonNull Inventory inventory) {
         return Optional.ofNullable(this.menus.get(inventory));
     }
 
@@ -154,7 +152,7 @@ public class MenuManager<E extends IMenu> implements Listener {
      * @throws IllegalArgumentException If the viewer argument is null
      */
     @NonNull
-    public Optional<E> getMenu(@NonNull HumanEntity viewer) {
+    public Optional<IMenu> getMenu(@NonNull HumanEntity viewer) {
         return this.getMenu(viewer.getOpenInventory().getTopInventory());
     }
 
@@ -166,7 +164,7 @@ public class MenuManager<E extends IMenu> implements Listener {
      */
     @NonNull
     @UnmodifiableView
-    public Map<Inventory, E> getMap() {
+    public Map<Inventory, IMenu> getMap() {
         return Collections.unmodifiableMap(this.menus);
     }
 

@@ -1,6 +1,5 @@
 package com.cosimo.utilities.menu;
 
-import com.cosimo.utilities.menu.manager.MenuManager;
 import com.cosimo.utilities.menu.type.Menu;
 import com.cosimo.utilities.menu.type.PropertyMenu;
 import com.google.common.base.Preconditions;
@@ -98,7 +97,7 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
      * @throws NullPointerException     If a {@link HumanEntity} is null
      */
     @NonNull
-    public Self open(@NonNull MenuManager<AbstractMenu<?>> menuManager,
+    public Self open(@NonNull MenuManager menuManager,
                      @NonNull Iterable<@NonNull ? extends HumanEntity> viewers) {
         menuManager.registerMenu(this);
 
@@ -127,7 +126,7 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
      * @throws NullPointerException     If a {@link HumanEntity} is null
      */
     @NonNull
-    public Self open(@NonNull MenuManager<AbstractMenu<?>> menuManager, @NonNull HumanEntity @NonNull ... viewers) {
+    public Self open(@NonNull MenuManager menuManager, @NonNull HumanEntity @NonNull ... viewers) {
         return this.open(menuManager, List.of(viewers));
     }
 
