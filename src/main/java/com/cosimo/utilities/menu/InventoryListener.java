@@ -16,8 +16,7 @@ public interface InventoryListener {
      * such.
      *
      * @param event    {@link InventoryClickEvent}
-     * @param external Whether the clicked slot is outside the inventory menu detected by
-     *                 {@link com.cosimo.utilities.menu.manager.MenuManager}
+     * @param external Whether the clicked slot is outside the inventory menu detected by {@link MenuManager}
      */
     void onClick(@NonNull InventoryClickEvent event, boolean external);
 

@@ -1,6 +1,5 @@
 package com.cosimo.utilities.menu;
 
-import com.cosimo.utilities.menu.manager.MenuManager;
 import com.cosimo.utilities.menu.type.Menu;
 import com.cosimo.utilities.menu.type.PropertyMenu;
 import com.google.common.base.Preconditions;

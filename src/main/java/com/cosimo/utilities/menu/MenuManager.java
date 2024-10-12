@@ -1,6 +1,5 @@
-package com.cosimo.utilities.menu.manager;
+package com.cosimo.utilities.menu;
 
-import com.cosimo.utilities.menu.IMenu;
 import com.google.common.base.Preconditions;
 import lombok.NonNull;
 import org.bukkit.Bukkit;
