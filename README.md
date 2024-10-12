@@ -36,7 +36,7 @@ To use the library, a `MenuManager` needs to be instantiated, which will manage 
             <dependency>
                <groupId>com.github.CosimoTiger</groupId>
                <artifactId>plugin-utilities</artifactId>
-               <version>1.0.0-alpha.1</version>
+               <version>1.0.0-alpha.2</version>
             </dependency>
        </dependencies>
    </project>
@@ -52,7 +52,7 @@ To use the library, a `MenuManager` needs to be instantiated, which will manage 
     }
     
     dependencies {
-        implementation 'com.github.CosimoTiger:plugin-utilities:1.0.0-alpha.1'
+        implementation 'com.github.CosimoTiger:plugin-utilities:1.0.0-alpha.2'
     }
     ```
 
