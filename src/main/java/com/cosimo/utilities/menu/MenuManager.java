@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.WeakHashMap;
 import java.util.logging.Level;
 
 /**
@@ -39,12 +40,10 @@ import java.util.logging.Level;
  */
 public class MenuManager implements Listener {
 
-    // TODO: WeakHashMap? Inventories might be referenced only by their Bukkit viewers.
-    //  WeakHashMap<Inventory, WeakReference<IMenu>> = new WeakHashMap<>(4);
     /**
      * Stores {@link IMenu} associations to their {@link Inventory} instances for quick access.
      */
-    private final Map<Inventory, IMenu> menus;
+    private final WeakHashMap<Inventory, IMenu> menus;
     private final Plugin provider;
 
     /**
@@ -55,7 +54,7 @@ public class MenuManager implements Listener {
      * @throws IllegalArgumentException If the {@link Plugin} argument is null
      * @throws IllegalStateException    If the {@link Plugin} argument is not enabled
      */
-    protected MenuManager(@NonNull Plugin provider, @NonNull Map<Inventory, IMenu> mapImpl) {
+    protected MenuManager(@NonNull Plugin provider, @NonNull WeakHashMap<Inventory, IMenu> mapImpl) {
         Preconditions.checkState(provider.isEnabled(), "Plugin provider argument can't be disabled");
         Bukkit.getPluginManager().registerEvents(this, this.provider = provider);
         this.menus = mapImpl;
@@ -69,7 +68,7 @@ public class MenuManager implements Listener {
      * @throws IllegalStateException    If the {@link Plugin} argument is not enabled
      */
     public MenuManager(@NonNull Plugin provider) {
-        this(provider, new HashMap<>(4));
+        this(provider, new WeakHashMap<>(4));
     }
 
     /**

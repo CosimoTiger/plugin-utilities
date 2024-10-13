@@ -14,12 +14,14 @@ import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 
+import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.StreamSupport;
 
 /**
@@ -41,7 +43,7 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
     /**
      * Backing {@link Inventory} that's wrapped and controlled by this class.
      */
-    private final Inventory inventory;
+    private final WeakReference<Inventory> inventory;
     /**
      * The identifier number of a {@link BukkitTask} that's relevant to this inventory. The task is by default
      * automatically cancelled when the menu is closed with no viewers left, but this can be modified by overriding the
@@ -57,7 +59,7 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
      * @throws IllegalArgumentException If the {@link Inventory} argument is null
      */
     public AbstractMenu(@NonNull Inventory inventory) {
-        this.inventory = inventory;
+        this.inventory = new WeakReference<>(inventory);
     }
 
     /**
@@ -99,7 +101,7 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
     @NonNull
     public Self open(@NonNull MenuManager menuManager,
                      @NonNull Iterable<@NonNull ? extends HumanEntity> viewers) {
-        menuManager.registerMenu(this);
+        final var previousMenu = menuManager.registerMenu(this);
 
         final long count = StreamSupport.stream(viewers.spliterator(), false)
                 .filter(Objects::nonNull)
@@ -107,8 +109,9 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
                 .count();
 
         if (count == 0) {
-            // We've been bamboozled and need to undo the menu registration, because nobody is viewing the menu now.
-            menuManager.unregisterMenu(this);
+            // We've been bamboozled and need to undo the menu registration, unless it's already in the manager.
+            previousMenu.filter(menu -> menu == this)
+                    .ifPresentOrElse(Function.identity()::apply, () -> menuManager.unregisterMenu(this));
             throw new IllegalArgumentException("Zero or all null menu viewers provided to open the menu");
         }
 
@@ -350,7 +353,7 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
      */
     @NonNull
     public final Inventory getInventory() {
-        return this.inventory;
+        return Objects.requireNonNull(this.inventory.get());
     }
 
     /**
