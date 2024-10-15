@@ -51,8 +51,6 @@ public class MenuManager implements Listener {
         return instance;
     }
 
-    // TODO: WeakHashMap? Inventories might be referenced only by their Bukkit viewers.
-    //  WeakHashMap<Inventory, WeakReference<IMenu>> = new WeakHashMap<>(4);
     /**
      * Stores {@link IMenu} associations to their {@link Inventory} instances for quick access.
      */
@@ -245,9 +243,6 @@ public class MenuManager implements Listener {
     public void onInventoryDrag(@NonNull InventoryDragEvent event) {
         this.getMenu(event.getInventory()).ifPresent(menu -> menu.onDrag(event));
     }
-
-    // TODO: Test whether this is called at all, since the listener is being
-    //  unregistered for the plugin that's being disabled
 
     /**
      * Passes a {@link PluginDisableEvent} of this {@link MenuManager}'s provider ({@link #getPlugin()}) to all
