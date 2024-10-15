@@ -14,7 +14,6 @@ import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -88,10 +87,10 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
     /**
      * Opens this {@link AbstractMenu} for the given viewers, fail-fast.
      *
-     * @param viewers {@link Collection}&lt;{@link HumanEntity}&gt; of which each will see this {@link AbstractMenu}
+     * @param viewers {@link Iterable}&lt;{@link HumanEntity}&gt; of which each will see this {@link AbstractMenu}
      *                {@link Inventory}
      * @return This instance, useful for chaining
-     * @throws IllegalArgumentException If the {@link Collection}&lt;{@link HumanEntity}&gt; argument is null or empty
+     * @throws IllegalArgumentException If the {@link Iterable}&lt;{@link HumanEntity}&gt; argument is null or empty
      * @throws IllegalStateException    If this {@link AbstractMenu}'s {@link MenuManager} isn't registered for handling
      *                                  events
      * @throws NullPointerException     If a {@link HumanEntity} is null
@@ -99,18 +98,12 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
     @NonNull
     public Self open(@NonNull MenuManager menuManager,
                      @NonNull Iterable<@NonNull ? extends HumanEntity> viewers) {
+        viewers.forEach(viewer -> Objects.requireNonNull(viewer, "Menu viewer can't be null"));
+
         menuManager.registerMenu(this);
 
-        final long count = StreamSupport.stream(viewers.spliterator(), false)
-                .filter(Objects::nonNull)
-                .peek(viewer -> viewer.openInventory(this.getInventory()))
-                .count();
-
-        if (count == 0) {
-            // We've been bamboozled and need to undo the menu registration, because nobody is viewing the menu now.
-            menuManager.unregisterMenu(this);
-            throw new IllegalArgumentException("Zero or all null menu viewers provided to open the menu");
-        }
+        StreamSupport.stream(viewers.spliterator(), false)
+                .forEach(viewer -> viewer.openInventory(this.getInventory()));
 
         return (Self) this;
     }
@@ -131,7 +124,40 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
     }
 
     /**
-     * Applies a lambda function this {@link AbstractMenu}'s {@link Inventory}, such as
+     * Opens this {@link AbstractMenu} for the given viewers using the {@link MenuManager} singleton instance,
+     * fail-fast.
+     *
+     * @param viewers Array of {@link HumanEntity} of which each will see this {@link AbstractMenu} {@link Inventory}
+     * @return This instance, useful for chaining
+     * @throws IllegalArgumentException If the {@link HumanEntity} array argument is null or empty
+     * @throws IllegalStateException    If this {@link AbstractMenu}'s {@link MenuManager} isn't registered for handling
+     *                                  events
+     * @throws NullPointerException     If a {@link HumanEntity} is null
+     */
+    @NonNull
+    public Self open(@NonNull HumanEntity @NonNull ... viewers) {
+        return this.open(MenuManager.getInstance(), viewers);
+    }
+
+    /**
+     * Opens this {@link AbstractMenu} for the given viewers using the {@link MenuManager} singleton instance,
+     * fail-fast.
+     *
+     * @param viewers {@link Iterable}&lt;{@link HumanEntity}&gt; of which each will see this {@link AbstractMenu}
+     *                {@link Inventory}
+     * @return This instance, useful for chaining
+     * @throws IllegalArgumentException If the {@link Iterable}&lt;{@link HumanEntity}&gt; argument is null or empty
+     * @throws IllegalStateException    If this {@link AbstractMenu}'s {@link MenuManager} isn't registered for handling
+     *                                  events
+     * @throws NullPointerException     If a {@link HumanEntity} is null
+     */
+    @NonNull
+    public Self open(@NonNull Iterable<@NonNull ? extends HumanEntity> viewers) {
+        return this.open(MenuManager.getInstance(), viewers);
+    }
+
+    /**
+     * Applies a lambda function to this {@link AbstractMenu}'s {@link Inventory}, such as
      * {@link Inventory#addItem(ItemStack...)}, and returns this instance to chain it.
      *
      * @param consumer Lambda function that'll modify this {@link Inventory}

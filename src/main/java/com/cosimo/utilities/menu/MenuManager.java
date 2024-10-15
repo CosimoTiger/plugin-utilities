@@ -2,6 +2,7 @@ package com.cosimo.utilities.menu;
 
 import com.google.common.base.Preconditions;
 import lombok.NonNull;
+import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.EventHandler;
@@ -14,6 +15,7 @@ import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.Collections;
@@ -39,6 +41,16 @@ import java.util.logging.Level;
  */
 public class MenuManager implements Listener {
 
+    @Nullable
+    @Setter
+    private static MenuManager instance = null;
+
+    @NonNull
+    public static MenuManager getInstance() {
+        Preconditions.checkState(instance != null, "MenuManager singleton instance is null");
+        return instance;
+    }
+
     // TODO: WeakHashMap? Inventories might be referenced only by their Bukkit viewers.
     //  WeakHashMap<Inventory, WeakReference<IMenu>> = new WeakHashMap<>(4);
     /**
@@ -58,7 +70,12 @@ public class MenuManager implements Listener {
     protected MenuManager(@NonNull Plugin provider, @NonNull Map<Inventory, IMenu> mapImpl) {
         Preconditions.checkState(provider.isEnabled(), "Plugin provider argument can't be disabled");
         Bukkit.getPluginManager().registerEvents(this, this.provider = provider);
+
         this.menus = mapImpl;
+
+        if (instance == null) {
+            instance = this;
+        }
     }
 
     /**
