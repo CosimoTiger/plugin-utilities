@@ -95,25 +95,13 @@ To use the library, a `MenuManager` needs to be instantiated, which will manage 
     
     public class ExamplePlugin extends JavaPlugin {
     
-       private static MenuManager menuManager = null;
-       private static ExamplePlugin instance = null;
-    
        @Override
        public void onEnable() {
-          menuManager = new MenuManager(this);
-          instance = this;
+          new MenuManager(this);
     
           final var config = new YamlFile(this, "config.yml").reloadFile().getMemory();
     
           getCommand("example").setExecutor(new ExampleCommand(config.getConfigurationSection("commands.example")));
-       }
-    
-       public static MenuManager getMenuManager() {
-          return menuManager;
-       }
-    
-       public static ExamplePlugin getInstance() {
-          return instance;
        }
     }
     ```
