@@ -22,13 +22,8 @@ public interface IMenu extends InventoryListener {
      * and any action on the menu are cancelled, but interaction with one's own inventory is allowed.
      */
     @Override
-    default void onClick(@NonNull InventoryClickEvent event, boolean external) {
-        final var action = event.getAction();
-
-        if (action == InventoryAction.COLLECT_TO_CURSOR || action == InventoryAction.MOVE_TO_OTHER_INVENTORY ||
-            !external) {
-            event.setCancelled(true);
-        }
+    default void onClick(@NonNull InventoryClickEvent event) {
+        event.setCancelled(MenuUtils.shouldCancelMenuClick(event));
     }
 
     /**
@@ -81,4 +76,12 @@ public interface IMenu extends InventoryListener {
      * @return Non-null {@link Inventory}
      */
     @NonNull Inventory getInventory();
+
+    default int getColumns() {
+        return MenuUtils.getInventoryTypeColumns(this.getInventory());
+    }
+
+    default int getRows() {
+        return this.getInventory().getSize() / this.getColumns();
+    }
 }

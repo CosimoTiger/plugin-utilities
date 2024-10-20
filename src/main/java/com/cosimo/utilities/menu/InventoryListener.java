@@ -15,10 +15,9 @@ public interface InventoryListener {
      * Event handler for the {@link InventoryClickEvent}. Useful for reacting to slot button clicks and cancelling
      * such.
      *
-     * @param event    {@link InventoryClickEvent}
-     * @param external Whether the clicked slot is outside the inventory menu detected by {@link MenuManager}
+     * @param event {@link InventoryClickEvent}
      */
-    void onClick(@NonNull InventoryClickEvent event, boolean external);
+    void onClick(@NonNull InventoryClickEvent event);
 
     /**
      * Event handler for the {@link InventoryDragEvent}. Useful for handling dragged items

@@ -20,8 +20,8 @@ public class SlotActionMenu extends PropertyMenu<BiConsumer<InventoryClickEvent,
      * it exists, and can freely change the outcome of the same event.
      */
     @Override
-    public void onClick(@NonNull InventoryClickEvent event, boolean external) {
-        super.onClick(event, external);
+    public void onClick(@NonNull InventoryClickEvent event) {
+        super.onClick(event);
         this.getProperty(event.getSlot()).ifPresent(property -> property.accept(event, this));
     }
 }
