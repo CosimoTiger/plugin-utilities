@@ -70,18 +70,26 @@ public interface IMenu extends InventoryListener {
         return this;
     }
 
+    default int getColumns() {
+        return MenuUtils.getInventoryTypeColumns(this.getInventory());
+    }
+
+    default int getColumn(int slot) {
+        return slot % this.getColumns();
+    }
+
+    default int getRows() {
+        return this.getRow(this.getInventory().getSize());
+    }
+
+    default int getRow(int slot) {
+        return slot / this.getColumns();
+    }
+
     /**
      * Returns the {@link Inventory} that this instance is controlling, should always be the same.
      *
      * @return Non-null {@link Inventory}
      */
     @NonNull Inventory getInventory();
-
-    default int getColumns() {
-        return MenuUtils.getInventoryTypeColumns(this.getInventory());
-    }
-
-    default int getRows() {
-        return this.getInventory().getSize() / this.getColumns();
-    }
 }

@@ -39,6 +39,12 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
      */
     private final Inventory inventory;
     /**
+     * Cached values for drawing algorithms. Stored as bytes because there's no reason for them to be large values, and
+     * to not take up as much memory.
+     */
+    private final byte columns, rows;
+
+    /**
      * The identifier number of a {@link BukkitTask} that's attached to this inventory's lifecycle. The task is by
      * default automatically cancelled when the menu is closed with no viewers left, but this can be modified by
      * overriding the {@link #onClose(InventoryCloseEvent)} method. Example use is a constant animation that's setting
@@ -54,6 +60,8 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
      */
     public AbstractMenu(@NonNull Inventory inventory) {
         this.inventory = inventory;
+        this.columns = (byte) MenuUtils.getInventoryTypeColumns(this.getInventory());
+        this.rows = (byte) this.getRow(this.getInventory().getSize());
     }
 
     /**
@@ -180,10 +188,8 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
     }
 
     @NonNull
-    public Self setRow(@Nullable ItemStack item, final int index) {
-        final int columns = this.getColumns();
-
-        for (int slot = index * columns; slot < (index + 1) * columns; slot++) {
+    public Self drawRow(@Nullable ItemStack item, final int index) {
+        for (int slot = index * this.getColumns(); slot < (index + 1) * this.getColumns(); slot++) {
             this.set(item, slot);
         }
 
@@ -191,43 +197,53 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
     }
 
     @NonNull
-    public Self setColumn(@Nullable ItemStack item, int index) {
-        final int columns = this.getColumns();
-
-        for (int slot = index; slot < this.getInventory().getSize(); slot += columns) {
-            this.set(item, slot);
+    public Self drawColumn(@Nullable ItemStack item, int index) {
+        for (; index < this.getInventory().getSize(); index += this.getColumns()) {
+            this.set(item, index);
         }
 
         return (Self) this;
     }
 
     @NonNull
-    public Self setRectangle(@Nullable ItemStack item, int startSlot, final int endSlot) {
+    public Self fillRectangle(@Nullable ItemStack item, int startSlot, final int endSlot) {
+        final int rectangleWidth = this.getColumn(endSlot) - this.getColumn(startSlot);
+
+        for (int row = this.getRow(endSlot) - this.getRow(startSlot); row >= 0; row--) {
+            for (int column = 0; column <= rectangleWidth; column++) {
+                this.set(item, startSlot + row * this.getColumns() + column);
+            }
+        }
+
+        return (Self) this;
+    }
+
+    @NonNull
+    public Self drawOutline(@Nullable ItemStack item, final int startSlot, final int endSlot) {
         if (startSlot == endSlot) {
             this.set(item, startSlot);
             return (Self) this;
         }
 
-        final int columns = this.getColumns();
-        final int startRow = startSlot / columns;
-        final int endRow = endSlot / columns;
-        final int startColumn = startSlot % columns;
-        final int endColumn = endSlot % columns;
+        final int startRow = this.getRow(startSlot);
+        final int endRow = this.getRow(endSlot);
+        final int startColumn = this.getColumn(startSlot);
+        final int endColumn = this.getColumn(endSlot);
 
         if (startRow == endRow) {
             for (int col = startColumn; col <= endColumn; col++) {
-                this.set(item, startRow * columns + col);
+                this.set(item, startRow * this.getColumns() + col);
             }
 
             return (Self) this;
         }
 
-        for (int col = startColumn; col <= endColumn; col++) {
-            this.set(item, startRow * columns + col, endRow * columns + col);
+        for (int column = startColumn; column <= endColumn; column++) {
+            this.set(item, startRow * this.getColumns() + column, endRow * this.getColumns() + column);
         }
 
         for (int row = startRow + 1; row < endRow; row++) {
-            this.set(item, row * columns + startColumn, row * columns + endColumn);
+            this.set(item, row * this.getColumns() + startColumn, row * this.getColumns() + endColumn);
         }
 
         return (Self) this;
@@ -244,7 +260,7 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
      */
     @NonNull
     public Self set(@Nullable ItemStack item, @NonNull Iterable<Integer> slots) {
-        slots.forEach(slot -> this.getInventory().setItem(slot, item));
+        slots.forEach(slot -> this.set(item, slot));
         return (Self) this;
     }
 
@@ -331,6 +347,16 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
     @NonNull
     public Optional<ItemStack> getItem(int slot) {
         return Optional.ofNullable(this.getInventory().getItem(slot));
+    }
+
+    @Override
+    public int getColumns() {
+        return this.columns;
+    }
+
+    @Override
+    public int getRows() {
+        return this.rows;
     }
 
     /**

@@ -25,15 +25,15 @@ public class SlotPosition {
         this.isZeroIndexed = isZeroIndexed;
     }
 
-    public static SlotPosition of(int row, int column, boolean isZeroIndexed) {
-        return new SlotPosition(row, column, isZeroIndexed);
+    public static SlotPosition atZeroIndex(int row, int column) {
+        return new SlotPosition(row, column, true);
     }
 
-    public static SlotPosition of(int row, int column) {
-        return of(row, column, true);
+    public static SlotPosition at(int row, int column) {
+        return new SlotPosition(row, column, false);
     }
 
-    public int getSlotIndex(@NonNull Inventory inventory) {
+    public int toSlot(@NonNull Inventory inventory) {
         final int rows = inventory.getSize() / MenuUtils.getInventoryTypeColumns(inventory);
         final int slot;
 

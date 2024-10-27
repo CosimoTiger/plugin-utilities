@@ -75,7 +75,7 @@ public class ChestMenuTests {
     @ParameterizedTest
     @MethodSource("generateRectangleTestCases")
     public void shouldDrawRectangleInExactSlots(RectangleTestCase testCase) {
-        this.menu.setRectangle(null, testCase.startSlot(), testCase.endSlot());
+        this.menu.drawOutline(null, testCase.startSlot(), testCase.endSlot());
 
         verify(this.mockedInventory, times(testCase.rectangleSlots().size())).setItem(this.slotArgCaptor.capture(),
                                                                                       nullable(ItemStack.class));
@@ -87,7 +87,6 @@ public class ChestMenuTests {
     private static Stream<ColumnTestCase> getColumnTestCases() {
         return IntStream.range(0, COLUMNS).mapToObj(column -> {
             final var columnSlots = IntStream.range(0, ROWS).map(slot -> column + slot * COLUMNS).boxed().toList();
-
             return new ColumnTestCase(columnSlots, column);
         });
     }
@@ -95,7 +94,7 @@ public class ChestMenuTests {
     @ParameterizedTest
     @MethodSource("getColumnTestCases")
     public void shouldDrawColumnInExactSlots(ColumnTestCase columnTestCase) {
-        this.menu.setColumn(null, columnTestCase.column());
+        this.menu.drawColumn(null, columnTestCase.column());
 
         verify(this.mockedInventory, times(ROWS)).setItem(this.slotArgCaptor.capture(), nullable(ItemStack.class));
 

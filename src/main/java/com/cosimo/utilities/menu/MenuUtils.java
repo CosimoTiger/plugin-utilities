@@ -27,8 +27,9 @@ public class MenuUtils {
     public static int getInventoryTypeColumns(@NonNull Inventory inventory) {
         return switch (inventory.getType()) {
             case CHEST, ENDER_CHEST, BARREL, PLAYER, CREATIVE, SHULKER_BOX -> 9;
-            case DROPPER, DISPENSER -> 3;
             case HOPPER -> 5;
+            case DROPPER, DISPENSER, CRAFTER -> 3;
+            case SMITHING -> 2;
             default -> inventory.getSize();
         };
     }
