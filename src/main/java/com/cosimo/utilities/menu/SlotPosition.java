@@ -34,7 +34,7 @@ public class SlotPosition {
     }
 
     public int toSlot(@NonNull Inventory inventory) {
-        final int rows = inventory.getSize() / MenuUtils.getInventoryTypeColumns(inventory);
+        final int rows = inventory.getSize() / MenuUtils.getColumns(inventory);
         final int slot;
 
         if (!this.isZeroIndexed) {

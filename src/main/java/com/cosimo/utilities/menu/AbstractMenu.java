@@ -32,15 +32,15 @@ import java.util.stream.StreamSupport;
  * @see PropertyMenu
  */
 @SuppressWarnings("unchecked")
-public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements IMenu {
+public abstract class AbstractMenu<Self extends AbstractMenu<Self, E>, E> implements IMenu {
 
     /**
      * Backing {@link Inventory} that's wrapped and controlled by this class.
      */
     private final Inventory inventory;
     /**
-     * Cached values for drawing algorithms. Stored as bytes because there's no reason for them to be large values, and
-     * to not take up as much memory.
+     * Cached values for slot drawing algorithms. Stored as bytes because there's no reason for them to be large values,
+     * and to not take up as much memory.
      */
     private final byte columns, rows;
 
@@ -60,8 +60,8 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
      */
     public AbstractMenu(@NonNull Inventory inventory) {
         this.inventory = inventory;
-        this.columns = (byte) MenuUtils.getInventoryTypeColumns(this.getInventory());
-        this.rows = (byte) this.getRow(this.getInventory().getSize());
+        this.columns = (byte) IMenu.super.getColumns();
+        this.rows = (byte) IMenu.super.getRows();
     }
 
     /**
@@ -188,30 +188,30 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
     }
 
     @NonNull
-    public Self drawRow(@Nullable ItemStack item, final int index) {
+    public Self fillRow(@NonNull Button<E> button, final int index) {
         for (int slot = index * this.getColumns(); slot < (index + 1) * this.getColumns(); slot++) {
-            this.set(item, slot);
+            this.set(button, slot);
         }
 
         return (Self) this;
     }
 
     @NonNull
-    public Self drawColumn(@Nullable ItemStack item, int index) {
+    public Self fillColumn(@NonNull Button<E> button, int index) {
         for (; index < this.getInventory().getSize(); index += this.getColumns()) {
-            this.set(item, index);
+            this.set(button, index);
         }
 
         return (Self) this;
     }
 
     @NonNull
-    public Self fillRectangle(@Nullable ItemStack item, int startSlot, final int endSlot) {
-        final int rectangleWidth = this.getColumn(endSlot) - this.getColumn(startSlot);
+    public Self fillRectangle(@NonNull Button<E> button, int startSlot, final int endSlot) {
+        final int rectangleWidth = this.getColumnIndex(endSlot) - this.getColumnIndex(startSlot);
 
-        for (int row = this.getRow(endSlot) - this.getRow(startSlot); row >= 0; row--) {
+        for (int row = this.getRowIndex(endSlot) - this.getRowIndex(startSlot); row >= 0; row--) {
             for (int column = 0; column <= rectangleWidth; column++) {
-                this.set(item, startSlot + row * this.getColumns() + column);
+                this.set(button, startSlot + row * this.getColumns() + column);
             }
         }
 
@@ -219,72 +219,72 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
     }
 
     @NonNull
-    public Self drawOutline(@Nullable ItemStack item, final int startSlot, final int endSlot) {
+    public Self drawOutline(@NonNull Button<E> button, final int startSlot, final int endSlot) {
         if (startSlot == endSlot) {
-            this.set(item, startSlot);
+            this.set(button, startSlot);
             return (Self) this;
         }
 
-        final int startRow = this.getRow(startSlot);
-        final int endRow = this.getRow(endSlot);
-        final int startColumn = this.getColumn(startSlot);
-        final int endColumn = this.getColumn(endSlot);
+        final int startRow = this.getRowIndex(startSlot);
+        final int endRow = this.getRowIndex(endSlot);
+        final int startColumn = this.getColumnIndex(startSlot);
+        final int endColumn = this.getColumnIndex(endSlot);
 
         if (startRow == endRow) {
-            for (int col = startColumn; col <= endColumn; col++) {
-                this.set(item, startRow * this.getColumns() + col);
+            for (int column = startColumn; column <= endColumn; column++) {
+                this.set(button, startRow * this.getColumns() + column);
             }
 
             return (Self) this;
         }
 
         for (int column = startColumn; column <= endColumn; column++) {
-            this.set(item, startRow * this.getColumns() + column, endRow * this.getColumns() + column);
+            this.set(button, startRow * this.getColumns() + column, endRow * this.getColumns() + column);
         }
 
         for (int row = startRow + 1; row < endRow; row++) {
-            this.set(item, row * this.getColumns() + startColumn, row * this.getColumns() + endColumn);
+            this.set(button, row * this.getColumns() + startColumn, row * this.getColumns() + endColumn);
         }
 
         return (Self) this;
     }
 
     /**
-     * Sets an {@link ItemStack} at this {@link AbstractMenu}'s given slot(s).
+     * Sets an {@link Button} at this {@link AbstractMenu}'s given slot(s).
      *
-     * @param item  {@link ItemStack} to set at given slots
-     * @param slots Slots that the {@link ItemStack} will be placed at
+     * @param button {@link Button} to set at given slots
+     * @param slots  Slots that the {@link Button} will be placed at
      * @return This instance, useful for chaining
      * @throws IndexOutOfBoundsException If a slot in the slot array argument is out of this inventory's boundaries
      * @throws IllegalArgumentException  If the slot array argument is null
      */
     @NonNull
-    public Self set(@Nullable ItemStack item, @NonNull Iterable<Integer> slots) {
-        slots.forEach(slot -> this.set(item, slot));
+    public Self set(@NonNull Button<E> button, @NonNull Iterable<Integer> slots) {
+        slots.forEach(slot -> this.set(button, slot));
         return (Self) this;
     }
 
     /**
-     * Sets an {@link ItemStack} at this {@link AbstractMenu}'s given slot(s).
+     * Sets an {@link Button} at this {@link AbstractMenu}'s given slot(s).
      *
-     * @param item  {@link ItemStack} to set at given slots
-     * @param slots Slots that the {@link ItemStack} will be placed at
+     * @param button {@link Button} to set at given slots
+     * @param slots  Slots that the {@link Button} will be placed at
      * @return This instance, useful for chaining
      * @throws IndexOutOfBoundsException If a slot in the slot array argument is out of this inventory's boundaries
      * @throws IllegalArgumentException  If the slot array argument is null
      */
     @NonNull
-    public Self set(@Nullable ItemStack item, int @NonNull ... slots) {
+    public Self set(@NonNull Button<E> button, int @NonNull ... slots) {
         for (int slot : slots) {
-            this.set(item, slot);
+            this.set(button, slot);
         }
 
         return (Self) this;
     }
 
     @NonNull
-    public Self set(@Nullable ItemStack item, int slot) {
-        this.getInventory().setItem(slot, item);
+    public Self set(@NonNull Button<E> button, int slot) {
+        this.getInventory().setItem(slot, button.item());
         return (Self) this;
     }
 

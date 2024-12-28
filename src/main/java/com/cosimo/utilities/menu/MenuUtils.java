@@ -6,6 +6,9 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 
+/**
+ * Contains common {@link IMenu} and {@link AbstractMenu} logic.
+ */
 public class MenuUtils {
 
     public static boolean isAboutToBecomeDisposable(@NonNull InventoryCloseEvent event) {
@@ -24,7 +27,7 @@ public class MenuUtils {
         return isInventoryViewItemMixingAction(event.getAction()) || isClickInsideInventory(event);
     }
 
-    public static int getInventoryTypeColumns(@NonNull Inventory inventory) {
+    public static int getColumns(@NonNull Inventory inventory) {
         return switch (inventory.getType()) {
             case CHEST, ENDER_CHEST, BARREL, PLAYER, CREATIVE, SHULKER_BOX -> 9;
             case HOPPER -> 5;

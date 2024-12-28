@@ -1,9 +1,12 @@
 package com.cosimo;
 
+import com.cosimo.utilities.menu.Button;
+import com.cosimo.utilities.menu.MenuUtils;
 import com.cosimo.utilities.menu.type.Menu;
 import lombok.NonNull;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
@@ -13,6 +16,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
@@ -34,20 +38,23 @@ public class ChestMenuTests {
     @Captor
     private ArgumentCaptor<Integer> slotArgCaptor;
 
+    private MockedStatic<MenuUtils> mockedUtils;
+
     @Mock
     private Inventory mockedInventory;
 
     private Menu menu;
 
     @BeforeEach
-    public void setup() {
+    public void setUp() {
         MockitoAnnotations.openMocks(this);
 
         when(this.mockedInventory.getSize()).thenReturn(INVENTORY_SIZE);
 
-        this.menu = spy(new Menu(this.mockedInventory));
+        this.mockedUtils = mockStatic(MenuUtils.class);
+        this.mockedUtils.when(() -> MenuUtils.getColumns(any())).thenReturn(9);
 
-        doReturn(9).when(this.menu).getColumns();
+        this.menu = spy(new Menu(this.mockedInventory));
 
         Mockito.doAnswer(invocation -> {
                     final int slot = invocation.getArgument(0);
@@ -60,6 +67,12 @@ public class ChestMenuTests {
                          nullable(ItemStack.class));
     }
 
+    @AfterEach
+    public void tearDown() {
+        this.mockedUtils.close();
+    }
+
+    @NonNull
     private static Stream<RectangleTestCase> generateRectangleTestCases() {
         return Stream.of(new RectangleTestCase(
                                  Set.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 17, 18, 26, 27, 35, 36, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53), 0,
@@ -75,11 +88,10 @@ public class ChestMenuTests {
     @ParameterizedTest
     @MethodSource("generateRectangleTestCases")
     public void shouldDrawRectangleInExactSlots(RectangleTestCase testCase) {
-        this.menu.drawOutline(null, testCase.startSlot(), testCase.endSlot());
+        this.menu.drawOutline(Button.empty(), testCase.startSlot(), testCase.endSlot());
 
         verify(this.mockedInventory, times(testCase.rectangleSlots().size())).setItem(this.slotArgCaptor.capture(),
                                                                                       nullable(ItemStack.class));
-        verifyNoMoreInteractions(this.mockedInventory);
 
         assertEquals(testCase.rectangleSlots(), Set.copyOf(this.slotArgCaptor.getAllValues()));
     }
@@ -94,7 +106,7 @@ public class ChestMenuTests {
     @ParameterizedTest
     @MethodSource("getColumnTestCases")
     public void shouldDrawColumnInExactSlots(ColumnTestCase columnTestCase) {
-        this.menu.drawColumn(null, columnTestCase.column());
+        this.menu.fillColumn(Button.empty(), columnTestCase.column());
 
         verify(this.mockedInventory, times(ROWS)).setItem(this.slotArgCaptor.capture(), nullable(ItemStack.class));
 

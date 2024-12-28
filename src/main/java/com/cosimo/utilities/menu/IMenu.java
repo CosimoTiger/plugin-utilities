@@ -11,7 +11,8 @@ import org.bukkit.inventory.Inventory;
 import java.util.List;
 
 /**
- * Interface which is a collection of minimum methods a {@link MenuManager} needs to work with menus.
+ * A collection of minimal methods that a {@link MenuManager} needs to work with menus, along with utility methods, such
+ * as for rows and columns.
  */
 public interface IMenu extends InventoryListener {
 
@@ -70,19 +71,42 @@ public interface IMenu extends InventoryListener {
         return this;
     }
 
+    /**
+     * Returns the amount of columns this {@link Inventory}'s size has according to
+     * {@link MenuUtils#getColumns(Inventory)}.
+     *
+     * @return positive integer, at least 1
+     */
     default int getColumns() {
-        return MenuUtils.getInventoryTypeColumns(this.getInventory());
+        return MenuUtils.getColumns(this.getInventory());
     }
 
-    default int getColumn(int slot) {
+    /**
+     * Returns the column index of this {@link Inventory} given a {@link Inventory} slot index.
+     *
+     * @param slot positive integer, at least 0, up to {@link Inventory#getSize()} of this menu
+     * @return positive integer, at least 0
+     */
+    default int getColumnIndex(int slot) {
         return slot % this.getColumns();
     }
 
+    /**
+     * Returns the amount of rows this {@link Inventory}'s size has by deducing from {@link #getColumns()}.
+     *
+     * @return positive integer, at least 1
+     */
     default int getRows() {
-        return this.getRow(this.getInventory().getSize());
+        return this.getRowIndex(this.getInventory().getSize());
     }
 
-    default int getRow(int slot) {
+    /**
+     * Returns the row index of this {@link Inventory} given a {@link Inventory} slot index.
+     *
+     * @param slot positive integer, at least 0, up to {@link Inventory#getSize()} of this menu
+     * @return positive integer, at least 0
+     */
+    default int getRowIndex(int slot) {
         return slot / this.getColumns();
     }
 
@@ -91,5 +115,6 @@ public interface IMenu extends InventoryListener {
      *
      * @return Non-null {@link Inventory}
      */
-    @NonNull Inventory getInventory();
+    @NonNull
+    Inventory getInventory();
 }

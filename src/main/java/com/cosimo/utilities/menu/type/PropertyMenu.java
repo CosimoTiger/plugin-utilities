@@ -1,13 +1,16 @@
 package com.cosimo.utilities.menu.type;
 
 import com.cosimo.utilities.menu.AbstractMenu;
+import com.cosimo.utilities.menu.Button;
 import lombok.NonNull;
 import org.bukkit.inventory.Inventory;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Spliterator;
 import java.util.function.Consumer;
 
 /**
@@ -22,12 +25,9 @@ import java.util.function.Consumer;
  * @see AbstractMenu
  */
 @SuppressWarnings("unchecked")
-public class PropertyMenu<E> extends AbstractMenu<PropertyMenu<E>> implements Iterable<E> {
+public class PropertyMenu<E> extends AbstractMenu<PropertyMenu<E>, E> implements Iterable<E> {
 
-    /**
-     * Properties of each slot in this inventory are stored in an array, linear like inventories.
-     */
-    private E[] properties = (E[]) new Object[this.getInventory().getSize()];
+    private final E[] properties = (E[]) new Object[this.getInventory().getSize()];
 
     /**
      * Creates a new {@link PropertyMenu} using the default constructor for {@link Menu}, with an array of this
@@ -40,36 +40,34 @@ public class PropertyMenu<E> extends AbstractMenu<PropertyMenu<E>> implements It
     }
 
     /**
-     * Sets a slot property object at the given inventory {@link AbstractMenu} slots.
-     *
      * @param property Property {@link Object}
-     * @param slots    Slots that these properties will belong to
+     * @param slot     Slot that this properties will belong to
      * @return This instance, useful for chaining
      * @throws IllegalArgumentException  If the array of slots is null
      * @throws IndexOutOfBoundsException If a slot in the slot array argument is out of this inventory's boundaries
      */
     @NonNull
-    public PropertyMenu<E> set(@Nullable E property, @NonNull Iterable<Integer> slots) {
-        slots.forEach(slot -> this.properties[slot] = property);
+    public PropertyMenu<E> set(E property, int slot) {
+        this.properties[slot] = property;
         return this;
     }
 
     /**
-     * Sets a slot property object at the given inventory {@link AbstractMenu} slot(s).
+     * Decomposes a {@link Button} into an {@link org.bukkit.inventory.ItemStack} and slot property object and sets them
+     * in the given inventory {@link AbstractMenu} slot.
      *
-     * @param property Property {@link Object}
-     * @param slots    Slots that these properties will belong to
+     * @param button {@link Button} that has a nullable {@link org.bukkit.inventory.ItemStack} and nullable property
+     * @param slot   Slot to place the {@link Button}'s {@link org.bukkit.inventory.ItemStack} in the actual
+     *               {@link Inventory} and property in this {@link PropertyMenu}
      * @return This instance, useful for chaining
-     * @throws IllegalArgumentException  If the array of slots is null
-     * @throws IndexOutOfBoundsException If a slot in the slot array argument is out of this inventory's boundaries
+     * @throws NullPointerException      If the {@link Button} is null
+     * @throws IndexOutOfBoundsException If the slot is out of this inventory's boundaries
      */
+    @Override
     @NonNull
-    public PropertyMenu<E> set(@Nullable E property, int @NonNull ... slots) {
-        for (int slot : slots) {
-            this.properties[slot] = property;
-        }
-
-        return this;
+    public PropertyMenu<E> set(@NotNull Button<E> button, int slot) {
+        this.getInventory().setItem(slot, button.item());
+        return this.set(button.property(), slot);
     }
 
     /**
@@ -94,7 +92,7 @@ public class PropertyMenu<E> extends AbstractMenu<PropertyMenu<E>> implements It
      */
     @NonNull
     public PropertyMenu<E> clearProperties() {
-        this.properties = (E[]) new Object[this.getInventory().getSize()];
+        Arrays.fill(this.properties, null);
         return this;
     }
 

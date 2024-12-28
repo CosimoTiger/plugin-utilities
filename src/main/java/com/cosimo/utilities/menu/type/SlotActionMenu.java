@@ -7,7 +7,7 @@ import org.bukkit.inventory.Inventory;
 import java.util.function.BiConsumer;
 
 /**
- * {@link PropertyMenu} implementation with callable {@link BiConsumer} action.
+ * {@link PropertyMenu} implementation with a callable {@link BiConsumer} property.
  */
 public class SlotActionMenu extends PropertyMenu<BiConsumer<InventoryClickEvent, SlotActionMenu>> {
 
