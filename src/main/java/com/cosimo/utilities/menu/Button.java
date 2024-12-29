@@ -16,6 +16,8 @@ import org.jetbrains.annotations.Nullable;
  */
 public record Button<E>(@Nullable ItemStack item, @Nullable E property) {
 
+    public static final Button<Object> EMPTY = new Button<>(null, null);
+
     /**
      * Creates a {@link Button} with an item and no associated property.
      *
@@ -79,6 +81,7 @@ public record Button<E>(@Nullable ItemStack item, @Nullable E property) {
      */
     @Contract("-> new")
     public static <E> Button<E> empty() {
-        return new Button<>(null, null);
+        //noinspection unchecked
+        return (Button<E>) EMPTY;
     }
 }
