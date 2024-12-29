@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
-class SlotPositionTest {
+class SlotTest {
 
     private static final int COLUMNS = 9;
     private static final int ROWS = 4;
@@ -51,76 +51,70 @@ class SlotPositionTest {
         return IntStream.range(0, getInventorySize());
     }
 
-    private static Stream<SlotPosition> getValidZeroIndexedPositions() {
+    private static Stream<Slot> getValidZeroIndexedSlots() {
         return IntStream.range(0, ROWS)
                 .boxed()
-                .flatMap(row -> IntStream.range(0, COLUMNS).mapToObj(column -> SlotPosition.atZeroIndex(row, column)));
+                .flatMap(row -> IntStream.range(0, COLUMNS).mapToObj(column -> Slot.atZeroIndex(row, column)));
     }
 
     private static Stream<SlotPositionTestCase> getZeroIndexedTestCases() {
-        final var slots = getValidZeroIndexedPositions().toList();
+        final var slots = getValidZeroIndexedSlots().toList();
         return getInventorySlots().mapToObj(index -> new SlotPositionTestCase(slots.get(index), index));
     }
 
     @ParameterizedTest
     @MethodSource("getZeroIndexedTestCases")
     void testToSlotZeroIndexed(SlotPositionTestCase testCase) {
-        final int slot = testCase.slotPosition().toSlot(this.mockedInventory);
+        final int slot = testCase.slot().toSlot(this.mockedInventory);
         assertEquals(testCase.expectedSlot(), slot);
     }
 
-    private static Stream<SlotPosition> getValidPositions() {
+    private static Stream<Slot> getValidSlots() {
         return IntStream.range(1, ROWS + 1)
                 .boxed()
-                .flatMap(row -> IntStream.range(1, COLUMNS + 1).mapToObj(column -> SlotPosition.at(row, column)));
+                .flatMap(row -> IntStream.range(1, COLUMNS + 1).mapToObj(column -> Slot.at(row, column)));
     }
 
     private static Stream<SlotPositionTestCase> getOneIndexedTestCases() {
-        final var slots = getValidPositions().toList();
+        final var slots = getValidSlots().toList();
         return getInventorySlots().mapToObj(index -> new SlotPositionTestCase(slots.get(index), index));
     }
 
     @ParameterizedTest
     @MethodSource("getOneIndexedTestCases")
     void testToSlotOneIndexed(SlotPositionTestCase testCase) {
-        final int slot = testCase.slotPosition().toSlot(this.mockedInventory);
+        final int slot = testCase.slot().toSlot(this.mockedInventory);
         assertEquals(testCase.expectedSlot(), slot);
     }
 
     @ParameterizedTest
     @ValueSource(ints = {-99, -5, -2, -1})
     void testInvalidRowAndColumnIndex(int value) {
-        assertThrows(IllegalArgumentException.class, () -> SlotPosition.atZeroIndex(value, 1));
-        assertThrows(IllegalArgumentException.class, () -> SlotPosition.atZeroIndex(1, value));
+        assertThrows(IllegalArgumentException.class, () -> Slot.atZeroIndex(value, 1));
+        assertThrows(IllegalArgumentException.class, () -> Slot.atZeroIndex(1, value));
     }
 
-    private static Stream<SlotPosition> getExceedingZeroIndexedPositions() {
-        return Stream.of(SlotPosition.atZeroIndex(5, 0),
-                         SlotPosition.atZeroIndex(4, 10),
-                         SlotPosition.atZeroIndex(4, 11),
-                         SlotPosition.atZeroIndex(0, 37));
-    }
-
-    @ParameterizedTest
-    @MethodSource("getExceedingZeroIndexedPositions")
-    void testZeroIndexedExceedsInventory(SlotPosition position) {
-        assertThrows(IllegalArgumentException.class, () -> position.toSlot(this.mockedInventory));
-    }
-
-    private static Stream<SlotPosition> getExceedingOneIndexedPositions() {
-        return Stream.of(SlotPosition.at(4, 10),
-                         SlotPosition.at(5, 1),
-                         SlotPosition.at(5, 8),
-                         SlotPosition.at(5, 9),
-                         SlotPosition.at(4, 10));
+    private static Stream<Slot> getExceedingZeroIndexedSlots() {
+        return Stream.of(Slot.atZeroIndex(5, 0), Slot.atZeroIndex(4, 10), Slot.atZeroIndex(4, 11),
+                         Slot.atZeroIndex(0, 37));
     }
 
     @ParameterizedTest
-    @MethodSource("getExceedingOneIndexedPositions")
-    void testOneIndexedExceedsInventory(SlotPosition position) {
+    @MethodSource("getExceedingZeroIndexedSlots")
+    void testZeroIndexedExceedsInventory(Slot position) {
         assertThrows(IllegalArgumentException.class, () -> position.toSlot(this.mockedInventory));
     }
 
-    private record SlotPositionTestCase(SlotPosition slotPosition, int expectedSlot) {
+    private static Stream<Slot> getExceedingOneIndexedSlots() {
+        return Stream.of(Slot.at(4, 10), Slot.at(5, 1), Slot.at(5, 8), Slot.at(5, 9), Slot.at(4, 10));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getExceedingOneIndexedSlots")
+    void testOneIndexedExceedsInventory(Slot position) {
+        assertThrows(IllegalArgumentException.class, () -> position.toSlot(this.mockedInventory));
+    }
+
+    private record SlotPositionTestCase(Slot slot, int expectedSlot) {
     }
 }
