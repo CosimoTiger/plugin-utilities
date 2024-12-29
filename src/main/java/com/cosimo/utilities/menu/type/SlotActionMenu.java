@@ -11,6 +11,9 @@ import java.util.function.BiConsumer;
  */
 public class SlotActionMenu extends PropertyMenu<BiConsumer<InventoryClickEvent, SlotActionMenu>> {
 
+    /**
+     * {@inheritDoc}
+     */
     public SlotActionMenu(@NonNull Inventory inventory) {
         super(inventory);
     }

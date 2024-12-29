@@ -3,6 +3,7 @@ package com.cosimo.utilities.menu.util;
 import com.cosimo.utilities.menu.IMenu;
 import lombok.NonNull;
 import org.bukkit.inventory.Inventory;
+import org.jetbrains.annotations.Contract;
 
 /**
  * Represents the position of a slot in an {@link Inventory} or {@link IMenu} grid, as a 2D coordinate, a pair of a row
@@ -37,6 +38,7 @@ public record Slot(int row, int column, boolean isZeroIndexed) {
      * @param column The column of the slot position (starting from 0)
      * @return A new {@link Slot} instance with zero indexing
      */
+    @Contract("_, _ -> new")
     public static Slot atZeroIndex(int row, int column) {
         return new Slot(row, column, true);
     }
@@ -48,6 +50,7 @@ public record Slot(int row, int column, boolean isZeroIndexed) {
      * @param column The column of the slot position (starting from 1)
      * @return A new {@link Slot} instance with one indexing
      */
+    @Contract("_, _ -> new")
     public static Slot at(int row, int column) {
         return new Slot(row, column, false);
     }
@@ -60,6 +63,7 @@ public record Slot(int row, int column, boolean isZeroIndexed) {
      * @return The slot index corresponding to the {@link Slot} in the provided inventory
      * @throws IllegalArgumentException if the {@link Slot} exceeds the size of the inventory
      */
+    @Contract(pure = true)
     public int toSlot(@NonNull IMenu menu) {
         return this.toSlot(menu.getInventory());
     }
@@ -72,6 +76,7 @@ public record Slot(int row, int column, boolean isZeroIndexed) {
      * @return The slot index corresponding to the {@link Slot} in the provided inventory
      * @throws IllegalArgumentException if the {@link Slot} exceeds the size of the inventory
      */
+    @Contract(pure = true)
     public int toSlot(@NonNull Inventory inventory) {
         final int columns = MenuUtils.getColumns(inventory);
         int slot = this.row * columns + this.column;

@@ -54,6 +54,24 @@ public class PropertyMenu<E> extends AbstractMenu<PropertyMenu<E>, E> implements
     }
 
     /**
+     * Modifies a property located at a given slot with given operations to perform.
+     *
+     * @param applyProperty Method that'll take a slot property object as an argument and perform operations on it
+     * @param slot          Slot at which a property that is being modified is located at
+     * @return This instance, useful for chaining
+     * @throws IndexOutOfBoundsException If the slot argument is out of this inventory's array boundaries
+     * @throws IllegalArgumentException  If the {@link Consumer} argument is null
+     */
+    @NonNull
+    @Contract(mutates = "this")
+    public PropertyMenu<E> changeProperty(@NonNull Consumer<E> applyProperty, int slot) {
+        this.getProperty(slot).ifPresent(applyProperty);
+        return this;
+    }
+
+    /**
+     * Sets the given property at the given numeric slot in this {@link PropertyMenu}.
+     *
      * @param property Property {@link Object}
      * @param slot     Slot that this properties will belong to
      * @return This instance, useful for chaining
@@ -61,6 +79,7 @@ public class PropertyMenu<E> extends AbstractMenu<PropertyMenu<E>, E> implements
      * @throws IndexOutOfBoundsException If a slot in the slot array argument is out of this inventory's boundaries
      */
     @NonNull
+    @Contract(mutates = "this")
     public PropertyMenu<E> set(E property, int slot) {
         this.properties[slot] = property;
         return this;
@@ -79,24 +98,10 @@ public class PropertyMenu<E> extends AbstractMenu<PropertyMenu<E>, E> implements
      */
     @Override
     @NonNull
+    @Contract(mutates = "this")
     public PropertyMenu<E> set(@NotNull Button<E> button, int slot) {
         this.getInventory().setItem(slot, button.item());
         return this.set(button.property(), slot);
-    }
-
-    /**
-     * Modifies a property located at a given slot with given operations to perform.
-     *
-     * @param applyProperty Method that'll take a slot property object as an argument and perform operations on it
-     * @param slot          Slot at which a property that is being modified is located at
-     * @return This instance, useful for chaining
-     * @throws IndexOutOfBoundsException If the slot argument is out of this inventory's array boundaries
-     * @throws IllegalArgumentException  If the {@link Consumer} argument is null
-     */
-    @NonNull
-    public PropertyMenu<E> changeProperty(@NonNull Consumer<E> applyProperty, int slot) {
-        this.getProperty(slot).ifPresent(applyProperty);
-        return this;
     }
 
     /**
@@ -105,6 +110,7 @@ public class PropertyMenu<E> extends AbstractMenu<PropertyMenu<E>, E> implements
      * @return This instance, useful for chaining
      */
     @NonNull
+    @Contract(mutates = "this")
     public PropertyMenu<E> clearProperties() {
         Arrays.fill(this.properties, null);
         return this;
@@ -117,6 +123,7 @@ public class PropertyMenu<E> extends AbstractMenu<PropertyMenu<E>, E> implements
      */
     @NonNull
     @Override
+    @Contract(mutates = "this")
     public PropertyMenu<E> clear() {
         super.clear();
         return this.clearProperties();
@@ -130,6 +137,7 @@ public class PropertyMenu<E> extends AbstractMenu<PropertyMenu<E>, E> implements
      * @throws IndexOutOfBoundsException If the given slot argument is out of this inventory's boundaries
      */
     @NonNull
+    @Contract(pure = true)
     public Optional<E> getProperty(int slot) {
         return Optional.ofNullable(this.properties[slot]);
     }

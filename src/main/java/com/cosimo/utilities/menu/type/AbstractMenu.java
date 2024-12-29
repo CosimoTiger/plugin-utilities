@@ -12,6 +12,7 @@ import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -22,7 +23,7 @@ import java.util.stream.StreamSupport;
 
 /**
  * Represents a collection of algorithms, features and event handlers upon an {@link Inventory} of any type that
- * multiple viewers can see and interact with.
+ * multiple viewers can see and interact with. All slots are zero-indexed.
  *
  * <p>A developer can subclass this class, override the methods or add them to customise the ways of processing inputs
  * for inventory menu events or modifying the inventories.
@@ -103,6 +104,7 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self, E>, E> implem
      * @throws NullPointerException     If a {@link HumanEntity} is null
      */
     @NonNull
+    @Contract(value = "_, _ -> this", mutates = "this")
     public Self open(@NonNull MenuManager menuManager, @NonNull Iterable<@NonNull ? extends HumanEntity> viewers) {
         viewers.forEach(viewer -> Objects.requireNonNull(viewer, "Menu viewer can't be null"));
 
@@ -124,6 +126,7 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self, E>, E> implem
      * @throws NullPointerException     If a {@link HumanEntity} is null
      */
     @NonNull
+    @Contract(value = "_, _ -> this", mutates = "this")
     public Self open(@NonNull MenuManager menuManager, @NonNull HumanEntity @NonNull ... viewers) {
         return this.open(menuManager, List.of(viewers));
     }
@@ -140,6 +143,7 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self, E>, E> implem
      * @throws NullPointerException     If a {@link HumanEntity} is null
      */
     @NonNull
+    @Contract(value = "_ -> this", mutates = "this")
     public Self open(@NonNull HumanEntity @NonNull ... viewers) {
         return this.open(MenuManager.getInstance(), viewers);
     }
@@ -157,6 +161,7 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self, E>, E> implem
      * @throws NullPointerException     If a {@link HumanEntity} is null
      */
     @NonNull
+    @Contract(value = "_ -> this", mutates = "this")
     public Self open(@NonNull Iterable<@NonNull ? extends HumanEntity> viewers) {
         return this.open(MenuManager.getInstance(), viewers);
     }
@@ -169,6 +174,7 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self, E>, E> implem
      * @return This instance, useful for chaining
      */
     @NonNull
+    @Contract(value = "_ -> this", mutates = "this")
     public Self apply(@NonNull Consumer<Inventory> consumer) {
         consumer.accept(this.getInventory());
         return (Self) this;
@@ -184,12 +190,21 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self, E>, E> implem
      * @throws IllegalArgumentException  If the {@link Consumer}&lt;{@link ItemStack}&gt; argument is null
      */
     @NonNull
+    @Contract(value = "_, _ -> this", mutates = "this")
     public Self apply(@NonNull Consumer<ItemStack> consumer, int slot) {
         this.getItem(slot).ifPresent(consumer);
         return (Self) this;
     }
 
+    /**
+     * Fills an entire row of the inventory with a given button.
+     *
+     * @param button The button to fill the row with
+     * @param index  The row index (starting at 0) to fill
+     * @return This instance, useful for chaining
+     */
     @NonNull
+    @Contract(value = "_, _ -> this", mutates = "this")
     public Self fillRow(@NonNull Button<E> button, final int index) {
         for (int slot = index * this.getColumns(); slot < (index + 1) * this.getColumns(); slot++) {
             this.set(button, slot);
@@ -198,7 +213,15 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self, E>, E> implem
         return (Self) this;
     }
 
+    /**
+     * Fills an entire column of the inventory with a given {@link Button}.
+     *
+     * @param button The {@link Button} to fill the column with
+     * @param index  The column index to fill
+     * @return This instance, useful for chaining
+     */
     @NonNull
+    @Contract(value = "_, _ -> this", mutates = "this")
     public Self fillColumn(@NonNull Button<E> button, int index) {
         for (; index < this.getInventory().getSize(); index += this.getColumns()) {
             this.set(button, index);
@@ -207,7 +230,16 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self, E>, E> implem
         return (Self) this;
     }
 
+    /**
+     * Fills a rectangular area within the inventory with a given {@link Button} from one corner to the other.
+     *
+     * @param button    The {@link Button} to fill the rectangle with
+     * @param startSlot The starting slot index of the rectangle's top-left corner
+     * @param endSlot   The ending slot index of the rectangle's bottom-right corner
+     * @return This instance, useful for chaining
+     */
     @NonNull
+    @Contract(value = "_, _, _ -> this", mutates = "this")
     public Self fillRectangle(@NonNull Button<E> button, int startSlot, final int endSlot) {
         final int rectangleWidth = this.getColumnIndex(endSlot) - this.getColumnIndex(startSlot);
 
@@ -220,7 +252,16 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self, E>, E> implem
         return (Self) this;
     }
 
+    /**
+     * Draws an outline in the inventory with a given button between two slots.
+     *
+     * @param button    The button to use for the outline
+     * @param startSlot The starting slot index for the outline
+     * @param endSlot   The ending slot index for the outline
+     * @return This instance, useful for chaining
+     */
     @NonNull
+    @Contract(value = "_, _, _ -> this", mutates = "this")
     public Self drawOutline(@NonNull Button<E> button, final int startSlot, final int endSlot) {
         if (startSlot == endSlot) {
             this.set(button, startSlot);
@@ -261,6 +302,7 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self, E>, E> implem
      * @throws IllegalArgumentException  If the slot array argument is null
      */
     @NonNull
+    @Contract(value = "_, _ -> this", mutates = "this")
     public Self set(@NonNull Button<E> button, @NonNull Iterable<Integer> slots) {
         slots.forEach(slot -> this.set(button, slot));
         return (Self) this;
@@ -276,6 +318,7 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self, E>, E> implem
      * @throws IllegalArgumentException  If the slot array argument is null
      */
     @NonNull
+    @Contract(value = "_, _ -> this", mutates = "this")
     public Self set(@NonNull Button<E> button, int @NonNull ... slots) {
         for (int slot : slots) {
             this.set(button, slot);
@@ -284,7 +327,16 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self, E>, E> implem
         return (Self) this;
     }
 
+    /**
+     * Assigns a {@link Button} to a specific slot in the inventory.
+     *
+     * @param button The {@link Button} to assign
+     * @param slot   The slot index
+     * @return This instance, useful for chaining
+     * @throws IndexOutOfBoundsException If the slot index is out of bounds
+     */
     @NonNull
+    @Contract(value = "_, _ -> this", mutates = "this")
     public Self set(@NonNull Button<E> button, int slot) {
         this.getInventory().setItem(slot, button.item());
         return (Self) this;
@@ -304,6 +356,7 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self, E>, E> implem
      * @return This instance, useful for chaining
      */
     @NonNull
+    @Contract(value = "_ -> this", mutates = "this")
     public Self attachBukkitTask(@Nullable BukkitTask task) {
         if (this.hasBukkitTask()) {
             Bukkit.getScheduler().cancelTask(this.getBukkitTaskId());
@@ -321,6 +374,7 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self, E>, E> implem
      * @return This instance, useful for chaining
      */
     @NonNull
+    @Contract(value = "-> this", mutates = "this")
     public Self close() {
         return (Self) IMenu.super.close();
     }
@@ -334,6 +388,7 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self, E>, E> implem
      * @see PropertyMenu#clearProperties()
      */
     @NonNull
+    @Contract(value = "-> this", mutates = "this")
     public Self clear() {
         this.getInventory().clear();
         return (Self) this;
@@ -347,16 +402,19 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self, E>, E> implem
      * @throws IndexOutOfBoundsException If the given slot argument is out of the inventory's bounds
      */
     @NonNull
+    @Contract(pure = true)
     public Optional<ItemStack> getItem(int slot) {
         return Optional.ofNullable(this.getInventory().getItem(slot));
     }
 
     @Override
+    @Contract(pure = true)
     public int getColumns() {
         return this.columns;
     }
 
     @Override
+    @Contract(pure = true)
     public int getRows() {
         return this.rows;
     }
@@ -367,10 +425,17 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self, E>, E> implem
      * @return Always the same {@link Inventory}
      */
     @NonNull
+    @Contract(pure = true)
     public final Inventory getInventory() {
         return this.inventory;
     }
 
+    /**
+     * Checks if this menu has an associated Bukkit task ID stored.
+     *
+     * @return True if a Bukkit task ID is stored, otherwise false
+     */
+    @Contract(pure = true)
     public boolean hasBukkitTask() {
         return this.taskId > -1;
     }
@@ -381,6 +446,7 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self, E>, E> implem
      *
      * @return {@link BukkitTask} identifier number or -1 if none is assigned
      */
+    @Contract(pure = true)
     public int getBukkitTaskId() {
         return this.taskId;
     }
