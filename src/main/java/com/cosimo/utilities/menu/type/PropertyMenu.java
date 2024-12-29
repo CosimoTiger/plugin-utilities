@@ -190,6 +190,7 @@ public class PropertyMenu<E> extends AbstractMenu<PropertyMenu<E>, E> implements
             if (!this.hasNext()) {
                 throw new NoSuchElementException("End of menu property iterator reached at index " + (this.cursor + 1));
             }
+
             return PropertyMenu.this.properties[++this.cursor];
         }
 
@@ -215,6 +216,7 @@ public class PropertyMenu<E> extends AbstractMenu<PropertyMenu<E>, E> implements
             if (!this.hasPrevious()) {
                 throw new NoSuchElementException("Start of menu property reached");
             }
+
             return PropertyMenu.this.properties[this.cursor--];
         }
 
