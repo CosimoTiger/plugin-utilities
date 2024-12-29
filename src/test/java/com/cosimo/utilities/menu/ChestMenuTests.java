@@ -1,6 +1,6 @@
 package com.cosimo.utilities.menu;
 
-import com.cosimo.utilities.menu.type.Menu;
+import com.cosimo.utilities.menu.type.PropertyMenu;
 import com.cosimo.utilities.menu.util.MenuUtils;
 import lombok.NonNull;
 import org.bukkit.Bukkit;
@@ -21,6 +21,7 @@ import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -35,7 +36,9 @@ public class ChestMenuTests {
     private static final int INVENTORY_SIZE = ROWS * COLUMNS;
 
     @Captor
-    private ArgumentCaptor<Integer> slotArgCaptor;
+    private ArgumentCaptor<Integer> itemSlotArgCaptor;
+    @Captor
+    private ArgumentCaptor<Integer> propertySlotArgCaptor;
 
     private MockedStatic<MenuUtils> mockedUtils;
 
@@ -45,7 +48,7 @@ public class ChestMenuTests {
     @Mock
     private Inventory mockedInventory;
 
-    private Menu menu;
+    private PropertyMenu<Object> menu;
 
     @BeforeEach
     public void setUp() {
@@ -56,7 +59,7 @@ public class ChestMenuTests {
         this.mockedUtils = mockStatic(MenuUtils.class);
         this.mockedUtils.when(() -> MenuUtils.getColumns(any())).thenReturn(9);
 
-        this.menu = spy(new Menu(this.mockedInventory));
+        this.menu = spy(new PropertyMenu<>(this.mockedInventory));
 
         doAnswer(invocation -> {
             final int slot = invocation.getArgument(0);
@@ -66,6 +69,14 @@ public class ChestMenuTests {
         }).when(this.mockedInventory)
                 .setItem(ArgumentMatchers.intThat(slot -> slot < 0 || slot >= INVENTORY_SIZE),
                          nullable(ItemStack.class));
+
+        doAnswer(invocation -> {
+            final int slot = invocation.getArgument(1);
+
+            throw new IndexOutOfBoundsException(
+                    "Slot %d is out of bounds! Minimum 0, exclusive maximum %s".formatted(slot, INVENTORY_SIZE));
+        }).when(this.menu).set(nullable(Object.class),
+                               ArgumentMatchers.intThat(slot -> slot < 0 || slot >= INVENTORY_SIZE));
     }
 
     @AfterEach
@@ -86,10 +97,12 @@ public class ChestMenuTests {
     public void shouldFillRectangularAreaCorrectly(FillAreaTestCase testCase) {
         this.menu.fillArea(Button.empty(), testCase.startSlot(), testCase.endSlot());
 
-        verify(this.mockedInventory, times(testCase.expectedSlots().size())).setItem(this.slotArgCaptor.capture(),
+        verify(this.mockedInventory, times(testCase.expectedSlots().size())).setItem(this.itemSlotArgCaptor.capture(),
                                                                                      nullable(ItemStack.class));
+        verify(this.menu, times(testCase.expectedSlots().size())).set(nullable(Objects.class),
+                                                                      this.propertySlotArgCaptor.capture());
 
-        assertEquals(testCase.expectedSlots(), Set.copyOf(this.slotArgCaptor.getAllValues()));
+        assertEquals(testCase.expectedSlots(), Set.copyOf(this.itemSlotArgCaptor.getAllValues()));
     }
 
     @NonNull
@@ -113,10 +126,12 @@ public class ChestMenuTests {
     public void shouldDrawOutlineInExactSlots(OutlineTestCase testCase) {
         this.menu.drawOutline(Button.empty(), testCase.startSlot(), testCase.endSlot());
 
-        verify(this.mockedInventory, times(testCase.outlineSlots().size())).setItem(this.slotArgCaptor.capture(),
+        verify(this.mockedInventory, times(testCase.outlineSlots().size())).setItem(this.itemSlotArgCaptor.capture(),
                                                                                     nullable(ItemStack.class));
+        verify(this.menu, times(testCase.outlineSlots().size())).set(nullable(Objects.class),
+                                                                     this.propertySlotArgCaptor.capture());
 
-        assertEquals(testCase.outlineSlots(), Set.copyOf(this.slotArgCaptor.getAllValues()));
+        assertEquals(testCase.outlineSlots(), Set.copyOf(this.itemSlotArgCaptor.getAllValues()));
     }
 
     private static Stream<LineTestCase> getColumnTestCases() {
@@ -131,9 +146,10 @@ public class ChestMenuTests {
     public void shouldDrawColumnInExactSlots(LineTestCase columnTestCase) {
         this.menu.fillColumn(Button.empty(), columnTestCase.column());
 
-        verify(this.mockedInventory, times(ROWS)).setItem(this.slotArgCaptor.capture(), nullable(ItemStack.class));
+        verify(this.mockedInventory, times(ROWS)).setItem(this.itemSlotArgCaptor.capture(), nullable(ItemStack.class));
+        verify(this.menu, times(ROWS)).set(nullable(Objects.class), this.propertySlotArgCaptor.capture());
 
-        assertEquals(columnTestCase.lineSlots(), this.slotArgCaptor.getAllValues());
+        assertEquals(columnTestCase.lineSlots(), this.itemSlotArgCaptor.getAllValues());
     }
 
     private static Stream<LineTestCase> getRowTestCases() {
@@ -148,9 +164,11 @@ public class ChestMenuTests {
     public void shouldDrawRowInExactSlots(LineTestCase rowTestCase) {
         this.menu.fillRow(Button.empty(), rowTestCase.column());
 
-        verify(this.mockedInventory, times(COLUMNS)).setItem(this.slotArgCaptor.capture(), nullable(ItemStack.class));
+        verify(this.mockedInventory, times(COLUMNS)).setItem(this.itemSlotArgCaptor.capture(),
+                                                             nullable(ItemStack.class));
+        verify(this.menu, times(COLUMNS)).set(nullable(Objects.class), this.propertySlotArgCaptor.capture());
 
-        assertEquals(rowTestCase.lineSlots(), this.slotArgCaptor.getAllValues());
+        assertEquals(rowTestCase.lineSlots(), this.itemSlotArgCaptor.getAllValues());
     }
 
     @Test
