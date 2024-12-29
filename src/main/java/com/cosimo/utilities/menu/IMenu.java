@@ -4,7 +4,9 @@ import lombok.NonNull;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.Inventory;
 
@@ -14,33 +16,55 @@ import java.util.List;
  * A collection of minimal methods that a {@link MenuManager} needs to work with menus, along with utility methods, such
  * as for rows and columns.
  */
-public interface IMenu extends InventoryListener {
+public interface IMenu {
 
     /**
-     * {@inheritDoc}
+     * Event handler for the {@link InventoryClickEvent}. Useful for reacting to slot button clicks and cancelling
+     * such.
      *
      * <p>By default, {@link InventoryAction#COLLECT_TO_CURSOR} and {@link InventoryAction#MOVE_TO_OTHER_INVENTORY}
      * and any action on the menu are cancelled, but interaction with one's own inventory is allowed.
      */
-    @Override
     default void onClick(@NonNull InventoryClickEvent event) {
         event.setCancelled(MenuUtils.shouldCancelMenuClick(event));
     }
 
     /**
-     * Acts as an event handler for the inventory item dragging event.
+     * Event handler for the {@link InventoryDragEvent}. Useful for handling dragged items
+     * {@link org.bukkit.inventory.ItemStack} input.
      *
      * <p>By default, any item dragging in this {@link AbstractMenu} will be cancelled.
      *
      * @param event {@link InventoryDragEvent} event
      */
-    @Override
     default void onDrag(@NonNull InventoryDragEvent event) {
         if (event.getRawSlots()
                 .stream()
                 .anyMatch(rawSlot -> this.getInventory().equals(event.getView().getInventory(rawSlot)))) {
             event.setCancelled(true);
         }
+    }
+
+    /**
+     * Event handler for the {@link InventoryCloseEvent}.
+     *
+     * <p>Useful for reopening menus, cleaning up objects, tasks, finalizing and serializing player settings etc.
+     *
+     * @param event {@link InventoryCloseEvent}
+     */
+    default void onClose(@NonNull InventoryCloseEvent event) {
+    }
+
+    /**
+     * Event handler for the {@link InventoryOpenEvent}.
+     *
+     * <p>Useful for initializing some menu components, starting tracking of viewers, starting up
+     * {@link org.bukkit.scheduler.BukkitTask}s etc., generally a verification that someone began a "menu session",
+     * which is a concept that can be seen in other menu libraries.
+     *
+     * @param event {@link InventoryOpenEvent}
+     */
+    default void onOpen(@NonNull InventoryOpenEvent event) {
     }
 
     /**
