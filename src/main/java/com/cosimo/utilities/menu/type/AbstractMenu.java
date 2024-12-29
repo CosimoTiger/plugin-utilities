@@ -240,7 +240,7 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self, E>, E> implem
      */
     @NonNull
     @Contract(value = "_, _, _ -> this", mutates = "this")
-    public Self fillRectangle(@NonNull Button<E> button, int startSlot, final int endSlot) {
+    public Self fillArea(@NonNull Button<E> button, final int startSlot, final int endSlot) {
         final int rectangleWidth = this.getColumnIndex(endSlot) - this.getColumnIndex(startSlot);
 
         for (int row = this.getRowIndex(endSlot) - this.getRowIndex(startSlot); row >= 0; row--) {
