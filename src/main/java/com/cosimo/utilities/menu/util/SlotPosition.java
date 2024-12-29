@@ -1,4 +1,4 @@
-package com.cosimo.utilities.menu;
+package com.cosimo.utilities.menu.util;
 
 import lombok.Getter;
 import lombok.NonNull;

@@ -1,7 +1,9 @@
-package com.cosimo.utilities.menu;
+package com.cosimo.utilities.menu.type;
 
-import com.cosimo.utilities.menu.type.Menu;
-import com.cosimo.utilities.menu.type.PropertyMenu;
+import com.cosimo.utilities.menu.Button;
+import com.cosimo.utilities.menu.IMenu;
+import com.cosimo.utilities.menu.MenuManager;
+import com.cosimo.utilities.menu.util.MenuUtils;
 import lombok.NonNull;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;

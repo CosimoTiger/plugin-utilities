@@ -1,6 +1,5 @@
 package com.cosimo.utilities.menu.type;
 
-import com.cosimo.utilities.menu.AbstractMenu;
 import lombok.NonNull;
 import org.bukkit.inventory.Inventory;
 

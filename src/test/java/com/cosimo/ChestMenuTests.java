@@ -1,8 +1,8 @@
 package com.cosimo;
 
 import com.cosimo.utilities.menu.Button;
-import com.cosimo.utilities.menu.MenuUtils;
 import com.cosimo.utilities.menu.type.Menu;
+import com.cosimo.utilities.menu.util.MenuUtils;
 import lombok.NonNull;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;

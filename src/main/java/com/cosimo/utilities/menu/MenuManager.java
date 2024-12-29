@@ -1,5 +1,6 @@
 package com.cosimo.utilities.menu;
 
+import com.cosimo.utilities.menu.util.MenuUtils;
 import com.google.common.base.Preconditions;
 import lombok.NonNull;
 import lombok.Setter;

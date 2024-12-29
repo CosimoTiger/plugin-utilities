@@ -1,5 +1,7 @@
-package com.cosimo.utilities.menu;
+package com.cosimo.utilities.menu.util;
 
+import com.cosimo.utilities.menu.IMenu;
+import com.cosimo.utilities.menu.type.AbstractMenu;
 import lombok.NonNull;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
