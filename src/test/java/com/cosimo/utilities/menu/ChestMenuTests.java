@@ -1,6 +1,5 @@
-package com.cosimo;
+package com.cosimo.utilities.menu;
 
-import com.cosimo.utilities.menu.Button;
 import com.cosimo.utilities.menu.type.Menu;
 import com.cosimo.utilities.menu.util.MenuUtils;
 import lombok.NonNull;
@@ -8,8 +7,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.parallel.Execution;
-import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
@@ -17,7 +14,6 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.List;
@@ -28,7 +24,6 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
-@Execution(ExecutionMode.CONCURRENT)
 public class ChestMenuTests {
 
     private static final int ROWS = 6;
@@ -56,12 +51,12 @@ public class ChestMenuTests {
 
         this.menu = spy(new Menu(this.mockedInventory));
 
-        Mockito.doAnswer(invocation -> {
-                    final int slot = invocation.getArgument(0);
+        doAnswer(invocation -> {
+            final int slot = invocation.getArgument(0);
 
-                    throw new IndexOutOfBoundsException(
-                            "Slot %d is out of bounds! Minimum 0, exclusive maximum %s".formatted(slot, INVENTORY_SIZE));
-                })
+            throw new IndexOutOfBoundsException(
+                    "Slot %d is out of bounds! Minimum 0, exclusive maximum %s".formatted(slot, INVENTORY_SIZE));
+        })
                 .when(this.mockedInventory)
                 .setItem(ArgumentMatchers.intThat(slot -> slot < 0 || slot >= INVENTORY_SIZE),
                          nullable(ItemStack.class));

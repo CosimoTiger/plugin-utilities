@@ -1,16 +1,12 @@
 package com.cosimo.utilities.menu.util;
 
-import lombok.Getter;
+import com.cosimo.utilities.menu.IMenu;
 import lombok.NonNull;
 import org.bukkit.inventory.Inventory;
 
-@Getter
-public class SlotPosition {
+public record SlotPosition(int row, int column, boolean isZeroIndexed) {
 
-    private final int row, column;
-    private final boolean isZeroIndexed;
-
-    private SlotPosition(int row, int column, boolean isZeroIndexed) {
+    public SlotPosition {
         if (row < 0 || !isZeroIndexed && row == 0) {
             throw new IllegalArgumentException(
                     "Invalid SlotPosition row given (row = %s) and (isZeroIndexed = %s)".formatted(row, isZeroIndexed));
@@ -19,10 +15,6 @@ public class SlotPosition {
                     "Invalid SlotPosition column given (column = %s) and (isZeroIndexed = %s)".formatted(column,
                                                                                                          isZeroIndexed));
         }
-
-        this.row = row;
-        this.column = column;
-        this.isZeroIndexed = isZeroIndexed;
     }
 
     public static SlotPosition atZeroIndex(int row, int column) {
@@ -33,14 +25,16 @@ public class SlotPosition {
         return new SlotPosition(row, column, false);
     }
 
+    public int toSlot(@NonNull IMenu menu) {
+        return this.toSlot(menu.getInventory());
+    }
+
     public int toSlot(@NonNull Inventory inventory) {
-        final int rows = inventory.getSize() / MenuUtils.getColumns(inventory);
-        final int slot;
+        final int columns = MenuUtils.getColumns(inventory);
+        int slot = this.row * columns + this.column;
 
         if (!this.isZeroIndexed) {
-            slot = this.row * rows + this.column;
-        } else {
-            slot = (this.row - 1) * rows + this.column - 1;
+            slot -= columns + 1;
         }
 
         if (slot >= inventory.getSize()) {
