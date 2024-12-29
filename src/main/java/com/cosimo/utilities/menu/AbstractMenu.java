@@ -303,8 +303,8 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self, E>, E> implem
      */
     @NonNull
     public Self attachBukkitTask(@Nullable BukkitTask task) {
-        if (this.taskId > -1) {
-            Bukkit.getScheduler().cancelTask(this.taskId);
+        if (this.hasBukkitTask()) {
+            Bukkit.getScheduler().cancelTask(this.getBukkitTaskId());
         }
 
         this.taskId = task == null ? -1 : task.getTaskId();
@@ -367,6 +367,10 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self, E>, E> implem
     @NonNull
     public final Inventory getInventory() {
         return this.inventory;
+    }
+
+    public boolean hasBukkitTask() {
+        return this.taskId > -1;
     }
 
     /**
