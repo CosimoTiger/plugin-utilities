@@ -54,7 +54,7 @@ class SlotTest {
     private static Stream<Slot> getValidZeroIndexedSlots() {
         return IntStream.range(0, ROWS)
                 .boxed()
-                .flatMap(row -> IntStream.range(0, COLUMNS).mapToObj(column -> Slot.atZeroIndex(row, column)));
+                .flatMap(row -> IntStream.range(0, COLUMNS).mapToObj(column -> Slot.of0th(row, column)));
     }
 
     private static Stream<SlotPositionTestCase> getZeroIndexedTestCases() {
@@ -72,7 +72,7 @@ class SlotTest {
     private static Stream<Slot> getValidSlots() {
         return IntStream.range(1, ROWS + 1)
                 .boxed()
-                .flatMap(row -> IntStream.range(1, COLUMNS + 1).mapToObj(column -> Slot.at(row, column)));
+                .flatMap(row -> IntStream.range(1, COLUMNS + 1).mapToObj(column -> Slot.of1st(row, column)));
     }
 
     private static Stream<SlotPositionTestCase> getOneIndexedTestCases() {
@@ -90,13 +90,13 @@ class SlotTest {
     @ParameterizedTest
     @ValueSource(ints = {-99, -5, -2, -1})
     void testInvalidRowAndColumnIndex(int value) {
-        assertThrows(IllegalArgumentException.class, () -> Slot.atZeroIndex(value, 1));
-        assertThrows(IllegalArgumentException.class, () -> Slot.atZeroIndex(1, value));
+        assertThrows(IllegalArgumentException.class, () -> Slot.of0th(value, 1));
+        assertThrows(IllegalArgumentException.class, () -> Slot.of0th(1, value));
     }
 
     private static Stream<Slot> getExceedingZeroIndexedSlots() {
-        return Stream.of(Slot.atZeroIndex(5, 0), Slot.atZeroIndex(4, 10), Slot.atZeroIndex(4, 11),
-                         Slot.atZeroIndex(0, 37));
+        return Stream.of(Slot.of0th(5, 0), Slot.of0th(4, 10), Slot.of0th(4, 11),
+                         Slot.of0th(0, 37));
     }
 
     @ParameterizedTest
@@ -106,7 +106,7 @@ class SlotTest {
     }
 
     private static Stream<Slot> getExceedingOneIndexedSlots() {
-        return Stream.of(Slot.at(4, 10), Slot.at(5, 1), Slot.at(5, 8), Slot.at(5, 9), Slot.at(4, 10));
+        return Stream.of(Slot.of1st(4, 10), Slot.of1st(5, 1), Slot.of1st(5, 8), Slot.of1st(5, 9), Slot.of1st(4, 10));
     }
 
     @ParameterizedTest

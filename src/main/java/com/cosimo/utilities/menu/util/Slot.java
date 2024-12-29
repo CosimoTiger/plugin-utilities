@@ -39,7 +39,7 @@ public record Slot(int row, int column, boolean isZeroIndexed) {
      * @return A new {@link Slot} instance with zero indexing
      */
     @Contract("_, _ -> new")
-    public static Slot atZeroIndex(int row, int column) {
+    public static Slot of0th(int row, int column) {
         return new Slot(row, column, true);
     }
 
@@ -51,15 +51,33 @@ public record Slot(int row, int column, boolean isZeroIndexed) {
      * @return A new {@link Slot} instance with one indexing
      */
     @Contract("_, _ -> new")
-    public static Slot at(int row, int column) {
+    public static Slot of1st(int row, int column) {
         return new Slot(row, column, false);
     }
 
     /**
-     * Converts the {@link Slot} to a corresponding slot index within the provided IMenu. The conversion depends on
-     * whether the position is zero-indexed or one-indexed.
+     * Converts the {@link Slot} to a corresponding slot index if only the column count of an {@link Inventory} is
+     * known.
      *
-     * @param menu The IMenu instance, which provides access to the inventory
+     * @param columns The amount of columns of the context {@link Inventory}
+     * @return The slot index corresponding to the {@link Slot} in the provided inventory
+     * @throws IllegalArgumentException if the {@link Slot} exceeds the size of the inventory
+     */
+    @Contract(pure = true)
+    public int toUncheckedSlot(int columns) {
+        int slot = this.row * columns + this.column;
+
+        if (!this.isZeroIndexed) {
+            slot -= columns + 1;
+        }
+
+        return slot;
+    }
+
+    /**
+     * Converts the {@link Slot} to a corresponding slot index within the provided {@link IMenu}.
+     *
+     * @param menu The {@link IMenu} instance, which provides access to the inventory
      * @return The slot index corresponding to the {@link Slot} in the provided inventory
      * @throws IllegalArgumentException if the {@link Slot} exceeds the size of the inventory
      */
@@ -69,21 +87,15 @@ public record Slot(int row, int column, boolean isZeroIndexed) {
     }
 
     /**
-     * Converts the {@link Slot} to a corresponding slot index within the provided Inventory. The conversion depends on
-     * whether the position was created as zero-indexed or one-indexed.
+     * Converts the {@link Slot} to a corresponding slot index within the provided {@link Inventory}.
      *
-     * @param inventory The Inventory instance that represents the available slots
+     * @param inventory The {@link Inventory} instance that represents the available slots
      * @return The slot index corresponding to the {@link Slot} in the provided inventory
      * @throws IllegalArgumentException if the {@link Slot} exceeds the size of the inventory
      */
     @Contract(pure = true)
     public int toSlot(@NonNull Inventory inventory) {
-        final int columns = MenuUtils.getColumns(inventory);
-        int slot = this.row * columns + this.column;
-
-        if (!this.isZeroIndexed) {
-            slot -= columns + 1;
-        }
+        final int slot = this.toUncheckedSlot(MenuUtils.getColumns(inventory));
 
         if (slot >= inventory.getSize()) {
             throw new IllegalArgumentException(
