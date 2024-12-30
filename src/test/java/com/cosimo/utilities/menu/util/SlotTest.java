@@ -13,6 +13,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static com.cosimo.utilities.menu.util.MenuUtils.MAX_CHEST_COLUMNS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mockStatic;
@@ -20,12 +21,7 @@ import static org.mockito.Mockito.when;
 
 class SlotTest {
 
-    private static final int COLUMNS = 9;
     private static final int ROWS = 4;
-
-    private static int getInventorySize() {
-        return COLUMNS * ROWS;
-    }
 
     private MockedStatic<MenuUtils> mockedUtils;
 
@@ -37,7 +33,7 @@ class SlotTest {
         MockitoAnnotations.openMocks(this);
 
         this.mockedUtils = mockStatic(MenuUtils.class);
-        this.mockedUtils.when(() -> MenuUtils.getColumns(this.mockedInventory)).thenReturn(COLUMNS);
+        this.mockedUtils.when(() -> MenuUtils.getColumns(this.mockedInventory)).thenReturn(MAX_CHEST_COLUMNS);
 
         when(this.mockedInventory.getSize()).thenReturn(getInventorySize());
     }
@@ -47,6 +43,10 @@ class SlotTest {
         this.mockedUtils.close();
     }
 
+    private static int getInventorySize() {
+        return MAX_CHEST_COLUMNS * ROWS;
+    }
+
     private static IntStream getInventorySlots() {
         return IntStream.range(0, getInventorySize());
     }
@@ -54,7 +54,7 @@ class SlotTest {
     private static Stream<Slot> getValidZeroIndexedSlots() {
         return IntStream.range(0, ROWS)
                 .boxed()
-                .flatMap(row -> IntStream.range(0, COLUMNS).mapToObj(column -> Slot.of0th(row, column)));
+                .flatMap(row -> IntStream.range(0, MAX_CHEST_COLUMNS).mapToObj(column -> Slot.of0th(row, column)));
     }
 
     private static Stream<SlotPositionTestCase> getZeroIndexedTestCases() {
@@ -72,7 +72,7 @@ class SlotTest {
     private static Stream<Slot> getValidSlots() {
         return IntStream.range(1, ROWS + 1)
                 .boxed()
-                .flatMap(row -> IntStream.range(1, COLUMNS + 1).mapToObj(column -> Slot.of1st(row, column)));
+                .flatMap(row -> IntStream.range(1, MAX_CHEST_COLUMNS + 1).mapToObj(column -> Slot.of1st(row, column)));
     }
 
     private static Stream<SlotPositionTestCase> getOneIndexedTestCases() {
@@ -95,8 +95,7 @@ class SlotTest {
     }
 
     private static Stream<Slot> getExceedingZeroIndexedSlots() {
-        return Stream.of(Slot.of0th(5, 0), Slot.of0th(4, 10), Slot.of0th(4, 11),
-                         Slot.of0th(0, 37));
+        return Stream.of(Slot.of0th(5, 0), Slot.of0th(4, 10), Slot.of0th(4, 11), Slot.of0th(0, 37));
     }
 
     @ParameterizedTest

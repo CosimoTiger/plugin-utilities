@@ -17,6 +17,9 @@ import org.jetbrains.annotations.Contract;
  */
 public class MenuUtils {
 
+    public static final int MAX_CHEST_COLUMNS = 9;
+    public static final int MAX_CHEST_ROWS = 6;
+
     /**
      * Determines if the inventory in the given {@link InventoryCloseEvent} is about to become disposable.
      *
