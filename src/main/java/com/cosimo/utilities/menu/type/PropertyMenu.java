@@ -142,6 +142,14 @@ public class PropertyMenu<E> extends AbstractMenu<PropertyMenu<E>, E> implements
         return Optional.ofNullable(this.properties[slot]);
     }
 
+    @NonNull
+    @Contract(pure = true)
+    public <T> Optional<T> getProperty(int slot, Class<T> castingClass) {
+        return Optional.ofNullable(this.properties[slot])
+                .filter(castingClass::isInstance)
+                .map(castingClass::cast);
+    }
+
     /**
      * Returns an iterator over the properties in this menu.
      * <p>

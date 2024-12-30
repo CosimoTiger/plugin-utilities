@@ -17,8 +17,8 @@ import org.jetbrains.annotations.Contract;
  */
 public class MenuUtils {
 
-    public static final int CHEST_COLUMNS = 9;
     public static final int MAX_CHEST_ROWS = 6;
+    public static final int CHEST_COLUMNS = 9;
 
     /**
      * Determines if the inventory in the given {@link InventoryCloseEvent} is about to become disposable.
@@ -87,5 +87,15 @@ public class MenuUtils {
             case SMITHING -> 2;
             default -> inventory.getSize();
         };
+    }
+
+    @Contract(pure = true)
+    public static int getChestRowsForCount(int count) {
+        return Math.clamp((int) Math.ceil((double) count / CHEST_COLUMNS), 1, MAX_CHEST_ROWS);
+    }
+
+    @Contract(pure = true)
+    public static int getChestSizeForCount(int count) {
+        return getChestRowsForCount(count) * CHEST_COLUMNS;
     }
 }
