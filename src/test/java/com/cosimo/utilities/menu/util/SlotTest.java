@@ -13,7 +13,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static com.cosimo.utilities.menu.util.MenuUtils.MAX_CHEST_COLUMNS;
+import static com.cosimo.utilities.menu.util.MenuUtils.CHEST_COLUMNS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mockStatic;
@@ -33,7 +33,7 @@ class SlotTest {
         MockitoAnnotations.openMocks(this);
 
         this.mockedUtils = mockStatic(MenuUtils.class);
-        this.mockedUtils.when(() -> MenuUtils.getColumns(this.mockedInventory)).thenReturn(MAX_CHEST_COLUMNS);
+        this.mockedUtils.when(() -> MenuUtils.getColumns(this.mockedInventory)).thenReturn(CHEST_COLUMNS);
 
         when(this.mockedInventory.getSize()).thenReturn(getInventorySize());
     }
@@ -44,7 +44,7 @@ class SlotTest {
     }
 
     private static int getInventorySize() {
-        return MAX_CHEST_COLUMNS * ROWS;
+        return CHEST_COLUMNS * ROWS;
     }
 
     private static IntStream getInventorySlots() {
@@ -54,7 +54,7 @@ class SlotTest {
     private static Stream<Slot> getValidZeroIndexedSlots() {
         return IntStream.range(0, ROWS)
                 .boxed()
-                .flatMap(row -> IntStream.range(0, MAX_CHEST_COLUMNS).mapToObj(column -> Slot.of0th(row, column)));
+                .flatMap(row -> IntStream.range(0, CHEST_COLUMNS).mapToObj(column -> Slot.of0th(row, column)));
     }
 
     private static Stream<SlotPositionTestCase> getZeroIndexedTestCases() {
@@ -72,7 +72,7 @@ class SlotTest {
     private static Stream<Slot> getValidSlots() {
         return IntStream.range(1, ROWS + 1)
                 .boxed()
-                .flatMap(row -> IntStream.range(1, MAX_CHEST_COLUMNS + 1).mapToObj(column -> Slot.of1st(row, column)));
+                .flatMap(row -> IntStream.range(1, CHEST_COLUMNS + 1).mapToObj(column -> Slot.of1st(row, column)));
     }
 
     private static Stream<SlotPositionTestCase> getOneIndexedTestCases() {

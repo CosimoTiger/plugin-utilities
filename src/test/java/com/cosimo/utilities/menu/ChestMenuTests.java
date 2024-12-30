@@ -26,14 +26,14 @@ import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static com.cosimo.utilities.menu.util.MenuUtils.MAX_CHEST_COLUMNS;
+import static com.cosimo.utilities.menu.util.MenuUtils.CHEST_COLUMNS;
 import static com.cosimo.utilities.menu.util.MenuUtils.MAX_CHEST_ROWS;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 public class ChestMenuTests {
 
-    private static final int INVENTORY_SIZE = MAX_CHEST_ROWS * MAX_CHEST_COLUMNS;
+    private static final int INVENTORY_SIZE = MAX_CHEST_ROWS * CHEST_COLUMNS;
 
     @Captor
     private ArgumentCaptor<Integer> itemSlotArgCaptor;
@@ -135,9 +135,9 @@ public class ChestMenuTests {
     }
 
     private static Stream<LineTestCase> getColumnTestCases() {
-        return IntStream.range(0, MAX_CHEST_COLUMNS).mapToObj(column -> {
+        return IntStream.range(0, CHEST_COLUMNS).mapToObj(column -> {
             final var columnSlots = IntStream.range(0, MAX_CHEST_ROWS)
-                    .map(slot -> column + slot * MAX_CHEST_COLUMNS)
+                    .map(slot -> column + slot * CHEST_COLUMNS)
                     .boxed()
                     .toList();
             return new LineTestCase(columnSlots, column);
@@ -158,8 +158,8 @@ public class ChestMenuTests {
 
     private static Stream<LineTestCase> getRowTestCases() {
         return IntStream.range(0, MAX_CHEST_ROWS).mapToObj(row -> {
-            final var rowSlots = IntStream.range(0, MAX_CHEST_COLUMNS)
-                    .map(slot -> row * MAX_CHEST_COLUMNS + slot)
+            final var rowSlots = IntStream.range(0, CHEST_COLUMNS)
+                    .map(slot -> row * CHEST_COLUMNS + slot)
                     .boxed()
                     .toList();
             return new LineTestCase(rowSlots, row);
@@ -171,9 +171,9 @@ public class ChestMenuTests {
     public void shouldDrawRowInExactSlots(LineTestCase rowTestCase) {
         this.menu.fillRow(Button.empty(), rowTestCase.column());
 
-        verify(this.mockedInventory, times(MAX_CHEST_COLUMNS)).setItem(this.itemSlotArgCaptor.capture(),
-                                                                       nullable(ItemStack.class));
-        verify(this.menu, times(MAX_CHEST_COLUMNS)).set(nullable(Objects.class), this.propertySlotArgCaptor.capture());
+        verify(this.mockedInventory, times(CHEST_COLUMNS)).setItem(this.itemSlotArgCaptor.capture(),
+                                                                   nullable(ItemStack.class));
+        verify(this.menu, times(CHEST_COLUMNS)).set(nullable(Objects.class), this.propertySlotArgCaptor.capture());
 
         assertEquals(rowTestCase.lineSlots(), this.itemSlotArgCaptor.getAllValues());
     }
