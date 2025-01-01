@@ -19,6 +19,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
 
 import java.util.List;
 import java.util.Objects;
@@ -56,7 +57,7 @@ public class ChestMenuTests {
 
         when(this.mockedInventory.getSize()).thenReturn(INVENTORY_SIZE);
 
-        this.mockedUtils = mockStatic(MenuUtils.class);
+        this.mockedUtils = mockStatic(MenuUtils.class, InvocationOnMock::callRealMethod);
         this.mockedUtils.when(() -> MenuUtils.getColumns(any())).thenReturn(9);
 
         this.menu = spy(new PropertyMenu<>(this.mockedInventory));
@@ -227,6 +228,22 @@ public class ChestMenuTests {
 
         assertEquals(-1, this.menu.getBukkitTaskId());
         assertFalse(this.menu.hasBukkitTask());
+    }
+
+    @Test
+    public void testGetChestRowsForCount() {
+        assertEquals(1, MenuUtils.getChestRowsForCount(5));
+        assertEquals(3, MenuUtils.getChestRowsForCount(20));
+        assertEquals(MenuUtils.MAX_CHEST_ROWS, MenuUtils.getChestRowsForCount(100));
+        assertEquals(1, MenuUtils.getChestRowsForCount(0));
+    }
+
+    @Test
+    public void testGetChestSizeForCount() {
+        assertEquals(9, MenuUtils.getChestSizeForCount(5));
+        assertEquals(27, MenuUtils.getChestSizeForCount(20));
+        assertEquals(MenuUtils.MAX_CHEST_ROWS * MenuUtils.CHEST_COLUMNS, MenuUtils.getChestSizeForCount(100));
+        assertEquals(9, MenuUtils.getChestSizeForCount(0));
     }
 
     public record FillAreaTestCase(@NonNull Set<Integer> expectedSlots, int startSlot, int endSlot) {
