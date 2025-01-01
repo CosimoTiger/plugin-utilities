@@ -132,8 +132,8 @@ public class PropertyMenu<E> extends AbstractMenu<PropertyMenu<E>, E> implements
     /**
      * Returns a property stored at the given slot of this inventory menu or null if it doesn't exist.
      *
-     * @param slot Slot index location of the Object in the inventory
-     * @return {@link Optional} of nullable Object
+     * @param slot Slot index location of the {@link Object} in the inventory
+     * @return {@link Optional} of nullable {@link Object}
      * @throws IndexOutOfBoundsException If the given slot argument is out of this inventory's boundaries
      */
     @NonNull
@@ -142,6 +142,15 @@ public class PropertyMenu<E> extends AbstractMenu<PropertyMenu<E>, E> implements
         return Optional.ofNullable(this.properties[slot]);
     }
 
+    /**
+     * Returns a cast property stored at the given slot of this {@link Inventory} menu if it's castable to the given
+     * class, otherwise null.
+     *
+     * @param slot         Slot index location of the {@link Object} in the {@link Inventory}
+     * @param castingClass The {@link Class} to expect this menu property to belong to
+     * @return {@link Optional} of nullable cast {@link Class} type
+     * @throws IndexOutOfBoundsException If the given slot argument is out of this {@link Inventory}'s boundaries
+     */
     @NonNull
     @Contract(pure = true)
     public <T> Optional<T> getProperty(int slot, Class<T> castingClass) {

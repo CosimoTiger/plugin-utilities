@@ -89,13 +89,27 @@ public class MenuUtils {
         };
     }
 
+    /**
+     * Calculates the number of rows required to fit a specified number of items in a chest-like {@link Inventory}.
+     *
+     * @param count the number of items to fit into the chest
+     * @return the number of rows required, clamped between 1 and {@link #MAX_CHEST_ROWS}
+     */
     @Contract(pure = true)
     public static int getChestRowsForCount(int count) {
         return Math.clamp((int) Math.ceil((double) count / CHEST_COLUMNS), 1, MAX_CHEST_ROWS);
     }
 
+    /**
+     * Computes the total {@link Inventory} size (in slots) required for a specified number of items in a chest-like
+     * {@link Inventory}.
+     *
+     * @param count the number of items to fit into the chest
+     * @return the total number of slots required
+     */
     @Contract(pure = true)
     public static int getChestSizeForCount(int count) {
         return getChestRowsForCount(count) * CHEST_COLUMNS;
     }
+
 }
