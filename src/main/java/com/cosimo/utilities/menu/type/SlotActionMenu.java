@@ -7,10 +7,13 @@ import org.bukkit.inventory.Inventory;
 import java.util.function.BiConsumer;
 
 /**
- * {@link PropertyMenu} implementation with callable {@link BiConsumer} action.
+ * {@link PropertyMenu} implementation with a callable {@link BiConsumer} property.
  */
 public class SlotActionMenu extends PropertyMenu<BiConsumer<InventoryClickEvent, SlotActionMenu>> {
 
+    /**
+     * {@inheritDoc}
+     */
     public SlotActionMenu(@NonNull Inventory inventory) {
         super(inventory);
     }
@@ -20,8 +23,8 @@ public class SlotActionMenu extends PropertyMenu<BiConsumer<InventoryClickEvent,
      * it exists, and can freely change the outcome of the same event.
      */
     @Override
-    public void onClick(@NonNull InventoryClickEvent event, boolean external) {
-        super.onClick(event, external);
+    public void onClick(@NonNull InventoryClickEvent event) {
+        super.onClick(event);
         this.getProperty(event.getSlot()).ifPresent(property -> property.accept(event, this));
     }
 }

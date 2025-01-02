@@ -1,5 +1,6 @@
 package com.cosimo.utilities.menu;
 
+import com.cosimo.utilities.menu.util.MenuUtils;
 import com.google.common.base.Preconditions;
 import lombok.NonNull;
 import lombok.Setter;
@@ -197,12 +198,11 @@ public class MenuManager implements Listener {
      * Passes any {@link InventoryClickEvent} to the {@link IMenu} it happened on.
      *
      * @param event InventoryClickEvent event
-     * @see IMenu#onClick(InventoryClickEvent, boolean)
+     * @see IMenu#onClick(InventoryClickEvent)
      */
     @EventHandler(priority = EventPriority.HIGH)
     public void onInventoryClick(@NonNull InventoryClickEvent event) {
-        this.getMenu(event.getInventory())
-                .ifPresent(menu -> menu.onClick(event, !menu.getInventory().equals(event.getClickedInventory())));
+        this.getMenu(event.getInventory()).ifPresent(menu -> menu.onClick(event));
     }
 
     /**
@@ -214,7 +214,7 @@ public class MenuManager implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onInventoryClose(@NonNull InventoryCloseEvent event) {
         this.getMenu(event.getInventory()).ifPresent(menu -> {
-            if (menu.getInventory().getViewers().size() < 2) {
+            if (MenuUtils.isAboutToBecomeDisposable(event)) {
                 this.unregisterMenu(menu);
             }
 

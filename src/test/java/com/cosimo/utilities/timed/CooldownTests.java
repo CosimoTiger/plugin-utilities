@@ -1,19 +1,12 @@
-package com.cosimo;
+package com.cosimo.utilities.timed;
 
-import com.cosimo.utilities.timed.Cooldown;
-import com.cosimo.utilities.timed.Cooldowns;
-import com.cosimo.utilities.timed.ICooldown;
-import com.cosimo.utilities.timed.TimeStandard;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.parallel.Execution;
-import org.junit.jupiter.api.parallel.ExecutionMode;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Execution(ExecutionMode.CONCURRENT)
 public class CooldownTests {
 
     /**

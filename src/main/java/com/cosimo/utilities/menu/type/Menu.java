@@ -1,6 +1,5 @@
 package com.cosimo.utilities.menu.type;
 
-import com.cosimo.utilities.menu.AbstractMenu;
 import lombok.NonNull;
 import org.bukkit.inventory.Inventory;
 
@@ -10,7 +9,7 @@ import org.bukkit.inventory.Inventory;
  * @author CosimoTiger
  * @see PropertyMenu
  */
-public class Menu extends AbstractMenu<Menu> {
+public class Menu extends AbstractMenu<Menu, Object> {
 
     /**
      * Creates a new {@link Menu} using the default constructor for {@link AbstractMenu}.
