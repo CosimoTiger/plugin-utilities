@@ -23,12 +23,14 @@ import java.util.function.Supplier;
  * A proxy class (rather than a true builder) that wraps around an {@link ItemStack}, allowing easier, more fluent and
  * chained modifications of the item.
  */
+@SuppressWarnings("unused")
 public class ItemBuilder implements Cloneable {
 
     /**
      * Mutable {@link ItemStack}.
      */
     private final ItemStack itemStack;
+    private ItemMeta itemMeta;
 
     /**
      * Creates a new {@link ItemBuilder} from an item stored in a given configuration file's path or a default provided
@@ -131,6 +133,7 @@ public class ItemBuilder implements Cloneable {
      */
     public ItemBuilder(@NonNull ItemStack itemStack) {
         this.itemStack = itemStack;
+        this.itemMeta = itemStack.getItemMeta();
     }
 
     /**
@@ -245,7 +248,9 @@ public class ItemBuilder implements Cloneable {
      */
     @NonNull
     public ItemBuilder with(@NonNull Consumer<ItemStack> itemConsumer) {
+        this.itemStack.setItemMeta(this.itemMeta);
         itemConsumer.accept(this.itemStack);
+        this.itemMeta = this.itemStack.getItemMeta();
         return this;
     }
 
@@ -473,7 +478,7 @@ public class ItemBuilder implements Cloneable {
      */
     @NonNull
     public Optional<ItemMeta> getItemMeta() {
-        return Optional.ofNullable(this.itemStack.getItemMeta());
+        return Optional.ofNullable(this.itemMeta);
     }
 
     /**
@@ -502,9 +507,11 @@ public class ItemBuilder implements Cloneable {
      */
     @NonNull
     public ItemStack build() {
+        this.itemStack.setItemMeta(this.itemMeta);
         return this.itemStack;
     }
 
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override
     public ItemBuilder clone() {
         return new ItemBuilder(this.itemStack.clone());
