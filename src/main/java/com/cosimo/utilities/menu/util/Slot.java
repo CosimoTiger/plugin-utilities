@@ -22,6 +22,19 @@ public final class Slot {
         }
 
         /**
+         * Converts a row-column position to a slot index with zero-based indexing with default columns for chest
+         * inventories using {@link MenuUtils#CHEST_COLUMNS}.
+         *
+         * @param row    The row of the slot position (starting from 1)
+         * @param column The column of the slot position (starting from 1)
+         * @return The calculated slot index
+         */
+        @Contract(pure = true)
+        public static int of(int row, int column) {
+            return of(row, column, MenuUtils.CHEST_COLUMNS);
+        }
+
+        /**
          * Converts a row-column position to a slot index with zero-based indexing.
          *
          * @param row     The row of the slot position (starting from 0)
@@ -82,6 +95,19 @@ public final class Slot {
      */
     public static final class One {
         private One() {
+        }
+
+        /**
+         * Converts a row-column position to a slot index with one-based indexing with default columns for chest
+         * inventories using {@link MenuUtils#CHEST_COLUMNS}.
+         *
+         * @param row    The row of the slot position (starting from 1)
+         * @param column The column of the slot position (starting from 1)
+         * @return The calculated slot index
+         */
+        @Contract(pure = true)
+        public static int of(int row, int column) {
+            return of(row, column, MenuUtils.CHEST_COLUMNS);
         }
 
         /**
