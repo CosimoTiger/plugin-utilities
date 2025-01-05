@@ -15,16 +15,14 @@ import java.util.ListIterator;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Spliterator;
-import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
 /**
- * Implementation of {@link Menu} with an {@link Object} array of the same size as the inventory, with methods for
- * working with these actions.
+ * Implementation of {@link Menu} with an {@link MenuAction} array of the same size as the {@link Inventory}, providing
+ * methods for associating and managing actions with {@link Inventory} slots.
  *
- * @author CosimoTiger
- * @see AbstractMenu
+ * @see MenuAction
  */
 @SuppressWarnings("unused")
 public class ActionMenu extends AbstractMenu<ActionMenu> implements Iterable<MenuAction> {
@@ -32,18 +30,19 @@ public class ActionMenu extends AbstractMenu<ActionMenu> implements Iterable<Men
     private final MenuAction[] actions = new MenuAction[this.getInventory().getSize()];
 
     /**
-     * Creates a new {@link ActionMenu} using the default constructor for {@link Menu}, with an array of this instance's
-     * generic type with default null values.
+     * Creates a new {@link ActionMenu}, initializing an action array of the same size as the {@link Inventory}.
      *
-     * @param inventory Not null {@link Inventory} that will be wrapped and controlled by an {@link AbstractMenu}
+     * @param inventory A non-null {@link Inventory} to be controlled by this {@link ActionMenu}
      */
     public ActionMenu(@NonNull Inventory inventory) {
         super(inventory);
     }
 
     /**
-     * {@inheritDoc} Passes the {@link InventoryClickEvent} to a {@link BiConsumer} at the clicked slot, which is run if
-     * it exists, and can freely change the outcome of the same event.
+     * {@inheritDoc} If a {@link MenuAction} is set for the clicked slot, it will be invoked with the
+     * {@link InventoryClickEvent}.
+     *
+     * @param event The {@link InventoryClickEvent} triggering the action
      */
     @Override
     public void onClick(@NonNull InventoryClickEvent event) {
@@ -52,11 +51,11 @@ public class ActionMenu extends AbstractMenu<ActionMenu> implements Iterable<Men
     }
 
     /**
-     * Returns an action stored at the given slot of this inventory menu or null if it doesn't exist.
+     * Retrieves the action associated with a specific slot in this menu.
      *
-     * @param slot Slot index location of the {@link Object} in the inventory
-     * @return {@link Optional} of nullable {@link Object}
-     * @throws IndexOutOfBoundsException If the given slot argument is out of this inventory's boundaries
+     * @param slot The index of the slot in the {@link Inventory}
+     * @return An {@link Optional} containing the {@link MenuAction} if one is set, or empty if no action exists
+     * @throws IndexOutOfBoundsException If the slot index is out of the {@link Inventory}'s boundaries
      */
     @NonNull
     @Contract(pure = true)
@@ -65,12 +64,9 @@ public class ActionMenu extends AbstractMenu<ActionMenu> implements Iterable<Men
     }
 
     /**
-     * Returns an iterator over the actions in this menu.
-     * <p>
-     * The iterator provides sequential access to the actions stored in the menu. It allows for the removal of elements
-     * during iteration but does not support addition.
+     * Returns an iterator over all {@link MenuAction}s in this menu, including null values.
      *
-     * @return A {@link ActionMenuIterator} instance for this menu
+     * @return An iterator over the actions in this menu
      */
     @NonNull
     @Override
@@ -79,7 +75,7 @@ public class ActionMenu extends AbstractMenu<ActionMenu> implements Iterable<Men
     }
 
     /**
-     * Returns a {@link Spliterator} over the actions in this menu.
+     * Returns a {@link Spliterator} for traversing the {@link MenuAction}s in this menu.
      *
      * @return A {@link Spliterator} for the actions in this menu
      */
@@ -89,14 +85,32 @@ public class ActionMenu extends AbstractMenu<ActionMenu> implements Iterable<Men
         return Arrays.spliterator(this.actions);
     }
 
+    /**
+     * Sets an item and action for multiple slots defined by a slot stream function.
+     *
+     * @param item               The {@link ItemStack} to set in the slots
+     * @param action             The {@link MenuAction} to associate with the slots
+     * @param slotStreamFunction A function that generates a stream of slot indices
+     * @return This menu instance, useful for chaining
+     */
     @NonNull
     @Contract(mutates = "this")
     public ActionMenu set(@Nullable ItemStack item, @Nullable MenuAction action,
-                          @NonNull Function<ActionMenu, IntStream> slotStream) {
-        this.set(item, slotStream);
-        return this.set(action, slotStream);
+                          @NonNull Function<ActionMenu, IntStream> slotStreamFunction) {
+        this.set(item, slotStreamFunction);
+        return this.set(action, slotStreamFunction);
     }
 
+    /**
+     * Sets an item and action for multiple slots defined by an iterable of slot indices.
+     *
+     * @param item   The {@link ItemStack} to set in the slots
+     * @param action The {@link MenuAction} to associate with the slots
+     * @param slots  An iterable of slot indices
+     * @return This menu instance, useful for chaining
+     * @throws NullPointerException      If the {@code slots} argument is {@code null}
+     * @throws IndexOutOfBoundsException If any slot in the iterable is out of the {@link Inventory}'s boundaries
+     */
     @NonNull
     @Contract(mutates = "this")
     public ActionMenu set(@Nullable ItemStack item, @Nullable MenuAction action,
@@ -105,6 +119,15 @@ public class ActionMenu extends AbstractMenu<ActionMenu> implements Iterable<Men
         return this.set(action, slots);
     }
 
+    /**
+     * Sets an item and action for specific slot indices.
+     *
+     * @param item   The {@link ItemStack} to set in the slots
+     * @param action The {@link MenuAction} to associate with the slots
+     * @param slots  The slot indices where the item and action will be set
+     * @return This menu instance, useful for chaining
+     * @throws NullPointerException If the {@code slots} argument is {@code null}
+     */
     @NonNull
     @Contract(mutates = "this")
     public ActionMenu set(@Nullable ItemStack item, @Nullable MenuAction action, int @NonNull ... slots) {
@@ -112,6 +135,15 @@ public class ActionMenu extends AbstractMenu<ActionMenu> implements Iterable<Men
         return this.set(action, slots);
     }
 
+    /**
+     * Sets both an {@link ItemStack} and a {@link MenuAction} at a specific slot in this {@link ActionMenu}.
+     *
+     * @param item   The {@link ItemStack} to be placed in the slot, or {@code null} to clear the item
+     * @param action The {@link MenuAction} to associate with the slot, or {@code null} to remove any existing action
+     * @param slot   The slot index where the item and action will be set
+     * @return This menu instance, useful for chaining
+     * @throws IndexOutOfBoundsException If the slot index is out of the {@link Inventory}'s boundaries
+     */
     @NonNull
     @Contract(mutates = "this")
     public ActionMenu set(@Nullable ItemStack item, @Nullable MenuAction action, int slot) {
@@ -119,19 +151,29 @@ public class ActionMenu extends AbstractMenu<ActionMenu> implements Iterable<Men
         return this.set(action, slot);
     }
 
-    public ActionMenu set(@Nullable MenuAction action, @NonNull Function<ActionMenu, IntStream> slotStream) {
-        slotStream.apply(this).forEach(slot -> this.set(action, slot));
+    /**
+     * Sets a {@link MenuAction} for all slots determined by a {@link Function} that produces a stream of slot indices.
+     *
+     * @param action             The {@link MenuAction} to associate with the slots, or {@code null} to clear existing
+     *                           actions
+     * @param slotStreamFunction A {@link Function} that generates a stream of slot indices for this menu
+     * @return This menu instance, useful for chaining
+     * @throws IndexOutOfBoundsException If any slot produced by the stream is out of the {@link Inventory}'s
+     *                                   boundaries
+     */
+    public ActionMenu set(@Nullable MenuAction action, @NonNull Function<ActionMenu, IntStream> slotStreamFunction) {
+        slotStreamFunction.apply(this).forEach(slot -> this.set(action, slot));
         return this;
     }
 
     /**
-     * Sets the given action at the given numeric slot in this {@link ActionMenu}.
+     * Sets a {@link MenuAction} for multiple slots specified by an {@link Iterable} of slot indices.
      *
-     * @param action {@link MenuAction}
-     * @param slots  Slots that this action will be set in
-     * @return This instance, useful for chaining
-     * @throws IllegalArgumentException  If the array of slots is null
-     * @throws IndexOutOfBoundsException If a slot in the slot array argument is out of this inventory's boundaries
+     * @param action The {@link MenuAction} to associate with the slots, or {@code null} to clear existing actions
+     * @param slots  An {@link Iterable} of slot indices where the action will be set
+     * @return This menu instance, useful for chaining
+     * @throws NullPointerException      If the {@code slots} argument is {@code null}
+     * @throws IndexOutOfBoundsException If any slot in the iterable is out of the {@link Inventory}'s boundaries
      */
     @NonNull
     @Contract(mutates = "this")
@@ -141,13 +183,13 @@ public class ActionMenu extends AbstractMenu<ActionMenu> implements Iterable<Men
     }
 
     /**
-     * Sets the given action at the given numeric slot in this {@link ActionMenu}.
+     * Sets a {@link MenuAction} for multiple slots specified by an array of slot indices.
      *
-     * @param action {@link MenuAction}
-     * @param slots  Slots that this action will be set in
-     * @return This instance, useful for chaining
-     * @throws IllegalArgumentException  If the array of slots is null
-     * @throws IndexOutOfBoundsException If a slot in the slot array argument is out of this inventory's boundaries
+     * @param action The {@link MenuAction} to associate with the slots, or {@code null} to clear existing actions
+     * @param slots  An array of slot indices where the action will be set
+     * @return This menu instance, useful for chaining
+     * @throws NullPointerException      If the {@code slots} argument is {@code null}
+     * @throws IndexOutOfBoundsException If any slot in the array is out of the {@link Inventory}'s boundaries
      */
     @NonNull
     @Contract(mutates = "this")
@@ -160,13 +202,12 @@ public class ActionMenu extends AbstractMenu<ActionMenu> implements Iterable<Men
     }
 
     /**
-     * Sets the given action at the given numeric slot in this {@link ActionMenu}.
+     * Sets a {@link MenuAction} at the given slot index.
      *
-     * @param action {@link MenuAction}
-     * @param slot   Slot that this actions will belong to
+     * @param action The {@link MenuAction} to associate with the slot, or {@code null} to remove any existing action
+     * @param slot   The slot where the {@link MenuAction} will be set
      * @return This instance, useful for chaining
-     * @throws IllegalArgumentException  If the array of slots is null
-     * @throws IndexOutOfBoundsException If a slot in the slot array argument is out of this inventory's boundaries
+     * @throws IndexOutOfBoundsException If the slot index is out of the {@link Inventory}'s boundaries
      */
     @NonNull
     @Contract(mutates = "this")
@@ -176,9 +217,9 @@ public class ActionMenu extends AbstractMenu<ActionMenu> implements Iterable<Men
     }
 
     /**
-     * Clears the whole inventory array of slot actions.
+     * Clears all slot actions in the menu, leaving the {@link Inventory} contents unchanged
      *
-     * @return This instance, useful for chaining
+     * @return This menu instance, useful for chaining
      */
     @NonNull
     @Contract(mutates = "this")
@@ -188,9 +229,9 @@ public class ActionMenu extends AbstractMenu<ActionMenu> implements Iterable<Men
     }
 
     /**
-     * Clears the whole inventory of its contents and slot actions.
+     * Clears all slot actions and items in the menu.
      *
-     * @return This instance, useful for chaining
+     * @return This menu instance, useful for chaining
      */
     @NonNull
     @Override
@@ -204,7 +245,7 @@ public class ActionMenu extends AbstractMenu<ActionMenu> implements Iterable<Men
      * A bidirectional iterator for the actions stored in the {@link ActionMenu}.
      * <p>
      * This iterator provides sequential and reverse access to the actions of the menu and allows elements to be
-     * modified or removed during iteration. Adding new elements isn't supported, but setting them is.
+     * modified or removed during iteration. Adding or removing elements isn't supported, but setting them is.
      */
     class ActionMenuIterator implements ListIterator<MenuAction> {
 

@@ -24,40 +24,37 @@ import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 
 /**
- * Represents a collection of algorithms, features and event handlers upon an {@link Inventory} of any type that
+ * Represents a collection of algorithms, features, and event handlers for an {@link Inventory} of any type that
  * multiple viewers can see and interact with. All slots are zero-indexed.
  *
- * <p>A developer can subclass this class, override the methods or add them to customise the ways of processing inputs
- * for inventory menu events or modifying the inventories.
+ * <p>This class can be subclassed to override or extend its functionality, enabling customization of inventory menu
+ * event processing or inventory modification.
  *
- * @param <Self> Menu subclass type of {@link AbstractMenu}, which allows method chaining while retaining the same
- *               subclass instance (see "Curiously Recurring Template Pattern")
+ * @param <Self> The specific subclass type of {@link AbstractMenu}, allowing method chaining while preserving the
+ *               subclass instance (leveraging the "Curiously Recurring Template Pattern")
  * @author CosimoTiger
- * @see Menu
- * @see ActionMenu
  */
 @SuppressWarnings({"unchecked", "unused"})
 public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements IMenu {
 
     /**
-     * Backing {@link Inventory} that's wrapped and controlled by this class.
+     * The {@link Inventory} instance managed by this class.
      */
     private final Inventory inventory;
     private final int columns, rows;
 
     /**
-     * The identifier number of a {@link BukkitTask} that's attached to this inventory's lifecycle. The task is by
-     * default automatically cancelled when the menu is closed with no viewers left, but this can be modified by
-     * overriding the {@link #onClose(InventoryCloseEvent)} method. Example use is a constant animation that's setting
-     * new {@link ItemStack}s in the menu.
+     * The identifier of the {@link BukkitTask} associated with this inventory's lifecycle. The task is automatically
+     * canceled when the menu closes with no viewers, unless {@link #onClose(InventoryCloseEvent)} is overridden. A
+     * common use case is running animations that periodically update the {@link ItemStack}s in the inventory.
      */
     protected int taskId = -1;
 
     /**
-     * The default constructor for all subclasses.
+     * Constructs a new menu, wrapping and managing the provided {@link Inventory}.
      *
-     * @param inventory Not null {@link Inventory} that will be wrapped and controlled by an {@link AbstractMenu}
-     * @throws IllegalArgumentException If the {@link Inventory} argument is null
+     * @param inventory A non-null {@link Inventory} instance to be managed by the menu
+     * @throws IllegalArgumentException If the provided {@link Inventory} is null
      */
     public AbstractMenu(@NonNull Inventory inventory) {
         this.inventory = inventory;
@@ -66,13 +63,12 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
     }
 
     /**
-     * Handles the inventory close events of an inventory.
+     * Handles inventory close events.
      *
-     * <p>Can open new menus: for the given {@link InventoryCloseEvent} of a
-     * {@link HumanEntity}, perform that task on the next tick. For an example, to reopen this menu:
-     * {@code Bukkit.getScheduler().runTask(plugin, () -> open(manager, event.getPlayer()))}.
+     * <p>This method can be used to open new menus after the current one is closed. For example, to reopen
+     * this menu for the player: {@code Bukkit.getScheduler().runTask(plugin, () -> open(manager, event.getPlayer()))}.
      *
-     * @param event {@link InventoryCloseEvent} event
+     * @param event The {@link InventoryCloseEvent} associated with the close action
      */
     @Override
     public void onClose(@NonNull InventoryCloseEvent event) {
@@ -82,19 +78,20 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
     }
 
     /**
-     * Acts as an event handler for the inventory opening event.
+     * Handles inventory open events.
      *
-     * @param event {@link InventoryOpenEvent} event
+     * @param event The {@link InventoryOpenEvent} associated with the open action
      */
     @Override
     public void onOpen(@NonNull InventoryOpenEvent event) {
     }
 
     /**
-     * Opens this {@link AbstractMenu} for the given viewers, fail-fast.
+     * Opens this menu for the specified viewers, using the provided {@link MenuManager}.
      *
-     * @param viewers {@link Iterable}&lt;{@link HumanEntity}&gt; of which each will see this {@link AbstractMenu}
-     *                {@link Inventory}
+     * @param menuManager The {@link MenuManager} to register this menu to
+     * @param viewers     {@link Iterable}&lt;{@link HumanEntity}&gt; of which each will see this {@link AbstractMenu}
+     *                    {@link Inventory}
      * @return This instance, useful for chaining
      * @throws IllegalArgumentException If the {@link Iterable}&lt;{@link HumanEntity}&gt; argument is null or empty
      * @throws IllegalStateException    If this {@link AbstractMenu}'s {@link MenuManager} isn't registered for handling
@@ -116,7 +113,9 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
     /**
      * Opens this {@link AbstractMenu} for the given viewers, fail-fast.
      *
-     * @param viewers Array of {@link HumanEntity} of which each will see this {@link AbstractMenu} {@link Inventory}
+     * @param menuManager The {@link MenuManager} to register this menu to
+     * @param viewers     Array of {@link HumanEntity} of which each will see this {@link AbstractMenu}
+     *                    {@link Inventory}
      * @return This instance, useful for chaining
      * @throws IllegalArgumentException If the {@link HumanEntity} array argument is null or empty
      * @throws IllegalStateException    If this {@link AbstractMenu}'s {@link MenuManager} isn't registered for handling
@@ -191,14 +190,14 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
      * }
      * </pre>
      *
-     * @param item       {@link ItemStack} to set at the generated slots
-     * @param slotStream {@link Function} that takes this menu as an input and returns an {@link IntStream} of slots to
-     *                   set the given {@link ItemStack} on
+     * @param item               {@link ItemStack} to set at the generated slots
+     * @param slotStreamFunction {@link Function} that takes this menu as an input and returns an {@link IntStream} of
+     *                           slots to set the given {@link ItemStack} on
      * @return This instance, useful for chaining
      * @throws NullPointerException If the {@code slotStream} is null
      */
-    public Self set(@Nullable ItemStack item, @NonNull Function<Self, IntStream> slotStream) {
-        slotStream.apply((Self) this).forEach(slot -> this.set(item, slot));
+    public Self set(@Nullable ItemStack item, @NonNull Function<Self, IntStream> slotStreamFunction) {
+        slotStreamFunction.apply((Self) this).forEach(slot -> this.set(item, slot));
         return (Self) this;
     }
 
@@ -292,7 +291,7 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
     /**
      * Clears all of this inventory menu's contents.
      *
-     * <p>Some subclasses may implement additional contents that can be cleared, such as properties.</p>
+     * <p>Some subclasses may implement additional contents that can be cleared, such as actions.</p>
      *
      * @return This instance, useful for chaining
      * @see ActionMenu#clearActions()
