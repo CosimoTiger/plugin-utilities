@@ -18,6 +18,7 @@ import java.util.List;
  * A collection of minimal methods that a {@link MenuManager} needs to work with menus, along with utility methods, such
  * as for rows and columns.
  */
+@SuppressWarnings("unused")
 public interface IMenu {
 
     /**

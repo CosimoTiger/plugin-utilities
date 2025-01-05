@@ -1,6 +1,5 @@
 package com.cosimo.utilities.item;
 
-import com.cosimo.utilities.menu.Button;
 import lombok.NonNull;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -510,28 +509,6 @@ public class ItemBuilder implements Cloneable {
     public ItemStack build() {
         this.itemStack.setItemMeta(this.itemMeta);
         return this.itemStack;
-    }
-
-    /**
-     * Builds a {@link Button} with only this instance's resulting {@link ItemStack} and null property.
-     *
-     * @param <E> Type of property for a {@link com.cosimo.utilities.menu.type.PropertyMenu}
-     * @return A {@link Button} with only this instance's resulting {@link ItemStack} and null property
-     */
-    @NonNull
-    public <E> Button<E> asButton() {
-        return Button.of(this.build());
-    }
-
-    /**
-     * Builds a {@link Button} with this instance's resulting {@link ItemStack} and a given property.
-     *
-     * @param <E> Type of property for a {@link com.cosimo.utilities.menu.type.PropertyMenu}
-     * @return A {@link Button} with this instance's resulting {@link ItemStack} and a given property
-     */
-    @NonNull
-    public <E> Button<E> asButton(E property) {
-        return Button.of(this.build(), property);
     }
 
     @SuppressWarnings("MethodDoesntCallSuperMethod")

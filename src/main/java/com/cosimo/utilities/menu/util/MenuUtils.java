@@ -111,5 +111,4 @@ public class MenuUtils {
     public static int getChestSizeForCount(int count) {
         return getChestRowsForCount(count) * CHEST_COLUMNS;
     }
-
 }
