@@ -40,6 +40,7 @@ import java.util.logging.Level;
  *
  * @author CosimoTiger
  */
+@SuppressWarnings("unused")
 public class MenuManager implements Listener {
 
     @Nullable
@@ -71,10 +72,6 @@ public class MenuManager implements Listener {
         Bukkit.getPluginManager().registerEvents(this, this.provider = provider);
 
         this.menus = mapImpl;
-
-        if (instance == null) {
-            instance = this;
-        }
     }
 
     /**
@@ -259,8 +256,8 @@ public class MenuManager implements Listener {
                     iterator.next().getValue().onDisable(event);
                 } catch (Exception exception) {
                     Bukkit.getLogger()
-                            .log(Level.WARNING, "An error occurred while handling a menu plugin disable event:",
-                                 exception);
+                          .log(Level.WARNING, "An error occurred while handling a menu plugin disable event:",
+                               exception);
                 }
             }
         }
