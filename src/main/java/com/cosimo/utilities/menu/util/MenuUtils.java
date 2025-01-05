@@ -10,10 +10,8 @@ import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.Contract;
 
 /**
- * Contains utility methods and common logic for working with {@link IMenu} and {@link AbstractMenu}.
- *
- * <p>This class provides commonly used logic for handling menu-related events, determining inventory states,
- * and performing inventory-related calculations.</p>
+ * Contains utility methods and common logic for working with {@link IMenu} and {@link AbstractMenu}, handling
+ * menu-related events, determining inventory states, and performing inventory-related calculations.</p>
  */
 public class MenuUtils {
 
@@ -73,8 +71,8 @@ public class MenuUtils {
     /**
      * Retrieves the number of columns in the specified {@link Inventory}, based on its type.
      *
-     * <p>Standard chest-like inventories typically have 9 columns, hoppers 5, dropper-like inventories 3, and most
-     * others are invalid, though they default to their size.</p>
+     * <p>Standard chest-like inventories typically have {@code 9} columns, hoppers {@code 5}, dropper-like
+     * inventories {@code 3}, and most others are invalid, though they default to their size.</p>
      *
      * @param inventory the {@link Inventory} to analyze
      * @return the number of columns in the inventory
