@@ -1,5 +1,6 @@
 package com.cosimo.utilities.item;
 
+import com.google.common.collect.LinkedHashMultimap;
 import lombok.NonNull;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -12,7 +13,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -140,20 +140,16 @@ public class ItemBuilder implements Cloneable {
      * Modifies the {@link ItemStack}'s subtype of {@link ItemMeta} with given operations, possibly specific for that
      * subclass.
      *
+     * @param metaClass    Class that belongs to the {@link ItemMeta} subtype
      * @param metaConsumer Consumer or anonymous function that'll take this instance's item's specific {@link ItemMeta}
      *                     as an argument
-     * @param metaClass    Class that belongs to the {@link ItemMeta} subtype
      * @param <T>          {@link ItemMeta} subclass type
      * @return This instance, useful for chaining
      * @throws IllegalArgumentException If the {@link Class}&lt;T&gt; or {@link Consumer}&lt;T&gt; argument is null
      */
     @NonNull
-    public <T extends ItemMeta> ItemBuilder withMeta(@NonNull Consumer<T> metaConsumer, @NonNull Class<T> metaClass) {
-        this.getItemMeta().filter(metaClass::isInstance).ifPresent(meta -> {
-            metaConsumer.accept(metaClass.cast(meta));
-            this.itemStack.setItemMeta(meta);
-        });
-
+    public <T extends ItemMeta> ItemBuilder withMeta(@NonNull Class<T> metaClass, @NonNull Consumer<T> metaConsumer) {
+        this.getItemMeta().filter(metaClass::isInstance).map(metaClass::cast).ifPresent(metaConsumer);
         return this;
     }
 
@@ -194,21 +190,6 @@ public class ItemBuilder implements Cloneable {
     }
 
     /**
-     * Appends new lines of lore at the given index of the {@link ItemStack}'s lore from a given list.
-     *
-     * @param index Index at which the specified new lines of lore will be added
-     * @param lines List of lore lines that'll be added
-     * @return This instance, useful for chaining
-     * @throws IllegalArgumentException If the {@link Collection}&lt;{@link String}&gt; argument is null
-     */
-    @NonNull
-    public ItemBuilder addLoreAt(int index, @NonNull Collection<String> lines) {
-        final List<String> lore = this.getLore();
-        lore.addAll(index, lines);
-        return this.lore(lore);
-    }
-
-    /**
      * Sets/repeats a new given line of lore at given <strong>existing</strong> indices of the {@link ItemStack}'s
      * lore.
      * <p>
@@ -218,21 +199,17 @@ public class ItemBuilder implements Cloneable {
      * @param indices Indexes at which the specified lore line will be set
      * @param line    New line of lore
      * @return This instance, useful for chaining
-     * @throws IllegalArgumentException If the integer array of indices is null
+     * @throws NullPointerException If the integer array of indices is null
      */
     @NonNull
     public ItemBuilder loreAt(@Nullable String line, final int @NonNull ... indices) {
-        final int size = Arrays.stream(indices)
-                                 .max()
-                                 .orElseThrow(() -> new IllegalArgumentException("Array of indices is null or empty")) +
-                         1;
         final List<String> lore = this.getLore();
 
-        if (lore.size() < size) {
-            lore.addAll(Collections.nCopies(lore.size() - size, null));
-        }
-
         for (int index : indices) {
+            while (index >= lore.size()) {
+                lore.add(null);
+            }
+
             lore.set(index, line);
         }
 
@@ -264,12 +241,23 @@ public class ItemBuilder implements Cloneable {
      */
     @NonNull
     public ItemBuilder withMeta(@NonNull Consumer<ItemMeta> metaConsumer) {
-        this.getItemMeta().ifPresent(meta -> {
-            metaConsumer.accept(meta);
-            this.itemStack.setItemMeta(meta);
-        });
-
+        this.getItemMeta().ifPresent(metaConsumer);
         return this;
+    }
+
+    /**
+     * Appends new lines of lore at the given index of the {@link ItemStack}'s lore from a given list.
+     *
+     * @param index Index at which the specified new lines of lore will be added
+     * @param lines List of lore lines that'll be added
+     * @return This instance, useful for chaining
+     * @throws IllegalArgumentException If the {@link Collection}&lt;{@link String}&gt; argument is null
+     */
+    @NonNull
+    public ItemBuilder addLoreAt(int index, @NonNull Collection<String> lines) {
+        final List<String> lore = this.getLore();
+        lore.addAll(index, lines);
+        return this.lore(lore);
     }
 
     /**
@@ -283,21 +271,6 @@ public class ItemBuilder implements Cloneable {
     @NonNull
     public ItemBuilder addLoreAt(int index, String @NonNull ... lines) {
         return this.addLoreAt(index, Arrays.asList(lines));
-    }
-
-    /**
-     * Appends new lines of lore at the end of the {@link ItemStack}'s lore from a given list.
-     *
-     * @param lines List of lore lines that'll be added
-     * @return This instance, useful for chaining
-     * @throws IllegalArgumentException If the {@link Collection}&lt;{@link String}&gt; argument is null
-     */
-    @NonNull
-    public ItemBuilder addLore(@NonNull Collection<String> lines) {
-        final List<String> lore = this.getLore();
-        lore.addAll(lines);
-
-        return this.lore(lore);
     }
 
     /**
@@ -362,12 +335,25 @@ public class ItemBuilder implements Cloneable {
     /**
      * Adds new ItemFlags to the {@link ItemStack}.
      *
+     * <p>If given {@link ItemFlag#HIDE_ATTRIBUTES} and {@link ItemMeta#getAttributeModifiers()} is null, the modifiers
+     * are initialized with an empty {@link LinkedHashMultimap} for the {@link ItemFlag} to work.
+     *
      * @param flags Array of ItemFlag enums
      * @return This instance, useful for chaining
      * @throws IllegalArgumentException If the {@link ItemFlag} array is null
      */
     @NonNull
     public ItemBuilder addFlags(@NonNull ItemFlag @NonNull ... flags) {
+        for (var flag : flags) {
+            if (flag == ItemFlag.HIDE_ATTRIBUTES) {
+                if (this.itemMeta.getAttributeModifiers() == null) {
+                    this.itemMeta.setAttributeModifiers(LinkedHashMultimap.create(1, 2));
+                }
+
+                break;
+            }
+        }
+
         return this.withMeta(meta -> meta.addItemFlags(flags));
     }
 
@@ -391,6 +377,21 @@ public class ItemBuilder implements Cloneable {
     @NonNull
     public ItemBuilder lore(@Nullable String @Nullable ... lines) {
         return this.lore(lines == null ? null : Arrays.asList(lines));
+    }
+
+    /**
+     * Appends new lines of lore at the end of the {@link ItemStack}'s lore from a given list.
+     *
+     * @param lines List of lore lines that'll be added
+     * @return This instance, useful for chaining
+     * @throws IllegalArgumentException If the {@link Collection}&lt;{@link String}&gt; argument is null
+     */
+    @NonNull
+    public ItemBuilder addLore(@NonNull Collection<String> lines) {
+        final List<String> lore = this.getLore();
+        lore.addAll(lines);
+
+        return this.lore(lore);
     }
 
     /**
