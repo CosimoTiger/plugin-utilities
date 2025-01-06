@@ -44,7 +44,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           body: |
-            A new version of plugin-utilities is ready. Grab your own via JitPack:
+            A new version of plugin-utilities is ready. Grab your own via [JitPack](https://jitpack.io/#CosimoTiger/plugin-utilities):
             
             #### Maven
             
