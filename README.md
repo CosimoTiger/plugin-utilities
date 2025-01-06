@@ -1,72 +1,108 @@
 # plugin-utilities
 
-A library with some common utilities for ease of developing Spigot plugins.
+An optimized and lightweight toolkit of flexible common utilities for developing Spigot API plugins.
+
+---
 
 # Features
 
-- central menu module for custom menus and handling of all their events
+- flexible menu package for easily making custom menus with clickable `ItemStack`s managed through Spigot events
 - `ItemBuilder` for less headache with `ItemMeta` and `ItemStack` modifications
-- cooldowns that manage themselves
-- plugin file handling
+- cooldowns package for tracking and renewing of expireable durations
+- plugin file package with methods for managing custom configuration files since only the default `config.yml` is
+  handled
 
-## The menu library
+---
 
-The menu library lets the developer wrap any `Inventory` with the menu classes, take control of all its common
-incoming `InventoryEvents` and edit its contents and viewers. The library tries to not assume too much for the
-developer, reinvent inventories or interfere with them, but disables most menu interactions, which can be easily
-overriden by the developer; it also comes with some pre-made classes that can be extended.
+## The menu package
 
-To use the library, a `MenuManager` needs to be instantiated, which will manage all the menus that are passed to it.
+Many menu libraries and frameworks exist, though they introduce an excess of assumed features with an already
+unoptimized and bloated core. This simple menu package integrates with the event-driven Spigot API, lets the developer 
+wrap any existing or new `Inventory` with the `IMenu` subclasses, take control of all its incoming `InventoryEvent`s and
+edit its contents and viewers at any moment. The menus offer a fluent and flexible builder design pattern that
+doesn't require subclassing for simpler use-cases.
 
-## How to use `plugin-utilities`
+The design principle of this package is the following:
 
-1. Add the library as a JitPack dependency via a build automation tool that you're using, such as Maven, Gradle, Ant,
-   etc.
+- menus don't need to store states or properties, only actions
+- states can be stored in action closures or external variables
+- any extra features are usually unnecessary and can be done with existing code
+    - e.g. pagination can be done using lambdas, caching through array lists or linked lists, and at any point in the
+      code; it's a matter of use-case
 
-    ```xml
-   <project>
-        <repositories>
-            <repository>
-                <id>jitpack.io</id>
-                <url>https://jitpack.io</url>
-            </repository>
-        </repositories>
-        
-       <dependencies>
-            <dependency>
-               <groupId>com.github.CosimoTiger</groupId>
-               <artifactId>plugin-utilities</artifactId>
-               <version>1.0.0-alpha.2</version>
-            </dependency>
-       </dependencies>
-   </project>
-    ```
+> [!IMPORTANT]
+> To let the menus work, simply do the following in your plugin's initialization: 
+`MenuManager.setInstance(new MenuManager(plugin));`
 
-    ```groovy
-    dependencyResolutionManagement {
-        repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-        repositories {
-            mavenCentral()
-            maven { url 'https://jitpack.io' }
-        }
-    }
-    
-    dependencies {
-        implementation 'com.github.CosimoTiger:plugin-utilities:1.0.0-alpha.2'
-    }
-    ```
+### Slot utilities
 
-2. **Optional step:** you can shade the dependency library using JAR minimization to exclude unused features from being
-   compiled with your plugin, which will decrease the file size impact of the dependency even though it's currently very
-   small and lightweight. Here's one way of doing it:
+Convert row-column coordinate pair indexing to slot indices by choosing zero-based or one-based indexing of rows and
+columns:
 
-   Inside `<plugins>...</plugins>` add:
+```java
+// For default chest inventories:
+int zeroBasedSlotIndex = Slot.Zero.from(2, 3);
+int oneBasedSlotIndex = Slot.One.from(3, 4);
+
+// Given an inventory context for calculating with columns:
+var menu = new Menu(Bukkit.createInventory(null, InventoryType.DISPENSER, "Example menu"));
+
+int slot = Slot.One.from(1, 3, menu.getInventory());
+
+menu.set(new ItemStack(Material.APPLE), slot);
+menu.set(new ItemStack(Material.COOKIE), menu -> IntStream.range(0, menu.getInventory().getSize()).toArray());
+```
+
+## The `ItemBuilder`
+
+The extensive `ItemBuilder` class simplifies the creation of `ItemStack` objects with a fluent and expressive design:
+
+```java
+final var playerHead = new ItemBuilder(Material.PLAYER_HEAD)
+        .name(ChatColor.AQUA + player.getName())
+        .withMeta(meta -> meta.setOwningPlayer(player), SkullMeta.class)
+        .lore(ChatColor.GRAY + "Get your own player head",
+              ChatColor.translateAlternateColorCodes('&', "&7using the &e/head&7 command."))
+        .amount(7)
+        .glint()
+        .build();
+final var customArmor = new ItemBuilder(Material.LEATHER_CHESTPLATE, ChatColor.BLUE + "Blue team suit")
+        .withMeta(meta -> {
+            meta.setColor(Color.fromRGB(52, 82, 235));
+            meta.addEnchant(Enchantment.FIRE_PROTECTION, 3, false);
+
+            if (meta.getAttributeModifiers() == null) {
+                meta.setAttributeModifiers(HashMultimap.create(2, 2));
+            }
+        }, LeatherArmorMeta.class)
+        .addLore(ChatColor.translateAlternateColorCodes('&', "&7You're on the &9Blue team&7!"),
+                 "",
+                 ChatColor.translateAlternateColorCodes('&', "&7Type &e/team <color> &7to switch teams."))
+        .addFlags(ItemFlag.HIDE_DYE, ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ADDITIONAL_TOOLTIP)
+        .build();
+
+player.getInventory().addItem(playerHead, customArmor);
+```
+
+---
+
+## Installation
+
+1. Add the library as a JitPack dependency via a build automation tool that you're using, such as Maven, Gradle, sbt,
+   etc. See all releases, snapshots and guides at
+   the [official JitPack website of this project](https://jitpack.io/#CosimoTiger/plugin-utilities).
+
+2. Shade the dependency library using JAR minimization to exclude unused features from being compiled with your plugin, 
+   which will decrease the file size impact of the dependency while keeping your plugin lightweight. Even though the 
+   dependency is small, this process ensures efficient packaging by eliminating unnecessary code.
+
+   Here's how you can configure it using Maven Shade Plugin, by adding inside Maven `<plugins>...</plugins>`:
 
     ```xml
     <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>3.6.0</version>
+        <version>VERSION</version> <!-- Replace VERSION with the latest plugin version -->
         <executions>
             <execution>
                 <phase>package</phase>
@@ -75,15 +111,38 @@ To use the library, a `MenuManager` needs to be instantiated, which will manage 
                 </goals>
                 <configuration>
                     <minimizeJar>true</minimizeJar>
+                    <artifactSet>
+                        <!-- Replace the "Tag" with the latest release version -->
+                        <includes>com.github.CosimoTiger:plugin-utilities:Tag</includes>
+                    </artifactSet>
                 </configuration>
             </execution>
         </executions>
     </plugin>
     ```
+   
+    Here's how you can configure it using the Gradle Shadow plugin (Groovy):
 
-   Beware of what these options do – if you're using Java Reflection, databases or possibly dependency injection, those
-   dependencies may be affected, but don't fret because you
-   can [exclude them from the process](https://maven.apache.org/plugins/maven-shade-plugin/examples/includes-excludes.html).
+    ```groovy
+   plugins {
+       id 'java'
+       // Replace the "VERSION" with the
+       id 'com.gradleup.shadow' version 'VERSION'
+   }
+   
+   shadowJar {
+       archiveClassifier.set('all')
+   
+       manifest {
+           attributes 'Main-Class': 'path.to.your.PluginMain'
+       }
+   
+       dependencies {
+           // Replace the "Tag" with the latest release version
+           include dependency('com.github.CosimoTiger:plugin-utilities:Tag')
+       }
+   }
+   ```
 
 3. Start writing your code. Here's the typical plugin initialization code example:
 
@@ -96,7 +155,7 @@ To use the library, a `MenuManager` needs to be instantiated, which will manage 
     
        @Override
        public void onEnable() {
-          new MenuManager(this);
+          MenuManager.setInstance(new MenuManager(this));
     
           final var config = new YamlFile(this, "config.yml").reloadFile().getMemory();
     
@@ -104,3 +163,25 @@ To use the library, a `MenuManager` needs to be instantiated, which will manage 
        }
     }
     ```
+
+---
+
+## Contributing
+
+We welcome contributions from the community, through forking or opening an issue. They should be in line with the
+project's main goals: optimized code that benefits everyone.
+
+---
+
+## License
+
+This project is licensed under the [MIT License](./LICENSE).
+
+---
+
+## Support
+
+For questions, issues or feature requests, please use the 
+[GitHub Issues](https://github.com/CosimoTiger/plugin-utilities/issues) section.
+
+---
