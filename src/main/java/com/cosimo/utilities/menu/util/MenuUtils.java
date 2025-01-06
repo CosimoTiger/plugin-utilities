@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Contract;
 
 /**
  * Contains utility methods and common logic for working with {@link IMenu} and {@link AbstractMenu}, handling
- * menu-related events, determining inventory states, and performing inventory-related calculations.</p>
+ * menu-related events, determining inventory states, and performing inventory-related calculations.
  */
 public class MenuUtils {
 
