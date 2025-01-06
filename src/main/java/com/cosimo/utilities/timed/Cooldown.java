@@ -4,6 +4,9 @@ import lombok.NonNull;
 
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Mutable implementation where the cooldown can be extended by a duration.
+ */
 public class Cooldown implements ICooldown {
 
     /**
@@ -17,7 +20,6 @@ public class Cooldown implements ICooldown {
      *
      * @param duration For how long this cooldown will last
      * @param unit     {@link TimeUnit} of the given cooldown duration parameter
-     * @see Cooldown - duration unit conversion to milliseconds
      */
     public Cooldown(long duration, @NonNull TimeUnit unit) {
         this.end = this.getCurrentTime() + this.toThisTime(duration, unit);

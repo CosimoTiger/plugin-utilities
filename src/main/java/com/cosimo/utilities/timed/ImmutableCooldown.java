@@ -4,6 +4,10 @@ import lombok.NonNull;
 
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Immutable implementation for tracking cooldown expiration only.
+ */
+@SuppressWarnings("unused")
 public class ImmutableCooldown implements ICooldown {
 
     /**
