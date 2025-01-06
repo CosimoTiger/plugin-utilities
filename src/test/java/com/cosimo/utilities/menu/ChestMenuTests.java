@@ -17,6 +17,8 @@ import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 
+import java.util.stream.IntStream;
+
 import static com.cosimo.utilities.menu.util.MenuUtils.CHEST_COLUMNS;
 import static com.cosimo.utilities.menu.util.MenuUtils.MAX_CHEST_ROWS;
 import static org.junit.jupiter.api.Assertions.*;
@@ -33,6 +35,9 @@ public class ChestMenuTests {
 
     @Mock
     private Inventory mockedInventory;
+
+    @Mock
+    private ItemStack mockedItem;
 
     private ActionMenu menu;
 
@@ -53,8 +58,8 @@ public class ChestMenuTests {
             throw new IndexOutOfBoundsException(
                     "Slot %d is out of bounds! Minimum 0, exclusive maximum %s".formatted(slot, INVENTORY_SIZE));
         }).when(this.mockedInventory)
-                .setItem(ArgumentMatchers.intThat(slot -> slot < 0 || slot >= INVENTORY_SIZE),
-                         nullable(ItemStack.class));
+          .setItem(ArgumentMatchers.intThat(slot -> slot < 0 || slot >= INVENTORY_SIZE),
+                   nullable(ItemStack.class));
 
         doAnswer(invocation -> {
             final int slot = invocation.getArgument(1);
@@ -62,12 +67,21 @@ public class ChestMenuTests {
             throw new IndexOutOfBoundsException(
                     "Slot %d is out of bounds! Minimum 0, exclusive maximum %s".formatted(slot, INVENTORY_SIZE));
         }).when(this.menu)
-                .set(nullable(MenuAction.class), ArgumentMatchers.intThat(slot -> slot < 0 || slot >= INVENTORY_SIZE));
+          .set(nullable(MenuAction.class), ArgumentMatchers.intThat(slot -> slot < 0 || slot >= INVENTORY_SIZE));
     }
 
     @AfterEach
     public void tearDown() {
         this.mockedUtils.close();
+    }
+
+    @Test
+    public void shouldSetItemExactTimes() {
+        final var slots = IntStream.range(0, this.menu.getInventory().getSize()).toArray();
+
+        this.menu.set(this.mockedItem, slots);
+
+        verify(this.menu, times(slots.length)).set(eq(this.mockedItem), anyInt());
     }
 
     @Test
