@@ -1,72 +1,36 @@
 # plugin-utilities
 
-A library with some common utilities for ease of developing Spigot plugins.
+![Java](https://img.shields.io/badge/Language-Java-orange.svg)
+![License](https://img.shields.io/badge/License-MIT-blue.svg)
 
-# Features
+## Overview
 
-- central menu module for custom menus and handling of all their events
-- `ItemBuilder` for less headache with `ItemMeta` and `ItemStack` modifications
-- cooldowns that manage themselves
-- plugin file handling
+An optimized and lightweight toolkit of flexible common utilities for developing Spigot API plugins.
 
-## The menu library
+## Features
 
-The menu library lets the developer wrap any `Inventory` with the menu classes, take control of all its common
-incoming `InventoryEvents` and edit its contents and viewers. The library tries to not assume too much for the
-developer, reinvent inventories or interfere with them, but disables most menu interactions, which can be easily
-overriden by the developer; it also comes with some pre-made classes that can be extended.
+- menu package for easily making custom flexible menus with clickable `ItemStack`s managed in the background through Spigot events,
+- `ItemBuilder` for less headache with `ItemMeta` and `ItemStack` modifications,
+- cooldowns package for tracking and renewing of expirable durations,
+- plugin file package with methods for managing multiple or custom configuration files
 
-To use the library, a `MenuManager` needs to be instantiated, which will manage all the menus that are passed to it.
+## Installation
 
-## How to use `plugin-utilities`
+1. Add the library as a JitPack dependency via a build automation tool that you're using, such as Maven, Gradle, sbt,
+   etc. See all releases, snapshots and guides at
+   the [official JitPack website of this project](https://jitpack.io/#CosimoTiger/plugin-utilities).
 
-1. Add the library as a JitPack dependency via a build automation tool that you're using, such as Maven, Gradle, Ant,
-   etc.
+2. Shade the dependency library using JAR minimization to exclude unused features from being compiled with your plugin, 
+   which will decrease the file size impact of the dependency while keeping your plugin lightweight. Even though the 
+   dependency is small, this process ensures efficient packaging by eliminating unnecessary code.
 
-    ```xml
-   <project>
-        <repositories>
-            <repository>
-                <id>jitpack.io</id>
-                <url>https://jitpack.io</url>
-            </repository>
-        </repositories>
-        
-       <dependencies>
-            <dependency>
-               <groupId>com.github.CosimoTiger</groupId>
-               <artifactId>plugin-utilities</artifactId>
-               <version>1.0.0-alpha.2</version>
-            </dependency>
-       </dependencies>
-   </project>
-    ```
-
-    ```groovy
-    dependencyResolutionManagement {
-        repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-        repositories {
-            mavenCentral()
-            maven { url 'https://jitpack.io' }
-        }
-    }
-    
-    dependencies {
-        implementation 'com.github.CosimoTiger:plugin-utilities:1.0.0-alpha.2'
-    }
-    ```
-
-2. **Optional step:** you can shade the dependency library using JAR minimization to exclude unused features from being
-   compiled with your plugin, which will decrease the file size impact of the dependency even though it's currently very
-   small and lightweight. Here's one way of doing it:
-
-   Inside `<plugins>...</plugins>` add:
+   Here's how you can configure it using Maven Shade Plugin, by adding inside Maven `<plugins>...</plugins>`:
 
     ```xml
     <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>3.6.0</version>
+        <version>VERSION</version> <!-- Replace VERSION with the latest plugin version -->
         <executions>
             <execution>
                 <phase>package</phase>
@@ -75,15 +39,38 @@ To use the library, a `MenuManager` needs to be instantiated, which will manage 
                 </goals>
                 <configuration>
                     <minimizeJar>true</minimizeJar>
+                    <artifactSet>
+                        <!-- Replace the "Tag" with the latest release version -->
+                        <includes>com.github.CosimoTiger:plugin-utilities:Tag</includes>
+                    </artifactSet>
                 </configuration>
             </execution>
         </executions>
     </plugin>
     ```
+   
+    Here's how you can configure it using the Gradle Shadow plugin (Groovy):
 
-   Beware of what these options do – if you're using Java Reflection, databases or possibly dependency injection, those
-   dependencies may be affected, but don't fret because you
-   can [exclude them from the process](https://maven.apache.org/plugins/maven-shade-plugin/examples/includes-excludes.html).
+    ```groovy
+   plugins {
+       id 'java'
+       // Replace the "VERSION" with the latest release available at https://github.com/GradleUp/shadow
+       id 'com.gradleup.shadow' version 'VERSION'
+   }
+   
+   shadowJar {
+       archiveClassifier.set('all')
+   
+       manifest {
+           attributes 'Main-Class': 'path.to.your.PluginMain'
+       }
+   
+       dependencies {
+           // Replace the "Tag" with the latest release version
+           include dependency('com.github.CosimoTiger:plugin-utilities:Tag')
+       }
+   }
+   ```
 
 3. Start writing your code. Here's the typical plugin initialization code example:
 
@@ -96,11 +83,25 @@ To use the library, a `MenuManager` needs to be instantiated, which will manage 
     
        @Override
        public void onEnable() {
-          new MenuManager(this);
+          MenuManager.setInstance(new MenuManager(this));
     
-          final var config = new YamlFile(this, "config.yml").reloadFile().getMemory();
+          final var config = new YamlFile(this, "command-config.yml").reloadFile().getMemory();
     
           getCommand("example").setExecutor(new ExampleCommand(config.getConfigurationSection("commands.example")));
        }
     }
     ```
+
+## Contributing
+
+We welcome contributions from the community, through forking or opening an issue. They should be in line with the
+project's main goals: optimized code that benefits everyone.
+
+## License
+
+This project is licensed under the [MIT License](./LICENSE).
+
+## Support
+
+For questions, issues or feature requests, please use the 
+[GitHub Issues](https://github.com/CosimoTiger/plugin-utilities/issues) section.
