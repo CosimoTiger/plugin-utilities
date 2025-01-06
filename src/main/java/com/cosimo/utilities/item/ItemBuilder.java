@@ -515,6 +515,6 @@ public class ItemBuilder implements Cloneable {
     @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override
     public ItemBuilder clone() {
-        return new ItemBuilder(this.itemStack.clone());
+        return new ItemBuilder(this.build().clone());
     }
 }
