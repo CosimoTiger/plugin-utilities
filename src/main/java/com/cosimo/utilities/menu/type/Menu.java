@@ -1,6 +1,6 @@
 package com.cosimo.utilities.menu.type;
 
-import com.cosimo.utilities.menu.AbstractMenu;
+import com.cosimo.utilities.menu.type.action.ActionMenu;
 import lombok.NonNull;
 import org.bukkit.inventory.Inventory;
 
@@ -8,7 +8,7 @@ import org.bukkit.inventory.Inventory;
  * The default instantiable class of the {@link AbstractMenu} class without the hassle of using generics.
  *
  * @author CosimoTiger
- * @see PropertyMenu
+ * @see ActionMenu
  */
 public class Menu extends AbstractMenu<Menu> {
 

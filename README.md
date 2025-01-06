@@ -89,7 +89,6 @@ To use the library, a `MenuManager` needs to be instantiated, which will manage 
 
     ```java
     import com.cosimo.utilities.file.YamlFile;
-    import com.cosimo.utilities.menu.AbstractMenu;
     import com.cosimo.utilities.menu.manager.MenuManager;
     import org.bukkit.plugin.java.JavaPlugin;
     

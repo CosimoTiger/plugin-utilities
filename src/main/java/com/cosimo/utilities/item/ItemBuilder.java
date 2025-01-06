@@ -248,9 +248,9 @@ public class ItemBuilder implements Cloneable {
      */
     @NonNull
     public ItemBuilder with(@NonNull Consumer<ItemStack> itemConsumer) {
-        this.itemStack.setItemMeta(this.itemMeta);
-        itemConsumer.accept(this.itemStack);
+        itemConsumer.accept(this.build());
         this.itemMeta = this.itemStack.getItemMeta();
+
         return this;
     }
 
