@@ -6,7 +6,7 @@
 
     <groupId>com.cosimo</groupId>
     <artifactId>plugin-utilities</artifactId>
-    <version>1.0.0-alpha.2</version>
+    <version>1.0.0-beta.1</version>
     <name>PluginUtilities</name>
     <url>https://github.com/CosimoTiger/plugin-utilities</url>
     <description>A library with many utilities that help with developing Spigot plugins.</description>
