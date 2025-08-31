@@ -2,6 +2,7 @@ package com.cosimo.utilities.menu.type.action;
 
 import com.cosimo.utilities.menu.type.AbstractMenu;
 import com.cosimo.utilities.menu.type.Menu;
+import com.cosimo.utilities.menu.util.Menus;
 import lombok.NonNull;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
@@ -46,7 +47,10 @@ public class ActionMenu extends AbstractMenu<ActionMenu> implements Iterable<Men
     @Override
     public void onClick(@NonNull InventoryClickEvent event) {
         super.onClick(event);
-        this.getAction(event.getSlot()).ifPresent(action -> action.accept(event, this));
+
+        if (Menus.isClickInsideInventory(event)) {
+            this.getAction(event.getSlot()).ifPresent(action -> action.accept(event, this));
+        }
     }
 
     /**
