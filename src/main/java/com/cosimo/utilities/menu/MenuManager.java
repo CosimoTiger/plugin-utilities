@@ -1,6 +1,6 @@
 package com.cosimo.utilities.menu;
 
-import com.cosimo.utilities.menu.util.MenuUtils;
+import com.cosimo.utilities.menu.util.Menus;
 import com.google.common.base.Preconditions;
 import lombok.NonNull;
 import lombok.Setter;
@@ -211,7 +211,7 @@ public class MenuManager implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onInventoryClose(@NonNull InventoryCloseEvent event) {
         this.getMenu(event.getInventory()).ifPresent(menu -> {
-            if (MenuUtils.isAboutToBecomeDisposable(event)) {
+            if (Menus.isAboutToBecomeDisposable(event)) {
                 this.unregisterMenu(menu);
             }
 

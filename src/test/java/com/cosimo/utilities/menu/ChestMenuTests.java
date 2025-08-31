@@ -2,7 +2,7 @@ package com.cosimo.utilities.menu;
 
 import com.cosimo.utilities.menu.type.action.ActionMenu;
 import com.cosimo.utilities.menu.type.action.MenuAction;
-import com.cosimo.utilities.menu.util.MenuUtils;
+import com.cosimo.utilities.menu.util.Menus;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -19,8 +19,8 @@ import org.mockito.invocation.InvocationOnMock;
 
 import java.util.stream.IntStream;
 
-import static com.cosimo.utilities.menu.util.MenuUtils.CHEST_COLUMNS;
-import static com.cosimo.utilities.menu.util.MenuUtils.MAX_CHEST_ROWS;
+import static com.cosimo.utilities.menu.util.Menus.CHEST_COLUMNS;
+import static com.cosimo.utilities.menu.util.Menus.MAX_CHEST_ROWS;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -28,7 +28,7 @@ public class ChestMenuTests {
 
     private static final int INVENTORY_SIZE = MAX_CHEST_ROWS * CHEST_COLUMNS;
 
-    private MockedStatic<MenuUtils> mockedUtils;
+    private MockedStatic<Menus> mockedUtils;
 
     @Mock
     private BukkitTask mockedTask;
@@ -47,8 +47,8 @@ public class ChestMenuTests {
 
         when(this.mockedInventory.getSize()).thenReturn(INVENTORY_SIZE);
 
-        this.mockedUtils = mockStatic(MenuUtils.class, InvocationOnMock::callRealMethod);
-        this.mockedUtils.when(() -> MenuUtils.getColumns(any())).thenReturn(9);
+        this.mockedUtils = mockStatic(Menus.class, InvocationOnMock::callRealMethod);
+        this.mockedUtils.when(() -> Menus.getColumns(any())).thenReturn(9);
 
         this.menu = spy(new ActionMenu(this.mockedInventory));
 
@@ -71,7 +71,7 @@ public class ChestMenuTests {
     }
 
     @AfterEach
-    public void tearDown() {
+    public void releaseMocks() {
         this.mockedUtils.close();
     }
 
@@ -137,17 +137,17 @@ public class ChestMenuTests {
 
     @Test
     public void testGetChestRowsForCount() {
-        assertEquals(1, MenuUtils.getChestRowsForCount(5));
-        assertEquals(3, MenuUtils.getChestRowsForCount(20));
-        assertEquals(MenuUtils.MAX_CHEST_ROWS, MenuUtils.getChestRowsForCount(100));
-        assertEquals(1, MenuUtils.getChestRowsForCount(0));
+        assertEquals(1, Menus.getChestRowsForCount(5));
+        assertEquals(3, Menus.getChestRowsForCount(20));
+        assertEquals(Menus.MAX_CHEST_ROWS, Menus.getChestRowsForCount(100));
+        assertEquals(1, Menus.getChestRowsForCount(0));
     }
 
     @Test
     public void testGetChestSizeForCount() {
-        assertEquals(9, MenuUtils.getChestSizeForCount(5));
-        assertEquals(27, MenuUtils.getChestSizeForCount(20));
-        assertEquals(MenuUtils.MAX_CHEST_ROWS * MenuUtils.CHEST_COLUMNS, MenuUtils.getChestSizeForCount(100));
-        assertEquals(9, MenuUtils.getChestSizeForCount(0));
+        assertEquals(9, Menus.getChestSizeForCount(5));
+        assertEquals(27, Menus.getChestSizeForCount(20));
+        assertEquals(Menus.MAX_CHEST_ROWS * Menus.CHEST_COLUMNS, Menus.getChestSizeForCount(100));
+        assertEquals(9, Menus.getChestSizeForCount(0));
     }
 }

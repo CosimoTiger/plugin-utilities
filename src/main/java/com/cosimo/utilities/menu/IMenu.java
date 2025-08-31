@@ -1,7 +1,7 @@
 package com.cosimo.utilities.menu;
 
 import com.cosimo.utilities.menu.type.AbstractMenu;
-import com.cosimo.utilities.menu.util.MenuUtils;
+import com.cosimo.utilities.menu.util.Menus;
 import lombok.NonNull;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryAction;
@@ -29,7 +29,7 @@ public interface IMenu {
      * and any action on the menu are cancelled, but interaction with one's own inventory is allowed.
      */
     default void onClick(@NonNull InventoryClickEvent event) {
-        event.setCancelled(MenuUtils.shouldCancelMenuClick(event));
+        event.setCancelled(Menus.shouldCancelMenuClick(event));
     }
 
     /**
@@ -42,8 +42,8 @@ public interface IMenu {
      */
     default void onDrag(@NonNull InventoryDragEvent event) {
         if (event.getRawSlots()
-                .stream()
-                .anyMatch(rawSlot -> this.getInventory().equals(event.getView().getInventory(rawSlot)))) {
+                 .stream()
+                 .anyMatch(rawSlot -> this.getInventory().equals(event.getView().getInventory(rawSlot)))) {
             event.setCancelled(true);
         }
     }
@@ -100,12 +100,12 @@ public interface IMenu {
 
     /**
      * Returns the amount of columns this {@link Inventory}'s size has according to
-     * {@link MenuUtils#getColumns(Inventory)}.
+     * {@link Menus#getColumns(Inventory)}.
      *
      * @return positive integer, at least 1
      */
     default int getColumns() {
-        return MenuUtils.getColumns(this.getInventory());
+        return Menus.getColumns(this.getInventory());
     }
 
     /**

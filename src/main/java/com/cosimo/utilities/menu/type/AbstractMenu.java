@@ -3,7 +3,7 @@ package com.cosimo.utilities.menu.type;
 import com.cosimo.utilities.menu.IMenu;
 import com.cosimo.utilities.menu.MenuManager;
 import com.cosimo.utilities.menu.type.action.ActionMenu;
-import com.cosimo.utilities.menu.util.MenuUtils;
+import com.cosimo.utilities.menu.util.Menus;
 import lombok.NonNull;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
@@ -71,7 +71,7 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
      */
     @Override
     public void onClose(@NonNull InventoryCloseEvent event) {
-        if (MenuUtils.isAboutToBecomeDisposable(event)) {
+        if (Menus.isAboutToBecomeDisposable(event)) {
             this.attachBukkitTask(null);
         }
     }

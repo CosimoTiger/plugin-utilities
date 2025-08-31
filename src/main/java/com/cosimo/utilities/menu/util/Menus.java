@@ -7,19 +7,20 @@ import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 
 /**
  * Contains utility methods and common logic for working with {@link IMenu} and {@link AbstractMenu}, handling
  * menu-related events, determining inventory states, and performing inventory-related calculations.
  */
-public class MenuUtils {
+public class Menus {
 
     public static final int MAX_CHEST_ROWS = 6;
     public static final int CHEST_COLUMNS = 9;
 
     /**
-     * Determines if the inventory in the given {@link InventoryCloseEvent} is about to become disposable.
+     * Determines if the inventory in the given {@link InventoryCloseEvent} handler is about to become disposable.
      *
      * <p>An inventory is considered disposable if it has fewer than two viewers remaining.</p>
      *
@@ -27,6 +28,7 @@ public class MenuUtils {
      * @return {@code true} if the inventory is about to become disposable, {@code false} otherwise
      */
     @Contract(pure = true)
+    @ApiStatus.Internal
     public static boolean isAboutToBecomeDisposable(@NonNull InventoryCloseEvent event) {
         return event.getViewers().size() < 2;
     }
@@ -64,6 +66,7 @@ public class MenuUtils {
      * @return {@code true} if the click should be canceled, {@code false} otherwise
      */
     @Contract(pure = true)
+    @ApiStatus.Internal
     public static boolean shouldCancelMenuClick(@NonNull InventoryClickEvent event) {
         return isInventoryViewItemMixingAction(event.getAction()) || isClickInsideInventory(event);
     }

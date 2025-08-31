@@ -23,7 +23,7 @@ public final class Slot {
 
         /**
          * Converts a row-column position to a slot index with zero-based indexing with default columns for chest
-         * inventories using {@link MenuUtils#CHEST_COLUMNS}.
+         * inventories using {@link Menus#CHEST_COLUMNS}.
          *
          * @param row    The row of the slot position (starting from 1)
          * @param column The column of the slot position (starting from 1)
@@ -31,7 +31,7 @@ public final class Slot {
          */
         @Contract(pure = true)
         public static int of(int row, int column) {
-            return of(row, column, MenuUtils.CHEST_COLUMNS);
+            return of(row, column, Menus.CHEST_COLUMNS);
         }
 
         /**
@@ -59,7 +59,7 @@ public final class Slot {
          */
         @Contract(pure = true)
         public static int of(int row, int column, @NonNull Inventory inventory) {
-            final int slot = of(row, column, MenuUtils.getColumns(inventory));
+            final int slot = of(row, column, Menus.getColumns(inventory));
 
             if (slot >= inventory.getSize()) {
                 throw new IllegalArgumentException(
@@ -99,7 +99,7 @@ public final class Slot {
 
         /**
          * Converts a row-column position to a slot index with one-based indexing with default columns for chest
-         * inventories using {@link MenuUtils#CHEST_COLUMNS}.
+         * inventories using {@link Menus#CHEST_COLUMNS}.
          *
          * @param row    The row of the slot position (starting from 1)
          * @param column The column of the slot position (starting from 1)
@@ -107,7 +107,7 @@ public final class Slot {
          */
         @Contract(pure = true)
         public static int of(int row, int column) {
-            return of(row, column, MenuUtils.CHEST_COLUMNS);
+            return of(row, column, Menus.CHEST_COLUMNS);
         }
 
         /**
@@ -135,7 +135,7 @@ public final class Slot {
          */
         @Contract(pure = true)
         public static int of(int row, int column, @NonNull Inventory inventory) {
-            final int slot = of(row, column, MenuUtils.getColumns(inventory));
+            final int slot = of(row, column, Menus.getColumns(inventory));
 
             if (slot >= inventory.getSize()) {
                 throw new IllegalArgumentException(

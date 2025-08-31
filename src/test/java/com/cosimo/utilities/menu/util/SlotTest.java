@@ -13,7 +13,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static com.cosimo.utilities.menu.util.MenuUtils.CHEST_COLUMNS;
+import static com.cosimo.utilities.menu.util.Menus.CHEST_COLUMNS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mockStatic;
@@ -23,7 +23,7 @@ class SlotTest {
 
     private static final int ROWS = 4;
 
-    private MockedStatic<MenuUtils> mockedUtils;
+    private MockedStatic<Menus> mockedUtils;
 
     @Mock
     private Inventory mockedInventory;
@@ -32,8 +32,8 @@ class SlotTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        this.mockedUtils = mockStatic(MenuUtils.class);
-        this.mockedUtils.when(() -> MenuUtils.getColumns(this.mockedInventory)).thenReturn(CHEST_COLUMNS);
+        this.mockedUtils = mockStatic(Menus.class);
+        this.mockedUtils.when(() -> Menus.getColumns(this.mockedInventory)).thenReturn(CHEST_COLUMNS);
 
         when(this.mockedInventory.getSize()).thenReturn(getInventorySize());
     }
