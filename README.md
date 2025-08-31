@@ -16,13 +16,11 @@ An optimized and lightweight toolkit of flexible common utilities for developing
 
 ## Installation
 
-1. Add the library as a JitPack dependency via a build automation tool that you're using, such as Maven, Gradle, sbt,
-   etc. See all releases, snapshots and guides at
+1. Add the library as a JitPack dependency via a build automation tool that you're using, such as Maven or Gradle. See all releases, snapshots and guides at
    the [official JitPack website of this project](https://jitpack.io/#CosimoTiger/plugin-utilities).
 
 2. Shade the dependency library using JAR minimization to exclude unused features from being compiled with your plugin, 
-   which will decrease the file size impact of the dependency while keeping your plugin lightweight. Even though the 
-   dependency is small, this process ensures efficient packaging by eliminating unnecessary code.
+   which will decrease the file size impact of the dependency, even though it's already relatively small.
 
    Here's how you can configure it using Maven Shade Plugin, by adding inside Maven `<plugins>...</plugins>`:
 
@@ -40,8 +38,8 @@ An optimized and lightweight toolkit of flexible common utilities for developing
                 <configuration>
                     <minimizeJar>true</minimizeJar>
                     <artifactSet>
-                        <!-- Replace the "Tag" with the latest release version -->
-                        <includes>com.github.CosimoTiger:plugin-utilities:Tag</includes>
+                        <!-- Replace the VERSION with the latest release version -->
+                        <includes>com.github.CosimoTiger:plugin-utilities:VERSION</includes>
                     </artifactSet>
                 </configuration>
             </execution>
@@ -66,8 +64,8 @@ An optimized and lightweight toolkit of flexible common utilities for developing
        }
    
        dependencies {
-           // Replace the "Tag" with the latest release version
-           include dependency('com.github.CosimoTiger:plugin-utilities:Tag')
+           // Replace the VERSION with the latest release version
+           include dependency('com.github.CosimoTiger:plugin-utilities:VERSION')
        }
    }
    ```
@@ -85,7 +83,7 @@ An optimized and lightweight toolkit of flexible common utilities for developing
        public void onEnable() {
           MenuManager.setInstance(new MenuManager(this));
     
-          final var config = new YamlFile(this, "command-config.yml").reloadFile().getMemory();
+          final var config = new YamlFile(this, "messages.yml").reloadFile().getMemory();
     
           getCommand("example").setExecutor(new ExampleCommand(config.getConfigurationSection("commands.example")));
        }
@@ -96,6 +94,8 @@ An optimized and lightweight toolkit of flexible common utilities for developing
 
 We welcome contributions from the community, through forking or opening an issue. They should be in line with the
 project's main goals: optimized code that benefits everyone.
+
+**How to build the project:** `mvn clean package`
 
 ## License
 
