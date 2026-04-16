@@ -2,7 +2,6 @@ package com.cosimo.utilities.menu;
 
 import com.cosimo.utilities.menu.type.AbstractMenu;
 import com.cosimo.utilities.menu.util.Menus;
-import lombok.NonNull;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -11,6 +10,7 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.Inventory;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.List;
 
@@ -18,6 +18,7 @@ import java.util.List;
  * A collection of minimal methods that a {@link MenuManager} needs to work with menus, along with utility methods, such
  * as for rows and columns.
  */
+@NullMarked
 @SuppressWarnings("unused")
 public interface IMenu {
 
@@ -28,8 +29,10 @@ public interface IMenu {
      * <p>By default, {@link InventoryAction#COLLECT_TO_CURSOR} and {@link InventoryAction#MOVE_TO_OTHER_INVENTORY}
      * and any action on the menu are cancelled, but interaction with one's own inventory is allowed.
      */
-    default void onClick(@NonNull InventoryClickEvent event) {
-        event.setCancelled(Menus.shouldCancelMenuClick(event));
+    default void onClick(InventoryClickEvent event) {
+        if (Menus.shouldCancelMenuClick(event)) {
+            event.setCancelled(true);
+        }
     }
 
     /**
@@ -40,7 +43,7 @@ public interface IMenu {
      *
      * @param event {@link InventoryDragEvent} event
      */
-    default void onDrag(@NonNull InventoryDragEvent event) {
+    default void onDrag(InventoryDragEvent event) {
         if (event.getRawSlots()
                  .stream()
                  .anyMatch(rawSlot -> this.getInventory().equals(event.getView().getInventory(rawSlot)))) {
@@ -55,7 +58,7 @@ public interface IMenu {
      *
      * @param event {@link InventoryCloseEvent}
      */
-    default void onClose(@NonNull InventoryCloseEvent event) {
+    default void onClose(InventoryCloseEvent event) {
     }
 
     /**
@@ -67,7 +70,7 @@ public interface IMenu {
      *
      * @param event {@link InventoryOpenEvent}
      */
-    default void onOpen(@NonNull InventoryOpenEvent event) {
+    default void onOpen(InventoryOpenEvent event) {
     }
 
     /**
@@ -80,7 +83,7 @@ public interface IMenu {
      *
      * @param event {@link PluginDisableEvent} event
      */
-    default void onDisable(@NonNull PluginDisableEvent event) {
+    default void onDisable(PluginDisableEvent event) {
         this.close();
     }
 
@@ -92,7 +95,6 @@ public interface IMenu {
      *
      * @return This instance, useful for chaining
      */
-    @NonNull
     default IMenu close() {
         List.copyOf(this.getInventory().getViewers()).forEach(HumanEntity::closeInventory);
         return this;
@@ -142,6 +144,5 @@ public interface IMenu {
      *
      * @return Non-null {@link Inventory}
      */
-    @NonNull
     Inventory getInventory();
 }

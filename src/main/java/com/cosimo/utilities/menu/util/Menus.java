@@ -2,18 +2,19 @@ package com.cosimo.utilities.menu.util;
 
 import com.cosimo.utilities.menu.IMenu;
 import com.cosimo.utilities.menu.type.AbstractMenu;
-import lombok.NonNull;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NullMarked;
 
 /**
  * Contains utility methods and common logic for working with {@link IMenu} and {@link AbstractMenu}, handling
  * menu-related events, determining inventory states, and performing inventory-related calculations.
  */
+@NullMarked
 public class Menus {
 
     public static final int MAX_CHEST_ROWS = 6;
@@ -29,7 +30,7 @@ public class Menus {
      */
     @Contract(pure = true)
     @ApiStatus.Internal
-    public static boolean isAboutToBecomeDisposable(@NonNull InventoryCloseEvent event) {
+    public static boolean isAboutToBecomeDisposable(InventoryCloseEvent event) {
         return event.getViewers().size() < 2;
     }
 
@@ -42,7 +43,7 @@ public class Menus {
      * @return {@code true} if the action involves item mixing, {@code false} otherwise
      */
     @Contract(pure = true)
-    public static boolean isInventoryViewItemMixingAction(@NonNull InventoryAction action) {
+    public static boolean isInventoryViewItemMixingAction(InventoryAction action) {
         return action == InventoryAction.COLLECT_TO_CURSOR || action == InventoryAction.MOVE_TO_OTHER_INVENTORY;
     }
 
@@ -53,21 +54,21 @@ public class Menus {
      * @return {@code true} if the click was inside the inventory, {@code false} otherwise
      */
     @Contract(pure = true)
-    public static boolean isClickInsideInventory(@NonNull InventoryClickEvent event) {
+    public static boolean isClickInsideInventory(InventoryClickEvent event) {
         return event.getInventory().equals(event.getClickedInventory());
     }
 
     /**
      * Determines if the given {@link InventoryClickEvent} should result in the menu click being canceled.
      *
-     * <p>Clicks are typically canceled if they involve item mixing actions or occur inside the inventory.</p>
+     * <p>Clicks are typically canceled if they involve item-mixing actions or occur inside the inventory.</p>
      *
      * @param event the {@link InventoryClickEvent} to evaluate
      * @return {@code true} if the click should be canceled, {@code false} otherwise
      */
     @Contract(pure = true)
     @ApiStatus.Internal
-    public static boolean shouldCancelMenuClick(@NonNull InventoryClickEvent event) {
+    public static boolean shouldCancelMenuClick(InventoryClickEvent event) {
         return isInventoryViewItemMixingAction(event.getAction()) || isClickInsideInventory(event);
     }
 
@@ -81,13 +82,26 @@ public class Menus {
      * @return the number of columns in the inventory
      */
     @Contract(pure = true)
-    public static int getColumns(@NonNull Inventory inventory) {
+    public static int getColumns(Inventory inventory) {
         return switch (inventory.getType()) {
             case CHEST, ENDER_CHEST, BARREL, PLAYER, SHULKER_BOX -> 9;
             case DROPPER, DISPENSER, CRAFTER -> 3;
             case SMITHING -> 2;
             default -> inventory.getSize();
         };
+    }
+
+    /**
+     * Calculates the number of rows required to fit a specified number of items in a {@link Inventory} with a limited
+     * number of columns, e.g., a hopper or a chest with left or right padding.
+     *
+     * @param count   the number of items to fit into the chest
+     * @param columns the number of columns in the chest
+     * @return the number of rows required, clamped between 1 and {@link #MAX_CHEST_ROWS}
+     */
+    @Contract(pure = true)
+    public static int getChestRowsForCount(int count, int columns) {
+        return Math.clamp((int) Math.ceil((double) count / columns), 1, MAX_CHEST_ROWS);
     }
 
     /**
@@ -98,7 +112,7 @@ public class Menus {
      */
     @Contract(pure = true)
     public static int getChestRowsForCount(int count) {
-        return Math.clamp((int) Math.ceil((double) count / CHEST_COLUMNS), 1, MAX_CHEST_ROWS);
+        return getChestRowsForCount(count, CHEST_COLUMNS);
     }
 
     /**

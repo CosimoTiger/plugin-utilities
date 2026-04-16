@@ -1,12 +1,13 @@
 package com.cosimo.utilities.timed;
 
-import lombok.NonNull;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.concurrent.TimeUnit;
 
 /**
  * Immutable implementation for tracking cooldown expiration only.
  */
+@NullMarked
 @SuppressWarnings("unused")
 public class ImmutableCooldown implements ICooldown {
 
@@ -22,7 +23,7 @@ public class ImmutableCooldown implements ICooldown {
      * @param unit     {@link TimeUnit} of the given cooldown duration parameter
      * @see ImmutableCooldown Duration unit conversion to milliseconds
      */
-    public ImmutableCooldown(long duration, @NonNull TimeUnit unit) {
+    public ImmutableCooldown(long duration, TimeUnit unit) {
         this.end = this.getCurrentTime() + this.toThisTime(duration, unit);
     }
 

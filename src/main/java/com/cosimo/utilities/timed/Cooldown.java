@@ -1,12 +1,13 @@
 package com.cosimo.utilities.timed;
 
-import lombok.NonNull;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.concurrent.TimeUnit;
 
 /**
  * Mutable implementation where the cooldown can be extended by a duration.
  */
+@NullMarked
 public class Cooldown implements ICooldown {
 
     /**
@@ -21,7 +22,7 @@ public class Cooldown implements ICooldown {
      * @param duration For how long this cooldown will last
      * @param unit     {@link TimeUnit} of the given cooldown duration parameter
      */
-    public Cooldown(long duration, @NonNull TimeUnit unit) {
+    public Cooldown(long duration, TimeUnit unit) {
         this.end = this.getCurrentTime() + this.toThisTime(duration, unit);
     }
 
@@ -41,7 +42,8 @@ public class Cooldown implements ICooldown {
      * @param unit     {@link TimeUnit} that the given duration argument is in
      * @return Previous ending time of this {@link Cooldown}
      */
-    public long extend(long duration, @NonNull TimeUnit unit) {
+    @SuppressWarnings("UnusedReturnValue")
+    public long extend(long duration, TimeUnit unit) {
         return this.extend(this.toThisTime(duration, unit));
     }
 

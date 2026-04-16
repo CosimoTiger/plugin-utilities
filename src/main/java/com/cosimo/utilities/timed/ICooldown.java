@@ -1,9 +1,10 @@
 package com.cosimo.utilities.timed;
 
-import lombok.NonNull;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.concurrent.TimeUnit;
 
+@NullMarked
 public interface ICooldown extends TimeStandard {
 
     /**
@@ -22,7 +23,7 @@ public interface ICooldown extends TimeStandard {
      * @param unit {@link TimeUnit} in which the remaining milliseconds should be converted to
      * @return The remaining cooldown time that can't be negative, expressed as a long in the given {@link TimeUnit}
      */
-    default long getRemaining(@NonNull TimeUnit unit) {
+    default long getRemaining(TimeUnit unit) {
         return Math.max(0, this.getDifference(unit));
     }
 
@@ -43,7 +44,7 @@ public interface ICooldown extends TimeStandard {
      * @param unit {@link TimeUnit} in which the remaining milliseconds should be converted to
      * @return The remaining cooldown time, expressed as a long in the given {@link TimeUnit}
      */
-    default long getDifference(@NonNull TimeUnit unit) {
+    default long getDifference(TimeUnit unit) {
         return this.fromThisTime(this.getDifference(), unit);
     }
 

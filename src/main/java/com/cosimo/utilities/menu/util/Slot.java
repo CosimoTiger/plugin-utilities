@@ -1,14 +1,15 @@
 package com.cosimo.utilities.menu.util;
 
 import com.cosimo.utilities.menu.IMenu;
-import lombok.NonNull;
 import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NullMarked;
 
 /**
  * Utility class for handling slot conversions in {@link Inventory} or {@link IMenu} grids. Provides separate utilities
  * for zero-based and one-based indexing through static inner classes for better convenience.
  */
+@NullMarked
 public final class Slot {
 
     private Slot() {
@@ -58,7 +59,7 @@ public final class Slot {
          * @throws IllegalArgumentException if the slot is out of bounds
          */
         @Contract(pure = true)
-        public static int of(int row, int column, @NonNull Inventory inventory) {
+        public static int of(int row, int column, Inventory inventory) {
             final int slot = of(row, column, Menus.getColumns(inventory));
 
             if (slot >= inventory.getSize()) {
@@ -134,7 +135,7 @@ public final class Slot {
          * @throws IllegalArgumentException if the slot is out of bounds
          */
         @Contract(pure = true)
-        public static int of(int row, int column, @NonNull Inventory inventory) {
+        public static int of(int row, int column, Inventory inventory) {
             final int slot = of(row, column, Menus.getColumns(inventory));
 
             if (slot >= inventory.getSize()) {

@@ -1,11 +1,11 @@
 package com.cosimo.utilities.file;
 
-import lombok.NonNull;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nonnull;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -16,18 +16,19 @@ import java.io.InputStreamReader;
  * {@link FileConfiguration} variable. This isn't done by default because calling superclass constructors and waiting on
  * them can be a problem when defining default class variables.
  */
+@NullMarked
 public class YamlFile extends PluginFile<FileConfiguration> {
 
     /**
      * Data loaded from a YAML file
      */
-    protected FileConfiguration fileConfig;
+    protected @Nullable FileConfiguration fileConfig;
 
-    public YamlFile(@NonNull Plugin plugin, @NonNull String resourcePath, @NonNull String destinationFile) {
+    public YamlFile(Plugin plugin, String resourcePath, String destinationFile) {
         super(plugin, resourcePath, destinationFile);
     }
 
-    public YamlFile(@NonNull Plugin plugin, @NonNull String resourcePath) {
+    public YamlFile(Plugin plugin, String resourcePath) {
         super(plugin, resourcePath);
     }
 
@@ -74,9 +75,8 @@ public class YamlFile extends PluginFile<FileConfiguration> {
         return this.fileConfig;
     }
 
-    @Nonnull
     @Override
-    public PluginFile<FileConfiguration> setMemory(@NonNull FileConfiguration newMemory) {
+    public PluginFile<FileConfiguration> setMemory(FileConfiguration newMemory) {
         this.fileConfig = newMemory;
         return this;
     }

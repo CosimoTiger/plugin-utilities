@@ -3,12 +3,12 @@ package com.cosimo.utilities.menu.type.action;
 import com.cosimo.utilities.menu.type.AbstractMenu;
 import com.cosimo.utilities.menu.type.Menu;
 import com.cosimo.utilities.menu.util.Menus;
-import lombok.NonNull;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -24,17 +24,18 @@ import java.util.function.Function;
  *
  * @see MenuAction
  */
+@NullMarked
 @SuppressWarnings("unused")
 public class ActionMenu extends AbstractMenu<ActionMenu> implements Iterable<MenuAction> {
 
-    private final MenuAction[] actions = new MenuAction[this.getInventory().getSize()];
+    private final @Nullable MenuAction[] actions = new MenuAction[this.getInventory().getSize()];
 
     /**
      * Creates a new {@link ActionMenu}, initializing an action array of the same size as the {@link Inventory}.
      *
      * @param inventory A non-null {@link Inventory} to be controlled by this {@link ActionMenu}
      */
-    public ActionMenu(@NonNull Inventory inventory) {
+    public ActionMenu(Inventory inventory) {
         super(inventory);
     }
 
@@ -45,7 +46,7 @@ public class ActionMenu extends AbstractMenu<ActionMenu> implements Iterable<Men
      * @param event The {@link InventoryClickEvent} triggering the action
      */
     @Override
-    public void onClick(@NonNull InventoryClickEvent event) {
+    public void onClick(InventoryClickEvent event) {
         super.onClick(event);
 
         if (Menus.isClickInsideInventory(event)) {
@@ -60,7 +61,6 @@ public class ActionMenu extends AbstractMenu<ActionMenu> implements Iterable<Men
      * @return An {@link Optional} containing the {@link MenuAction} if one is set, or empty if no action exists
      * @throws IndexOutOfBoundsException If the slot index is out of the {@link Inventory}'s boundaries
      */
-    @NonNull
     @Contract(pure = true)
     public Optional<MenuAction> getAction(int slot) {
         return Optional.ofNullable(this.actions[slot]);
@@ -71,7 +71,6 @@ public class ActionMenu extends AbstractMenu<ActionMenu> implements Iterable<Men
      *
      * @return An iterator over the actions in this menu
      */
-    @NonNull
     @Override
     public Iterator<MenuAction> iterator() {
         return new ActionMenuIterator();
@@ -82,9 +81,8 @@ public class ActionMenu extends AbstractMenu<ActionMenu> implements Iterable<Men
      *
      * @return A {@link Spliterator} for the actions in this menu
      */
-    @NonNull
     @Override
-    public Spliterator<MenuAction> spliterator() {
+    public Spliterator<@Nullable MenuAction> spliterator() {
         return Arrays.spliterator(this.actions);
     }
 
@@ -98,10 +96,9 @@ public class ActionMenu extends AbstractMenu<ActionMenu> implements Iterable<Men
      * @throws NullPointerException      If the {@code slots} argument is {@code null}
      * @throws IndexOutOfBoundsException If any slot is out of the {@link Inventory}'s boundaries
      */
-    @NonNull
     @Contract(mutates = "this")
     public ActionMenu set(@Nullable ItemStack item, @Nullable MenuAction action,
-                          @NonNull Function<ActionMenu, int[]> slotsFunction) {
+                          Function<ActionMenu, int[]> slotsFunction) {
         return this.set(item, action, slotsFunction.apply(this));
     }
 
@@ -115,10 +112,8 @@ public class ActionMenu extends AbstractMenu<ActionMenu> implements Iterable<Men
      * @throws NullPointerException      If the {@code slots} argument is {@code null}
      * @throws IndexOutOfBoundsException If any slot in the iterable is out of the {@link Inventory}'s boundaries
      */
-    @NonNull
     @Contract(mutates = "this")
-    public ActionMenu set(@Nullable ItemStack item, @Nullable MenuAction action,
-                          @NonNull Iterable<@NonNull Integer> slots) {
+    public ActionMenu set(@Nullable ItemStack item, @Nullable MenuAction action, Iterable<Integer> slots) {
         return this.set(item, slots).set(action, slots);
     }
 
@@ -131,9 +126,8 @@ public class ActionMenu extends AbstractMenu<ActionMenu> implements Iterable<Men
      * @return This menu instance, useful for chaining
      * @throws NullPointerException If the {@code slots} argument is {@code null}
      */
-    @NonNull
     @Contract(mutates = "this")
-    public ActionMenu set(@Nullable ItemStack item, @Nullable MenuAction action, int @NonNull ... slots) {
+    public ActionMenu set(@Nullable ItemStack item, @Nullable MenuAction action, int... slots) {
         return this.set(item, slots).set(action, slots);
     }
 
@@ -146,7 +140,6 @@ public class ActionMenu extends AbstractMenu<ActionMenu> implements Iterable<Men
      * @return This menu instance, useful for chaining
      * @throws IndexOutOfBoundsException If the slot index is out of the {@link Inventory}'s boundaries
      */
-    @NonNull
     @Contract(mutates = "this")
     public ActionMenu set(@Nullable ItemStack item, @Nullable MenuAction action, int slot) {
         this.getInventory().setItem(slot, item);
@@ -163,7 +156,7 @@ public class ActionMenu extends AbstractMenu<ActionMenu> implements Iterable<Men
      * @throws NullPointerException      If the {@code slots} argument is {@code null}
      * @throws IndexOutOfBoundsException If any slot is out of the {@link Inventory}'s boundaries
      */
-    public ActionMenu set(@Nullable MenuAction action, @NonNull Function<ActionMenu, int[]> slotsFunction) {
+    public ActionMenu set(@Nullable MenuAction action, Function<ActionMenu, int[]> slotsFunction) {
         return this.set(action, slotsFunction.apply(this));
     }
 
@@ -177,9 +170,8 @@ public class ActionMenu extends AbstractMenu<ActionMenu> implements Iterable<Men
      * @throws IndexOutOfBoundsException If any slot in the {@link Iterable} is out of the {@link Inventory}'s
      *                                   boundaries
      */
-    @NonNull
     @Contract(mutates = "this")
-    public ActionMenu set(@Nullable MenuAction action, @NonNull Iterable<@NonNull Integer> slots) {
+    public ActionMenu set(@Nullable MenuAction action, Iterable<Integer> slots) {
         slots.forEach(slot -> this.set(action, slot));
         return this;
     }
@@ -193,9 +185,8 @@ public class ActionMenu extends AbstractMenu<ActionMenu> implements Iterable<Men
      * @throws NullPointerException      If the {@code slots} argument is {@code null}
      * @throws IndexOutOfBoundsException If any slot in the array is out of the {@link Inventory}'s boundaries
      */
-    @NonNull
     @Contract(mutates = "this")
-    public ActionMenu set(@Nullable MenuAction action, int @NonNull ... slots) {
+    public ActionMenu set(@Nullable MenuAction action, int... slots) {
         for (int slot : slots) {
             this.set(action, slot);
         }
@@ -211,7 +202,6 @@ public class ActionMenu extends AbstractMenu<ActionMenu> implements Iterable<Men
      * @return This instance, useful for chaining
      * @throws IndexOutOfBoundsException If the slot index is out of the {@link Inventory}'s boundaries
      */
-    @NonNull
     @Contract(mutates = "this")
     public ActionMenu set(@Nullable MenuAction action, int slot) {
         this.actions[slot] = action;
@@ -223,7 +213,6 @@ public class ActionMenu extends AbstractMenu<ActionMenu> implements Iterable<Men
      *
      * @return This menu instance, useful for chaining
      */
-    @NonNull
     @Contract(mutates = "this")
     public ActionMenu clearActions() {
         Arrays.fill(this.actions, null);
@@ -235,7 +224,6 @@ public class ActionMenu extends AbstractMenu<ActionMenu> implements Iterable<Men
      *
      * @return This menu instance, useful for chaining
      */
-    @NonNull
     @Override
     @Contract(mutates = "this")
     public ActionMenu clear() {

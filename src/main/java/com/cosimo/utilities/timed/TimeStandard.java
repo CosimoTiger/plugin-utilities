@@ -1,6 +1,6 @@
 package com.cosimo.utilities.timed;
 
-import lombok.NonNull;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.concurrent.TimeUnit;
 
@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
  * default {@link System#currentTimeMillis()}, time in nanoseconds or different time units, or a video game current tick
  * time since startup.
  */
+@NullMarked
 public interface TimeStandard {
 
     /**
@@ -19,7 +20,7 @@ public interface TimeStandard {
      * @param duration Time duration to be converted
      * @return Time duration in a unit equivalent to {@link #getCurrentTime()}'s
      */
-    default long toThisTime(long duration, @NonNull TimeUnit unit) {
+    default long toThisTime(long duration, TimeUnit unit) {
         return unit.toMillis(duration);
     }
 
@@ -31,7 +32,7 @@ public interface TimeStandard {
      * @param duration Time duration to be converted
      * @return Time duration in a unit equivalent to {@link #getCurrentTime()}'s
      */
-    default long fromThisTime(long duration, @NonNull TimeUnit unit) {
+    default long fromThisTime(long duration, TimeUnit unit) {
         return unit.convert(duration, TimeUnit.MILLISECONDS);
     }
 

@@ -1,14 +1,15 @@
 package com.cosimo.utilities.item;
 
-import com.google.common.collect.LinkedHashMultimap;
 import lombok.NonNull;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,24 +18,27 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
  * A proxy class (rather than a true builder) that wraps around an {@link ItemStack}, allowing easier, more fluent and
- * chained modifications of the item.
+ * chained modifications of the item. Supports Kyori Adventure API {@link Component} for titles and lore instead of
+ * plain Strings, allowing for rich text formatting with colors, hover events, click events, and other modern Minecraft
+ * text features.
  */
+@NullMarked
 @SuppressWarnings("unused")
 public class ItemBuilder implements Cloneable {
 
     /**
      * Mutable {@link ItemStack}.
      */
-    private final ItemStack itemStack;
-    private ItemMeta itemMeta;
+    private ItemStack itemStack;
 
     /**
      * Creates a new {@link ItemBuilder} from an item stored in a given configuration file's path or a default provided
-     * one in case of non-existence of path or object at path.
+     * one in case of non-existence of path or object at the path.
      *
      * @param configuration Typically a YAML configuration file in which the item is stored
      * @param path          Path at which the item is stored at
@@ -49,7 +53,7 @@ public class ItemBuilder implements Cloneable {
 
     /**
      * Creates a new {@link ItemBuilder} from an item stored in a given configuration file's path or a default provided
-     * one in case of non-existence of path or object at path.
+     * one in case of non-existence of path or object at the path.
      *
      * @param configuration Typically a YAML configuration file in which the item is stored
      * @param path          Path at which the item is stored at
@@ -72,26 +76,26 @@ public class ItemBuilder implements Cloneable {
     }
 
     /**
-     * Creates a new {@link ItemBuilder} from the given material, amount and title of a new item being created.
+     * Creates a new {@link ItemBuilder} from the given material, amount, and title of a new item being created.
      *
      * @param material Type of item
-     * @param amount   Amount of items in a stack
-     * @param title    Display name or visible title of an item
+     * @param amount   Number of items in a stack
+     * @param title    Custom name or visible title of an item using Adventure Component
      */
-    public ItemBuilder(@NonNull Material material, int amount, @Nullable String title) {
-        this(new ItemStack(material, amount), title);
+    public ItemBuilder(Material material, int amount, @Nullable Component title) {
+        this(ItemStack.of(material, amount), title);
     }
 
     /**
      * Creates a new {@link ItemBuilder} from the given item, renaming it to a given title.
      *
      * @param itemStack {@link ItemStack} that's being wrapped by this class for further modification
-     * @param title     Display name or visible title of an item
+     * @param title     Custom name or visible title of an item using Adventure Component
      * @throws IllegalArgumentException If the ItemStack argument is null
      */
-    public ItemBuilder(@NonNull ItemStack itemStack, @Nullable String title) {
+    public ItemBuilder(ItemStack itemStack, @Nullable Component title) {
         this(itemStack);
-        this.title(title);
+        this.customName(title);
     }
 
     /**
@@ -99,9 +103,9 @@ public class ItemBuilder implements Cloneable {
      * of 1.
      *
      * @param material Type of item
-     * @param title    Display name or visible title of an item
+     * @param title    Custom name or visible title of an item using Adventure Component
      */
-    public ItemBuilder(@NonNull Material material, @Nullable String title) {
+    public ItemBuilder(Material material, @Nullable Component title) {
         this(material, 1, title);
     }
 
@@ -112,7 +116,7 @@ public class ItemBuilder implements Cloneable {
      * @param material Type of item
      * @param amount   Amount of items in a stack
      */
-    public ItemBuilder(@NonNull Material material, int amount) {
+    public ItemBuilder(Material material, int amount) {
         this(material, amount, null);
     }
 
@@ -121,7 +125,7 @@ public class ItemBuilder implements Cloneable {
      *
      * @param material Type of item
      */
-    public ItemBuilder(@NonNull Material material) {
+    public ItemBuilder(Material material) {
         this(material, 1, null);
     }
 
@@ -129,11 +133,10 @@ public class ItemBuilder implements Cloneable {
      * Creates a new {@link ItemBuilder} from a given {@link ItemStack}.
      *
      * @param itemStack {@link ItemStack} that's being wrapped by this class for further modification
-     * @throws IllegalArgumentException If the ItemStack argument is null or of Material.AIR type
+     * @throws IllegalArgumentException If the ItemStack argument is null or of {@link Material#AIR} type
      */
-    public ItemBuilder(@NonNull ItemStack itemStack) {
+    public ItemBuilder(ItemStack itemStack) {
         this.itemStack = itemStack;
-        this.itemMeta = itemStack.getItemMeta();
     }
 
     /**
@@ -147,9 +150,8 @@ public class ItemBuilder implements Cloneable {
      * @return This instance, useful for chaining
      * @throws IllegalArgumentException If the {@link Class}&lt;T&gt; or {@link Consumer}&lt;T&gt; argument is null
      */
-    @NonNull
-    public <T extends ItemMeta> ItemBuilder withMeta(@NonNull Class<T> metaClass, @NonNull Consumer<T> metaConsumer) {
-        this.getItemMeta().filter(metaClass::isInstance).map(metaClass::cast).ifPresent(metaConsumer);
+    public <T extends ItemMeta> ItemBuilder withMeta(Class<T> metaClass, Consumer<T> metaConsumer) {
+        this.itemStack.editMeta(metaClass, metaConsumer);
         return this;
     }
 
@@ -160,8 +162,7 @@ public class ItemBuilder implements Cloneable {
      * @return This instance, useful for chaining
      * @throws IllegalArgumentException If the {@link Collection}&lt;{@link Enchantment}&gt; argument is null
      */
-    @NonNull
-    public ItemBuilder removeEnchantments(@NonNull Collection<Enchantment> enchantments) {
+    public ItemBuilder removeEnchantments(Collection<Enchantment> enchantments) {
         enchantments.forEach(this.itemStack::removeEnchantment);
         return this;
     }
@@ -173,8 +174,7 @@ public class ItemBuilder implements Cloneable {
      * @return This instance, useful for chaining
      * @throws IllegalArgumentException If the {@link Enchantment} array argument is null
      */
-    @NonNull
-    public ItemBuilder removeEnchantments(@NonNull Enchantment @NonNull ... enchantments) {
+    public ItemBuilder removeEnchantments(Enchantment... enchantments) {
         Arrays.stream(enchantments).forEach(this.itemStack::removeEnchantment);
         return this;
     }
@@ -184,7 +184,6 @@ public class ItemBuilder implements Cloneable {
      *
      * @return This instance, useful for chaining
      */
-    @NonNull
     public ItemBuilder glint() {
         return this.withMeta(meta -> meta.setEnchantmentGlintOverride(true));
     }
@@ -197,13 +196,12 @@ public class ItemBuilder implements Cloneable {
      * plus 1 and proceed to set the line at given indices.
      *
      * @param indices Indexes at which the specified lore line will be set
-     * @param line    New line of lore
+     * @param line    New line of lore as Component
      * @return This instance, useful for chaining
      * @throws NullPointerException If the integer array of indices is null
      */
-    @NonNull
-    public ItemBuilder loreAt(@Nullable String line, final int @NonNull ... indices) {
-        final List<String> lore = this.getLore();
+    public ItemBuilder loreAt(@Nullable Component line, final int... indices) {
+        final var lore = this.getLore();
 
         for (int index : indices) {
             while (index >= lore.size()) {
@@ -223,11 +221,13 @@ public class ItemBuilder implements Cloneable {
      * @return This instance, useful for chaining
      * @throws IllegalArgumentException If the {@link Consumer}&lt;{@link ItemStack}&gt; argument is null
      */
-    @NonNull
-    public ItemBuilder with(@NonNull Consumer<ItemStack> itemConsumer) {
+    public ItemBuilder with(Consumer<ItemStack> itemConsumer) {
         itemConsumer.accept(this.build());
-        this.itemMeta = this.itemStack.getItemMeta();
+        return this;
+    }
 
+    public ItemBuilder withNew(Function<ItemStack, ItemStack> itemConsumer) {
+        this.itemStack = itemConsumer.apply(this.build());
         return this;
     }
 
@@ -239,9 +239,8 @@ public class ItemBuilder implements Cloneable {
      * @return This instance, useful for chaining
      * @throws IllegalArgumentException If the {@link Consumer}&lt;{@link ItemMeta}&gt; argument is null
      */
-    @NonNull
-    public ItemBuilder withMeta(@NonNull Consumer<ItemMeta> metaConsumer) {
-        this.getItemMeta().ifPresent(metaConsumer);
+    public ItemBuilder withMeta(Consumer<ItemMeta> metaConsumer) {
+        itemStack.editMeta(metaConsumer);
         return this;
     }
 
@@ -251,12 +250,13 @@ public class ItemBuilder implements Cloneable {
      * @param index Index at which the specified new lines of lore will be added
      * @param lines List of lore lines that'll be added
      * @return This instance, useful for chaining
-     * @throws IllegalArgumentException If the {@link Collection}&lt;{@link String}&gt; argument is null
+     * @throws IllegalArgumentException If the {@link Collection}&lt;{@link Component}&gt; argument is null
      */
-    @NonNull
-    public ItemBuilder addLoreAt(int index, @NonNull Collection<String> lines) {
-        final List<String> lore = this.getLore();
+    public ItemBuilder addLoreAt(int index, Collection<Component> lines) {
+        final var lore = this.getLore();
+
         lore.addAll(index, lines);
+
         return this.lore(lore);
     }
 
@@ -266,10 +266,9 @@ public class ItemBuilder implements Cloneable {
      * @param index Index at which the specified new lines of lore will be added
      * @param lines Array of lore lines that'll be added
      * @return This instance, useful for chaining
-     * @throws IllegalArgumentException If the {@link String} array of lore lines is null
+     * @throws IllegalArgumentException If the {@link Component} array of lore lines is null
      */
-    @NonNull
-    public ItemBuilder addLoreAt(int index, String @NonNull ... lines) {
+    public ItemBuilder addLoreAt(int index, Component... lines) {
         return this.addLoreAt(index, Arrays.asList(lines));
     }
 
@@ -280,8 +279,7 @@ public class ItemBuilder implements Cloneable {
      * @return This instance, useful for chaining
      * @throws IllegalArgumentException If the {@link ItemFlag} array is null
      */
-    @NonNull
-    public ItemBuilder removeFlags(@NonNull ItemFlag @NonNull ... flags) {
+    public ItemBuilder removeFlags(ItemFlag... flags) {
         return this.withMeta(meta -> meta.removeItemFlags(flags));
     }
 
@@ -296,9 +294,8 @@ public class ItemBuilder implements Cloneable {
      * @return This instance, useful for chaining
      * @throws IllegalArgumentException If the integer array of indexes is null
      */
-    @NonNull
-    public ItemBuilder removeLoreAt(int @NonNull ... indices) {
-        final List<String> lore = this.getLore();
+    public ItemBuilder removeLoreAt(int... indices) {
+        final var lore = this.getLore();
 
         for (int index : indices) {
             lore.remove(index);
@@ -314,9 +311,8 @@ public class ItemBuilder implements Cloneable {
      * @return This instance, useful for chaining
      * @throws IllegalArgumentException If the {@link Material} argument is null
      */
-    @NonNull
-    public ItemBuilder material(@NonNull Material material) {
-        return this.with(item -> item.setType(material));
+    public ItemBuilder material(Material material) {
+        return this.withNew(item -> item.withType(material));
     }
 
     /**
@@ -327,34 +323,8 @@ public class ItemBuilder implements Cloneable {
      * @throws IllegalArgumentException If the {@link Material} argument is null
      * @see #material(Material)
      */
-    @NonNull
-    public ItemBuilder type(@NonNull Material material) {
+    public ItemBuilder type(Material material) {
         return this.material(material);
-    }
-
-    /**
-     * Adds new ItemFlags to the {@link ItemStack}.
-     *
-     * <p>If given {@link ItemFlag#HIDE_ATTRIBUTES} and {@link ItemMeta#getAttributeModifiers()} is null, the modifiers
-     * are initialized with an empty {@link LinkedHashMultimap} for the {@link ItemFlag} to work.
-     *
-     * @param flags Array of ItemFlag enums
-     * @return This instance, useful for chaining
-     * @throws IllegalArgumentException If the {@link ItemFlag} array is null
-     */
-    @NonNull
-    public ItemBuilder addFlags(@NonNull ItemFlag @NonNull ... flags) {
-        for (var flag : flags) {
-            if (flag == ItemFlag.HIDE_ATTRIBUTES) {
-                if (this.itemMeta.getAttributeModifiers() == null) {
-                    this.itemMeta.setAttributeModifiers(LinkedHashMultimap.create(1, 2));
-                }
-
-                break;
-            }
-        }
-
-        return this.withMeta(meta -> meta.addItemFlags(flags));
     }
 
     /**
@@ -363,9 +333,8 @@ public class ItemBuilder implements Cloneable {
      * @param lines List of lore lines, lore will be removed if it's null
      * @return This instance, useful for chaining
      */
-    @NonNull
-    public ItemBuilder lore(@Nullable List<String> lines) {
-        return this.withMeta(meta -> meta.setLore(lines));
+    public ItemBuilder lore(@Nullable List<? extends @Nullable Component> lines) {
+        return this.withMeta(meta -> meta.lore(lines));
     }
 
     /**
@@ -374,8 +343,7 @@ public class ItemBuilder implements Cloneable {
      * @param lines Array of lore lines, lore will be removed if it's null
      * @return This instance, useful for chaining
      */
-    @NonNull
-    public ItemBuilder lore(@Nullable String @Nullable ... lines) {
+    public ItemBuilder lore(@Nullable Component @Nullable ... lines) {
         return this.lore(lines == null ? null : Arrays.asList(lines));
     }
 
@@ -384,11 +352,11 @@ public class ItemBuilder implements Cloneable {
      *
      * @param lines List of lore lines that'll be added
      * @return This instance, useful for chaining
-     * @throws IllegalArgumentException If the {@link Collection}&lt;{@link String}&gt; argument is null
+     * @throws IllegalArgumentException If the {@link Collection}&lt;{@link Component}&gt; argument is null
      */
-    @NonNull
-    public ItemBuilder addLore(@NonNull Collection<String> lines) {
-        final List<String> lore = this.getLore();
+    public ItemBuilder addLore(Collection<Component> lines) {
+        final var lore = this.getLore();
+
         lore.addAll(lines);
 
         return this.lore(lore);
@@ -399,10 +367,9 @@ public class ItemBuilder implements Cloneable {
      *
      * @param lines Array of lore lines that'll be added
      * @return This instance, useful for chaining
-     * @throws IllegalArgumentException If the {@link String} array of lore lines is null
+     * @throws IllegalArgumentException If the {@link Component} array of lore lines is null
      */
-    @NonNull
-    public ItemBuilder addLore(String @NonNull ... lines) {
+    public ItemBuilder addLore(Component... lines) {
         return this.addLore(Arrays.asList(lines));
     }
 
@@ -412,32 +379,19 @@ public class ItemBuilder implements Cloneable {
      * @param meta New {@link ItemMeta}, will be removed if it's null
      * @return This instance, useful for chaining
      */
-    @NonNull
     public ItemBuilder itemMeta(@Nullable ItemMeta meta) {
         return this.with(item -> item.setItemMeta(meta));
     }
 
     /**
-     * Sets a new given display name/title for the {@link ItemStack}.
+     * Sets a new custom name for the {@link ItemStack} using an Adventure {@link Component}.
      *
-     * @param title New display name/title of this {@link ItemStack}
+     * @param title New custom name of this {@link ItemStack}
      * @return This instance, useful for chaining
      */
-    @NonNull
-    public ItemBuilder title(@Nullable String title) {
-        return this.withMeta(meta -> meta.setDisplayName(title));
-    }
-
-    /**
-     * Alias of {@link #title(String)}.
-     *
-     * @param name New display name/title of this {@link ItemStack}
-     * @return This instance, useful for chaining
-     * @see #title(String)
-     */
-    @NonNull
-    public ItemBuilder name(@Nullable String name) {
-        return this.title(name);
+    @SuppressWarnings("UnusedReturnValue")
+    public ItemBuilder customName(@Nullable Component title) {
+        return this.withMeta(meta -> meta.customName(title));
     }
 
     /**
@@ -446,18 +400,16 @@ public class ItemBuilder implements Cloneable {
      * @param breakable Whether the {@link ItemStack} can lose its durability through use
      * @return This instance, useful for chaining
      */
-    @NonNull
     public ItemBuilder breakable(boolean breakable) {
         return this.withMeta(meta -> meta.setUnbreakable(!breakable));
     }
 
     /**
-     * Sets a given amount of items of the {@link ItemStack}.
+     * Sets a given number of items of the {@link ItemStack}.
      *
-     * @param amount Amount of items in an {@link ItemStack}
+     * @param amount Number of items in an {@link ItemStack}
      * @return This instance, useful for chaining
      */
-    @NonNull
     public ItemBuilder amount(int amount) {
         return this.with(item -> item.setAmount(amount));
     }
@@ -467,9 +419,8 @@ public class ItemBuilder implements Cloneable {
      *
      * @return This instance, useful for chaining
      */
-    @NonNull
     public ItemBuilder clearLore() {
-        return this.lore((ArrayList<String>) null);
+        return this.lore((List<Component>) null);
     }
 
     /**
@@ -477,9 +428,8 @@ public class ItemBuilder implements Cloneable {
      *
      * @return {@link ItemMeta} of the {@link ItemStack}
      */
-    @NonNull
     public Optional<ItemMeta> getItemMeta() {
-        return Optional.ofNullable(this.itemMeta);
+        return Optional.of(this.itemStack.getItemMeta());
     }
 
     /**
@@ -487,9 +437,8 @@ public class ItemBuilder implements Cloneable {
      *
      * @return Not null list of lore lines of the {@link ItemStack}, possibly empty
      */
-    @NonNull
-    public List<String> getLore() {
-        return this.getItemMeta().map(ItemMeta::getLore).orElseGet(ArrayList::new);
+    public List<@Nullable Component> getLore() {
+        return Optional.ofNullable(itemStack.lore()).orElseGet(ArrayList::new);
     }
 
     /**
@@ -506,9 +455,7 @@ public class ItemBuilder implements Cloneable {
      *
      * @return {@link ItemStack} that's being modified
      */
-    @NonNull
     public ItemStack build() {
-        this.itemStack.setItemMeta(this.itemMeta);
         return this.itemStack;
     }
 

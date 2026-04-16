@@ -1,6 +1,6 @@
 package com.cosimo.utilities.timed;
 
-import lombok.NonNull;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,6 +13,7 @@ import java.util.Map;
  *            unique keys
  * @param <V> Expected {@link ICooldown} implementation
  */
+@NullMarked
 @SuppressWarnings("unused")
 public class Cooldowns<K, V extends ICooldown> extends HashMap<K, V> {
     public Cooldowns(int initialCapacity, float loadFactor) {
@@ -27,7 +28,7 @@ public class Cooldowns<K, V extends ICooldown> extends HashMap<K, V> {
         super();
     }
 
-    public Cooldowns(@NonNull Map<K, ? extends V> map) {
+    public Cooldowns(Map<K, ? extends V> map) {
         super(map);
     }
 

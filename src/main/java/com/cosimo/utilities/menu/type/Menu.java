@@ -1,8 +1,8 @@
 package com.cosimo.utilities.menu.type;
 
 import com.cosimo.utilities.menu.type.action.ActionMenu;
-import lombok.NonNull;
 import org.bukkit.inventory.Inventory;
+import org.jspecify.annotations.NullMarked;
 
 /**
  * The default instantiable class of the {@link AbstractMenu} class without the hassle of using generics.
@@ -10,6 +10,7 @@ import org.bukkit.inventory.Inventory;
  * @author CosimoTiger
  * @see ActionMenu
  */
+@NullMarked
 public class Menu extends AbstractMenu<Menu> {
 
     /**
@@ -17,7 +18,7 @@ public class Menu extends AbstractMenu<Menu> {
      *
      * @param inventory Non-null {@link Inventory} to wrap around and control as a menu
      */
-    public Menu(@NonNull Inventory inventory) {
+    public Menu(Inventory inventory) {
         super(inventory);
     }
 }

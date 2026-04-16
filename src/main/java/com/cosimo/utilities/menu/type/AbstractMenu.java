@@ -4,7 +4,6 @@ import com.cosimo.utilities.menu.IMenu;
 import com.cosimo.utilities.menu.MenuManager;
 import com.cosimo.utilities.menu.type.action.ActionMenu;
 import com.cosimo.utilities.menu.util.Menus;
-import lombok.NonNull;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -13,7 +12,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
@@ -33,6 +33,7 @@ import java.util.stream.StreamSupport;
  *               subclass instance (leveraging the "Curiously Recurring Template Pattern")
  * @author CosimoTiger
  */
+@NullMarked
 @SuppressWarnings({"unchecked", "unused"})
 public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements IMenu {
 
@@ -55,7 +56,7 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
      * @param inventory A non-null {@link Inventory} instance to be managed by the menu
      * @throws IllegalArgumentException If the provided {@link Inventory} is null
      */
-    public AbstractMenu(@NonNull Inventory inventory) {
+    public AbstractMenu(Inventory inventory) {
         this.inventory = inventory;
         this.columns = IMenu.super.getColumns();
         this.rows = IMenu.super.getRows();
@@ -70,7 +71,7 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
      * @param event The {@link InventoryCloseEvent} associated with the close action
      */
     @Override
-    public void onClose(@NonNull InventoryCloseEvent event) {
+    public void onClose(InventoryCloseEvent event) {
         if (Menus.isAboutToBecomeDisposable(event)) {
             this.attachBukkitTask(null);
         }
@@ -82,7 +83,7 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
      * @param event The {@link InventoryOpenEvent} associated with the open action
      */
     @Override
-    public void onOpen(@NonNull InventoryOpenEvent event) {
+    public void onOpen(InventoryOpenEvent event) {
     }
 
     /**
@@ -97,9 +98,8 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
      *                                  events
      * @throws NullPointerException     If a {@link HumanEntity} is null
      */
-    @NonNull
     @Contract(value = "_, _ -> this", mutates = "this")
-    public Self open(@NonNull MenuManager menuManager, @NonNull Iterable<@NonNull ? extends HumanEntity> viewers) {
+    public Self open(MenuManager menuManager, Iterable<? extends HumanEntity> viewers) {
         viewers.forEach(viewer -> Objects.requireNonNull(viewer, "Menu viewer can't be null"));
 
         menuManager.registerMenu(this);
@@ -121,9 +121,8 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
      *                                  events
      * @throws NullPointerException     If a {@link HumanEntity} is null
      */
-    @NonNull
     @Contract(value = "_, _ -> this", mutates = "this")
-    public Self open(@NonNull MenuManager menuManager, @NonNull HumanEntity @NonNull ... viewers) {
+    public Self open(MenuManager menuManager, HumanEntity... viewers) {
         return this.open(menuManager, List.of(viewers));
     }
 
@@ -138,10 +137,9 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
      *                                  events
      * @throws NullPointerException     If a {@link HumanEntity} is null
      */
-    @NonNull
     @Contract(value = "_ -> this", mutates = "this")
-    public Self open(@NonNull HumanEntity @NonNull ... viewers) {
-        return this.open(MenuManager.getInstance(), viewers);
+    public Self open(HumanEntity... viewers) {
+        return this.open(MenuManager.instance(), viewers);
     }
 
     /**
@@ -155,10 +153,9 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
      *                                  events
      * @throws NullPointerException     If a {@link HumanEntity} is null
      */
-    @NonNull
     @Contract(value = "_ -> this", mutates = "this")
-    public Self open(@NonNull Iterable<@NonNull ? extends HumanEntity> viewers) {
-        return this.open(MenuManager.getInstance(), viewers);
+    public Self open(Iterable<? extends HumanEntity> viewers) {
+        return this.open(MenuManager.instance(), viewers);
     }
 
     /**
@@ -168,9 +165,8 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
      * @param consumer Method that'll modify this {@link Inventory}
      * @return This instance, useful for chaining
      */
-    @NonNull
     @Contract(value = "_ -> this", mutates = "this")
-    public Self apply(@NonNull Consumer<Inventory> consumer) {
+    public Self apply(Consumer<Inventory> consumer) {
         consumer.accept(this.getInventory());
         return (Self) this;
     }
@@ -182,7 +178,9 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
      * <p>
      * Example:
      * {@snippet id = "functionExample" lang = "java":
-     * new Menu(Bukkit.createInventory(null, 4 * 9, "Filled menu"))
+     * import net.kyori.adventure.text.Component;
+     *
+     * new Menu(Bukkit.createInventory(null, 4 * 9, Component.text("Filled menu")))
      *      .set(new ItemBuilder(Material.BLACK_STAINED_GLASS_PANE, " ").build(),
      *          menu -> IntStream.range(0, menu.getInventory().getSize()).toArray())
      *      .open(player);
@@ -194,7 +192,7 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
      * @return This instance, useful for chaining
      * @throws NullPointerException If the {@code slotStream} is null
      */
-    public Self set(@Nullable ItemStack item, @NonNull Function<Self, int[]> slotsFunction) {
+    public Self set(@Nullable ItemStack item, Function<Self, int[]> slotsFunction) {
         return this.set(item, slotsFunction.apply((Self) this));
     }
 
@@ -207,9 +205,8 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
      * @throws IndexOutOfBoundsException If a slot in the slot array argument is out of this inventory's boundaries
      * @throws NullPointerException      If the {@code slots} {@link Iterable} or their elements are null
      */
-    @NonNull
     @Contract(value = "_, _ -> this", mutates = "this")
-    public Self set(@Nullable ItemStack item, @NonNull Iterable<Integer> slots) {
+    public Self set(@Nullable ItemStack item, Iterable<Integer> slots) {
         slots.forEach(slot -> this.set(item, slot));
         return (Self) this;
     }
@@ -223,9 +220,8 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
      * @throws IndexOutOfBoundsException If a slot in the slot array argument is out of this inventory's boundaries
      * @throws NullPointerException      If the slot array argument is null
      */
-    @NonNull
     @Contract(value = "_, _ -> this", mutates = "this")
-    public Self set(@Nullable ItemStack item, int @NonNull ... slots) {
+    public Self set(@Nullable ItemStack item, int... slots) {
         for (int slot : slots) {
             this.set(item, slot);
         }
@@ -241,7 +237,6 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
      * @return This instance, useful for chaining
      * @throws IndexOutOfBoundsException If the slot index is out of bounds
      */
-    @NonNull
     @Contract(value = "_, _ -> this", mutates = "this")
     public Self set(@Nullable ItemStack item, int slot) {
         this.getInventory().setItem(slot, item);
@@ -261,7 +256,7 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
      * @param task Nullable {@link BukkitTask} to assign
      * @return This instance, useful for chaining
      */
-    @NonNull
+    @SuppressWarnings("UnusedReturnValue")
     @Contract(value = "_ -> this", mutates = "this")
     public Self attachBukkitTask(@Nullable BukkitTask task) {
         if (this.hasBukkitTask()) {
@@ -279,7 +274,6 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
      *
      * @return This instance, useful for chaining
      */
-    @NonNull
     @Contract(value = "-> this", mutates = "this")
     public Self close() {
         return (Self) IMenu.super.close();
@@ -293,7 +287,6 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
      * @return This instance, useful for chaining
      * @see ActionMenu#clearActions()
      */
-    @NonNull
     @Contract(value = "-> this", mutates = "this")
     public Self clear() {
         this.getInventory().clear();
@@ -307,7 +300,6 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
      * @return {@link Optional} of a nullable {@link ItemStack}
      * @throws IndexOutOfBoundsException If the given slot argument is out of the inventory's bounds
      */
-    @NonNull
     @Contract(pure = true)
     public Optional<ItemStack> getItem(int slot) {
         return Optional.ofNullable(this.getInventory().getItem(slot));
@@ -330,7 +322,6 @@ public abstract class AbstractMenu<Self extends AbstractMenu<Self>> implements I
      *
      * @return Always the same {@link Inventory}
      */
-    @NonNull
     @Contract(pure = true)
     public final Inventory getInventory() {
         return this.inventory;
