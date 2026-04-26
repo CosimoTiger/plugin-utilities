@@ -5,11 +5,11 @@
 
 ## Overview
 
-An optimized and lightweight toolkit of flexible common utilities for developing Spigot API plugins.
+An optimized and lightweight toolkit of flexible common utilities for developing PaperMC plugins.
 
 ## Features
 
-- menu package for easily making custom flexible menus with clickable `ItemStack`s managed in the background through Spigot events,
+- menu package for easily making custom flexible menus with clickable `ItemStack`s managed in the background through events,
 - `ItemBuilder` for less headache with `ItemMeta` and `ItemStack` modifications,
 - cooldowns package for tracking and renewing of expirable durations,
 - plugin file package with methods for managing multiple or custom configuration files
